@@ -20,13 +20,11 @@ public class Comment {
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member user;
+    private Long userId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "gym_id", nullable = false)
-    private Gym gym;
+    private Long gymId;
 
     @Column(name = "c_comment", nullable = false, columnDefinition = "TEXT")
     private String comment;
@@ -36,9 +34,9 @@ public class Comment {
     public Comment() {
     }
 
-    public Comment(Member user, Gym gym, String comment) {
-        this.user = user;
-        this.gym = gym;
+    public Comment(Long userId, Long gymId, String comment) {
+        this.userId = userId;
+        this.gymId = gymId;
         this.comment = comment;
     }
 

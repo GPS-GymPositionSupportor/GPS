@@ -3,7 +3,6 @@ package gps.base.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.lang.reflect.Member;
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,13 +19,16 @@ public class Review {
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
 
-    // 다대 1 관계
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member user;
+    private Long userId;
 
     @Column(name = "gym_id", nullable = false)
+    private Long gymId;
+
+    @Column(name = "r_comment", columnDefinition = "TEXT")
     private String comment;
+
+
 
 
 
