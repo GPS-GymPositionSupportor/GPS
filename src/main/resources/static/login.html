@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GPS 테스트 로그인</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { max-width: 300px; margin: 0 auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 108%; padding: 10px; margin: 10px 0; }
+        h1 { text-align: center; }
+        p { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>로그인</h1>
+    <form action="/login" method="post">
+        <input type="text" name="mId" placeholder="아이디" required>
+        <input type="password" name="mPassword" placeholder="비밀번호" required>
+        <button type="submit">로그인</button>
+    </form>
+    <p>계정이 없으신가요? <a href="register.html">회원가입</a> </p>
+</body>
+</html>
