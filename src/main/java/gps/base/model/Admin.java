@@ -16,6 +16,9 @@ public class Admin {
     @Column(name = "admin_id")
     private Long adminId;
 
+    @JoinColumn(name = "user_id")
+    private Long userId;
+
     @Column(name = "a_id", nullable = false)
     private String aId;
 
