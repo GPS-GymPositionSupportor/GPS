@@ -46,6 +46,10 @@ public class Member {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "authority", nullable = false)
+    private String authority;
+
     @Column(name = "m_created_by")
     private String mCreatedBy;
 
@@ -57,6 +61,8 @@ public class Member {
 
     @Column(name = "m_deleted-at")
     private LocalDateTime mDeletedAt;
+
+
     
     
     // PrePersist 로 현재 시간 설정 또는 삭제
