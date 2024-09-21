@@ -61,7 +61,7 @@ public class GymService {
 
     // 체육관 찾기 (부분 일치)
     public List<Gym> searchGymsByName(String name) {
-        return gymRepository.findByGNameContaining(name);
+        return gymRepository.findBygNameContaining(name);
     }
     
     
