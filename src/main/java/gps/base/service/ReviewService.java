@@ -107,8 +107,8 @@ public class ReviewService {
     
     // 댓글 수정
     @Transactional
-    public Comment updateComment(Long gymId, Long userId, Long cId, CommentDTO commentDTO) {
-        Comment comment = commentRepository.findByGymIdAndUserId(gymId, userId, cId)
+    public Comment updateComment(Long gymId, Long userId, Long id, CommentDTO commentDTO) {
+        Comment comment = commentRepository.findByGymIdAndUserIdAndId(gymId, userId, id)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
         comment.setComment(commentDTO.getComment());
@@ -125,8 +125,8 @@ public class ReviewService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long gymId, Long userId, Long cId) {
-        Comment comment = commentRepository.findByGymIdAndUserId(gymId, userId, cId)
+    public void deleteComment(Long gymId, Long userId, Long id) {
+        Comment comment = commentRepository.findByGymIdAndUserIdAndId(gymId, userId, id)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
         commentRepository.delete(comment);
