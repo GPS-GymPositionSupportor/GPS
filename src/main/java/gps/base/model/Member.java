@@ -48,7 +48,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "authority", nullable = false)
-    private String authority;
+    private Authority authority;
 
     @Column(name = "m_created_by")
     private String mCreatedBy;
