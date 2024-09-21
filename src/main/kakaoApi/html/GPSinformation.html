@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Kakao Map API - 헬스장 정보 수집</title>
+  <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?023855f0a78a87bb9407e335c59f0005&libraries=services"></script>
+</head>
+<body>
+<h1>카카오맵 API로 헬스장 정보 수집</h1>
+<div id="map" style="width:500px;height:400px;"></div>
+<button onclick="fetchGyms()">헬스장 정보 수집</button>
+<p id="status">헬스장 정보를 수집하려면 버튼을 클릭하세요.</p>
+
+<script>
+        // 카카오맵 API를 이용한 지도 생성
+        var mapContainer = document.getElementById('map'),
+            mapOption = {
+                center: new kakao.maps.LatLng(37.566826, 126.9786567), // 초기 중심좌표 설정 (서울)
+                level: 8 // 초기 확대 레벨 설정
+            };
+
+        var map = new kakao.maps.Map(mapContainer, mapOption);
+
+        var ps = new kakao.maps.services.Places(); // 장소 검색 객체 생성
+
+        // 전국의 시/군/구 리스트 (간단한 예시)
+        var regions = [
+            "서울 강남구", "서울 강동구", "부산 해운대구", "대구 중구", "광주 북구", // 각 지역 추가
+            // ... 전국의 모든 시/군/구를 여기에 추가
+        ];
+
+        // 현재 수집 중인 헬스장 데이터를 저장하는 배열
+        var gymData = [];
+
+        // 헬스장 정보를 수집하는 함수
+        async function fetchGyms() {
+            document.getElementById('status').innerText = '헬스장 정보를 수집 중입니다...';
+
+            for (var i = 0; i < regions.length; i++) {
+                await fetchGymsByRegion(regions[i]);
+            }
+
+            document.getElementById('status').innerText = `총 수집된 헬스장 수: ${gymData.length}`;
+
+            // 수집된 데이터를 Spring Boot 서버로 전송
+            sendGymDataToServer(gymData);
+        }
+
+        // 지역별로 헬스장을 검색하는 함수
+        async function fetchGymsByRegion(region) {
+            return new Promise((resolve, reject) => {
+                ps.keywordSearch(region + ' 헬스장', function (data, status, pagination) {
+                    if (status === kakao.maps.services.Status.OK) {
+                        for (var i = 0; i < data.length; i++) {
+                            gymData.push({
+                                name: data[i].place_name,
+                                address: data[i].road_address_name,
+                                latitude: data[i].y,
+                                longitude: data[i].x
+                            });
+                        }
+                        resolve();
+                    } else {
+                        console.error(`Error fetching gyms for ${region}:`, status);
+                        reject(status);
+                    }
+                });
+            });
+        }
+
+        // 수집된 헬스장 데이터를 Spring Boot 서버로 전송하는 함수
+        function sendGymDataToServer(gymData) {
+            fetch('http://localhost:8080/api/gyms', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gymData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                document.getElementById('status').innerText = '헬스장 정보가 서버에 저장되었습니다.';
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                document.getElementById('status').innerText = '헬스장 정보 저장 중 오류가 발생했습니다.';
+            });
+        }
+    </script>
+</body>
+</html>
