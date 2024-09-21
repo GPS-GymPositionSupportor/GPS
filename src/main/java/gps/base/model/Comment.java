@@ -15,7 +15,7 @@ public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "c_id")
-    private Long cId;
+    private Long id;
 
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
