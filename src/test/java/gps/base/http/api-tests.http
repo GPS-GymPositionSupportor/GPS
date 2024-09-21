@@ -1,0 +1,11 @@
+### 회원가입
+# @no-cookie-jar
+POST http://localhost:8080/api/register
+Content-Type: application/json
+
+{
+"mid": "testuser",
+"mPassword": "password123",
+"mName" : "Moon",
+"email" : "test@naver.com"
+}
