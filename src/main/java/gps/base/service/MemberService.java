@@ -4,7 +4,6 @@ import gps.base.model.Member;
 import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +23,6 @@ public class MemberService {
     private String uploadPath;
 
 
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     MemberRepository memberRepository;
@@ -33,9 +31,17 @@ public class MemberService {
 
     @Transactional
     public Member saveMember(Member member) {
-        member.setMPassword(passwordEncoder.encode(member.getMPassword()));
-        member.setMCreatedAt(LocalDateTime.now());
-        return memberRepository.save(member);
+        if (member.getMPassword() == null || member.getMPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("비밀번호는 필수 입력 항목입니다.");
+        }
+
+        try {
+            member.setMPassword(member.getMPassword());
+            member.setMCreatedAt(LocalDateTime.now());
+            return memberRepository.save(member);
+        } catch (Exception e) {
+            throw new RuntimeException("회원 저장 중 오류 발생 : " + e.getMessage(), e);
+        }
     }
 
 
@@ -47,10 +53,19 @@ public class MemberService {
 
     // 로그인 허가 메소드
     public boolean authenticateMember(String mId, String mPassword) {
-        Member member = memberRepository.findBymId(mId)
-                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + mId));
 
-        return passwordEncoder.matches(mPassword, member.getMPassword());
+        try {
+            Member member = memberRepository.findBymId(mId)
+                    .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + mId));
+
+            // 직접 문자열 비교
+            return mPassword.equals(member.getMPassword());
+        } catch (EntityNotFoundException e) {
+            // 사용자를 찾을 수 없는 경우
+            return false;
+        }
+
+
     }
 
 

@@ -23,8 +23,8 @@ public class Member {
     @Column(name = "m_password", nullable = false)
     private String mPassword;
 
-    @Column(name = "m_name", nullable = false)
-    private String mName;
+    @Column(name = "name", nullable = false)
+    private String name;
 
     /* String 값으로 프로필 이미지를 받는 이유.
         데이터베이스에 직접 이미지 파일 저장하는것 권장 X 
