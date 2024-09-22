@@ -1,25 +1,26 @@
 package gps.base.controller;
 
+
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.model.Comment;
-import gps.base.model.Gym;
-import gps.base.model.Member;
-import gps.base.model.Review;
+import gps.base.model.*;
 import gps.base.service.GymService;
 import gps.base.service.MemberService;
 import gps.base.service.ReviewService;
-import org.apache.coyote.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/api")
 public class MainController {
 
@@ -32,7 +33,7 @@ public class MainController {
     @Autowired
     private ReviewService reviewService;
 
-
+    private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
 
     /*
@@ -43,12 +44,34 @@ public class MainController {
     3. 프로필 이미지 업데이트
 
      */
-    @PostMapping("/register")
-    public ResponseEntity<Member> registerMember(@RequestBody Member member) {
-        Member savedMember = memberService.saveMember(member);
-        return new ResponseEntity<>(savedMember, HttpStatus.CREATED);
+
+    @GetMapping("/register")
+    public String showRegisterForm() {
+        return "forward:/registerForm.html";
     }
 
+
+    @PostMapping("/register")
+    public String registerMember(@ModelAttribute Member member, Model model) {
+        logger.info("회원 등록 요청을 받았습니다. : {}", member.getMId());
+        try {
+            member.setAuthority(Authority.USER);
+
+            Member savedMember = memberService.saveMember(member);
+            logger.info("회원 등록 완료 : {}", savedMember.getMId());
+            model.addAttribute("message", "회원가입이 성공적으로 완료되었습니다.");
+            return "forward:/login.html";
+        } catch (Exception e) {
+            logger.error("회원 등록 실패", e);
+            model.addAttribute("error", "회원 등록 실패 : " + e.getMessage());
+            return "forward:/register.html";
+        }
+    }
+
+    @GetMapping("/login")
+    public String loginForm() {
+        return "forward:/login.html";
+    }
 
 
     @PostMapping("/login")
@@ -64,7 +87,7 @@ public class MainController {
 
 
     @PostMapping("/member/{userId}/profile-image")
-    public ResponseEntity<String> updateProfileImage(@PathVariable Long userId, @RequestParam("file")MultipartFile file) {
+    public ResponseEntity<String> updateProfileImage(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
         try {
             memberService.updateProfileImage(userId, file);
             return ResponseEntity.ok("프로필 이미지가 업데이트되었습니다.");
@@ -72,8 +95,8 @@ public class MainController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
         }
     }
-    
-    
+
+
 
     /*
     체육관 관리
@@ -121,8 +144,8 @@ public class MainController {
         reviewService.deleteReview(gymId, userId);
         return ResponseEntity.noContent().build();
     }
-    
-    
+
+
     /*
     댓글 관리
      */
@@ -145,8 +168,5 @@ public class MainController {
         reviewService.deleteComment(gymId, userId, cId);
         return ResponseEntity.noContent().build();
     }
-
-
-
 
 }
