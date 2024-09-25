@@ -1,4 +1,4 @@
-package gps.base.model;
+package gps.base.gymdata.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
