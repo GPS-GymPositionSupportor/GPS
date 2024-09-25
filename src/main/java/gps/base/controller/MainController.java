@@ -47,7 +47,7 @@ public class MainController {
 
     @GetMapping("/register")
     public String showRegisterForm() {
-        return "forward:/registerForm.html";
+        return "registerForm";
     }
 
 
@@ -60,17 +60,17 @@ public class MainController {
             Member savedMember = memberService.saveMember(member);
             logger.info("회원 등록 완료 : {}", savedMember.getMId());
             model.addAttribute("message", "회원가입이 성공적으로 완료되었습니다.");
-            return "forward:/login.html";
+            return "/login";
         } catch (Exception e) {
             logger.error("회원 등록 실패", e);
             model.addAttribute("error", "회원 등록 실패 : " + e.getMessage());
-            return "forward:/register.html";
+            return "/register";
         }
     }
 
     @GetMapping("/login")
     public String loginForm() {
-        return "forward:/login.html";
+        return "/login.html";
     }
 
 
