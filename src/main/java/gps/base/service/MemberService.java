@@ -50,19 +50,27 @@ public class MemberService {
                 .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + userId));
     }
 
+    public Member getMemberBymId(String mId) {
+        return memberRepository.findBymId(mId)
+                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + mId));
+    }
+
 
     // 로그인 허가 메소드
-    public boolean authenticateMember(String mId, String mPassword) {
+    public Member authenticateMember(String mId, String mPassword) {
 
         try {
             Member member = memberRepository.findBymId(mId)
-                    .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + mId));
+                    .orElse(null);
 
-            // 직접 문자열 비교
-            return mPassword.equals(member.getMPassword());
+
+            if (member != null && mPassword.equals((member.getMPassword()))) {
+                return member;
+            }
+            return null;
         } catch (EntityNotFoundException e) {
             // 사용자를 찾을 수 없는 경우
-            return false;
+            return null;
         }
 
 
