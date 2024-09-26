@@ -1,11 +1,10 @@
-<h1>Teddy 브런치 입니다.</h1>
+<h1>Min 브런치 입니다.</h1>
 
-2.리뷰 및 커뮤니티 기능 개발 (문광희님)
+DB관리 및 지도 API 테스트 (조민국)
 
 
-- 주요 역할 : 리뷰 작성, 댓글 시스템, 사용자 인터렉션 기능 개발
-- 필요 기술 : Spring Boot, WebSocket, Restful API, JPA/Hibernate
+- 주요 역할 : ERD작성, DB구축 및 암호화, 소셜 로그인, api테스트 및 정리
+- 필요 기술 : Spring Boot, JPA, MySQL, OAuth, Selenium
 - 개발 내용 :
-- 리뷰 작성 및 조회 API 개발
-- 댓글 작성 및 답글 기능 구현
-- 리뷰 및 댓글에 대한 실시간 알림 시스템 구축(WebSocket 활용)
+- 실시간 위치 추적 기능 적용(Geolocation Api)
+- 헬스장 정보 삽입(카카오 api)
