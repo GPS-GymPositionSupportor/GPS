@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>체육관 등록 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        form { max-width: 500px; margin: 0 auto; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; }
+        button { width: 105%; padding: 10px; }
+        h1 { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>체육관 등록</h1>
+    <form action="/register-gym" method="post" enctype="multipart/form-data">
+        <input type="text" name="gName" placeholder="체육관 이름" required>
+        <input type="text" name="address" placeholder="주소" required>
+        <input type="number" name="gLongitude" placeholder="경도" step="any" required>
+        <input type="number" name="gLatitude" placeholder="위도" step="any" required>
+        <textarea name="information" placeholder="체육관 정보" required></textarea>
+        <input type="file" name="gymImage" accept="image/*" required>
+        <button type="submit">체육관 등록</button>
+    </form>
+</body>
+</html>
