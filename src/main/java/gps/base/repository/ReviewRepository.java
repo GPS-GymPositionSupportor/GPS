@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    Optional<Review> findByGymIdAndUserId(Long gymId, Long userId);
     List<Review> findByGymId(Long gymId);
+
+    Optional<Review> findByrIdAndGymIdAndUserId(Long rId, Long gymId, Long userId);
 }

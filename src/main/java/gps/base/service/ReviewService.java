@@ -25,6 +25,11 @@ public class ReviewService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    
+    
+    /*
+    리뷰 관련
+     */
 
     
     // 리뷰 작성
@@ -49,75 +54,82 @@ public class ReviewService {
         return reviewRepository.findByGymId(gymId);
     }
 
-    
-    // 댓글 작성
-    public Comment addComment(CommentDTO commentDTO) {
-        Comment comment = new Comment();
-        comment.setUserId(commentDTO.getUserId());
-        comment.setGymId(commentDTO.getGymId());
-        comment.setComment(commentDTO.getComment());
-
-        Comment savedComment = commentRepository.save(comment);
-
-        // WebSocket을 통해 실시간 알림 전송
-        messagingTemplate.convertAndSend("/topic/gym/" + comment.getGymId(), "새로운 댓글이 작성되었습니다.");
-
-        return savedComment;
+    // 리뷰 ID로 단일 리뷰 가져오기
+    public Review getReviewById(Long rId, Long gymId, Long userId) {
+        return reviewRepository.findByrIdAndGymIdAndUserId(rId, gymId, userId)
+                .orElseThrow(() -> new EntityNotFoundException(rId + " 에 해당하는 리뷰는 존재하지 않습니다."));
     }
 
-    public Review getReviewById(Long reviewId) {
-        return reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new EntityNotFoundException(reviewId + " 에 해당하는 리뷰는 존재하지 않습니다."));
-    }
-
-    public List<Comment> getCommentsByGym(Long gymId) {
-        return commentRepository.findByGymId(gymId);
+    // 모든 리뷰 가져오기
+    public List<Review> getAllReviews() {
+        return reviewRepository.findAll();
     }
     
     
     // 리뷰 수정
     @Transactional
-    public Review updateReview(Long gymId, Long userId, ReviewDTO reviewDTO) {
-        Review review = reviewRepository.findByGymIdAndUserId(gymId, userId)
-                .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
-
+    public Review updateReview(Long rId , Long gymId, Long userId, ReviewDTO reviewDTO) {
+        Review review = getReviewById(rId, gymId, userId);
         review.setComment(reviewDTO.getComment());
         // 추후 다른 필드들도 업데이트가 필요하면 코드추가
 
         Review updatedReview = reviewRepository.save(review);
-
         messagingTemplate.convertAndSend("/topic/gym/" + gymId, "리뷰가 수정되었습니다.");
-
         return updatedReview;
     }
 
 
     // 리뷰 삭제
     @Transactional
-    public void deleteReview(Long gymId, Long userId) {
-        Review review = reviewRepository.findByGymIdAndUserId(gymId, userId)
+    public void deleteReview(Long rId, Long gymId, Long userId) {
+        Review review = getReviewById(rId, gymId, userId);
+        reviewRepository.delete(review);
+        messagingTemplate.convertAndSend("/topic/gym/" + gymId, "리뷰가 삭제되었습니다.");
+    }
+
+    
+    /*
+    댓글 관련
+     */
+
+
+    // 댓글 작성
+    public Comment addComment(Long rId, Long userId, Long gymId, CommentDTO commentDTO) {
+        Review review = reviewRepository.findById(rId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
 
-        reviewRepository.delete(review);
+        Comment comment = new Comment(userId, gymId, commentDTO.getComment());
+        Comment savedComment = commentRepository.save(comment);
 
-        messagingTemplate.convertAndSend("/topic/gym/" + gymId, "리뷰가 삭제되었습니다.");
+        messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 댓글이 작성되었습니다.");
+        return savedComment;
+
+    }
+
+    // 리뷰에 대한 댓글 가져오기
+    public List<Comment> getCommentsByReview(Long rId) {
+        Review review = reviewRepository.findById(rId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
+        return commentRepository.findByReview(review);
     }
     
     
     
     // 댓글 수정
     @Transactional
-    public Comment updateComment(Long gymId, Long userId, Long id, CommentDTO commentDTO) {
-        Comment comment = commentRepository.findByGymIdAndUserIdAndId(gymId, userId, id)
+    public Comment updateComment(Long rId, Long commentId, Long userId, CommentDTO commentDTO) {
+        Review review = reviewRepository.findById(rId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
+        if(!comment.getUserId().equals(userId) || !comment.getGymId().equals(review.getGymId())) {
+            throw new IllegalArgumentException("댓글을 수정할 권한이 없습니다.");
+        }
+
         comment.setComment(commentDTO.getComment());
-        // 필요한 경우에 다른 필드들도 추가할 수 있는 코드 작성
-
         Comment updatedComment = commentRepository.save(comment);
-
-        messagingTemplate.convertAndSend("/topic/gym/" + gymId, "댓글이 수정되었습니다.");
-
+        messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "댓글이 수정되었습니다.");
         return updatedComment;
     }
 
@@ -125,16 +137,23 @@ public class ReviewService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long gymId, Long userId, Long id) {
-        Comment comment = commentRepository.findByGymIdAndUserIdAndId(gymId, userId, id)
+    public void deleteComment(Long rId, Long commentId, Long userId) {
+        Review review = reviewRepository.findById(rId)
+                .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
-        commentRepository.delete(comment);
+        if(!comment.getUserId().equals(userId) || !comment.getGymId().equals(review.getGymId())) {
+            throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
+        }
 
-        messagingTemplate.convertAndSend("/topic/gym/" + gymId, "댓글이 삭제되었습니다.");
+        commentRepository.delete(comment);
+        messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "댓글이 삭제되었습니다.");
     }
-    
-    
-    
+
+    // gym_id 값에 의해서 gym 데이터 요청
+    public List<Comment> getCommentsByGym(Long gymId) {
+        return commentRepository.findByGymId(gymId);
+    }
 
 }

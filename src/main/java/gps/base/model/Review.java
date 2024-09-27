@@ -22,7 +22,7 @@ public class Review {
     @JoinColumn(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(name = "gym_id", nullable = false)
+    @JoinColumn(name = "gym_id", nullable = false)
     private Long gymId;
 
     @Column(name = "r_comment", columnDefinition = "TEXT")
