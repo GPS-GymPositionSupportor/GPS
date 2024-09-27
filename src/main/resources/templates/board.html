@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Board</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
+        h1 { color: #333; }
+        .container { max-width: 100%; margin: auto; }
+        table { width: 100%; border-collapse: collapse }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f2f2f2; }
+        .btn { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>게시판</h1>
+        <a href="#" class="btn" id="writePost">글쓰기</a>
+        <table id="postList">
+            <thead>
+                <tr>
+                    <th>번호</th>
+                    <th>날짜</th>
+                    <th>작성자</th>
+                    <th>체육관 ID</th>
+                    <th>내용</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <script>
+        // 현재 로그인한 사용자 정보 (서버에서 제공해야 함)
+        let currentUser = {
+            userId: null,
+            isAdmin: false // 관리자 여부
+        };
+
+        // 사용자 정보 가져오기
+        function fetcUserInfo() {
+            fetch('/api/user/info')
+                .then(response => response.json())
+                .then(data => {
+                    currentUser.userId = data.userId;
+                    currentUser.isAdmin = data.isAdmin;
+                    document.getElementById('currentUser').textContent = currentUser.userId + (currentUser.isAdmin ? '(관리자)' : '');
+                });
+        }
+
+        // 리뷰 목록 가져오기
+        function fetchReviews() {
+            fetch('/api/reviews/all')
+                .then(response => response.json())
+                .then(reviews => {
+                    const tbody = document.querySelector('#postList tbody');
+                    tbody.innerHTML = '';
+                    reviews.forEach(review => {
+                        const row = `
+                            <tr>
+                                <td>${review.rId}</td>
+                                <td>${review.gymId}</td>
+                                <td>${review.userId}</td>
+                                <td>${review.comment}</td>
+                                <td>${new Date(review.addedAt).toLocaleString()}</td>
+                                <td>
+                                    ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
+                                        <button onclick="editReview(${review.rId}, ${review.gymId}, '${review.userId}')">수정</button>
+                                        <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                });
+        }
+
+        // 리뷰 작성
+        document.getElementById('writePost').addEventListener('click', () => {
+            const gymId = prompt('체육관 ID를 입력하세요:');
+            const comment = prompt('리뷰 내용을 입력하세요:');
+            if (gymId && comment) {
+                fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ userId: currentUser.userId, gymId, comment }),
+                })
+                    .then(response => response.json())
+                    .then(() => {
+                        fetchReviews(); // 목록 새로고침
+                    })
+                    .catch(error => {
+                        console.error('Error : ', error);
+                        alert('리뷰 작성에 실패했습니다.');
+                    });
+            }
+        });
+
+        // 리뷰 수정
+        function editReview(reviewId, gymId) {
+            const newComment = prompt('새로운 리뷰 내용을 입력하세요:');
+            if (newComment) {
+                fetch(`/api/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ gymId, comment: newComment }),
+                })
+                    .then(response => response.json())
+                    .then(() => {
+                        fetchReviews(); // 목록 새로고침
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('리뷰 수정에 실패했습니다.');
+                    });
+            }
+        }
+
+        // 리뷰 삭제
+        function deleteReview(reviewId, gymId, userId) {
+            if (confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
+                fetch(`/api/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ gymId }),
+                })
+                    .then(() => {
+                        fetchReviews(); // 목록 새로고침
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('리뷰 삭제에 실패했습니다.');
+                    });
+            }
+        }
+
+        // 초기화
+        fetcUserInfo();
+        fetchReviews();
+    </script>
+</body>
+</html>
