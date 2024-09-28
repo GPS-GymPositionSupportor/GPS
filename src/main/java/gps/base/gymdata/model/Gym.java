@@ -21,7 +21,7 @@ public class Gym {
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "admin_id", nullable = true) // admin_id는 nullable로 설정
     private Admin admin;
 
     @Column(name = "g_name", nullable = false)
@@ -33,44 +33,41 @@ public class Gym {
     @Column(name = "g_latitude", nullable = false)
     private double gLatitude;
 
-    @Column(name = "information", columnDefinition = "TINYTEXT")
+    @Column(name = "information", columnDefinition = "TINYTEXT", nullable = true) // nullable 설정
     private String information;
 
-    @Column(name = "gym_image")
+    @Column(name = "gym_image", nullable = true) // nullable 설정
     private String gymImage;
 
-    @Column(name = "rating")
+    @Column(name = "rating", nullable = true) // nullable 설정
     private Byte rating;
 
-    @Column(name = "g_created_by")
+    @Column(name = "g_created_by", nullable = true) // nullable 설정
     private String gCreatedBy;
 
-    @Column(name = "g_deleted_by")
+    @Column(name = "g_deleted_by", nullable = true) // nullable 설정
     private String gDeletedBy;
 
-    @Column(name = "g_created_at")
+    @Column(name = "g_created_at", nullable = true) // nullable 설정
     private LocalDateTime gCreatedAt;
 
-    @Column(name = "g_deleted_at")
+    @Column(name = "g_deleted_at", nullable = true) // nullable 설정
     private LocalDateTime gDeletedAt;
 
-
-    // Constructors
-
-
-    public Gym() {
+    // 생성일 자동 설정
+    @PrePersist
+    protected void onCreate() {
+        gCreatedAt = LocalDateTime.now();
     }
 
     public void setRating(Byte rating) {
-        if(rating <= 1 || rating >= 5) {
+        if (rating < 1 || rating > 5) {
             throw new IllegalArgumentException("점수는 1점과 5점 사이로만 입력 되어야 합니다.");
         }
         this.rating = rating;
     }
 
-    // gCreateAt 을 입력하기 전에 PrePersist로 세팅하기
-    @PrePersist
-    protected void onCreate() {
-        gCreatedAt = LocalDateTime.now();
+    // 기본 생성자
+    public Gym() {
     }
 }

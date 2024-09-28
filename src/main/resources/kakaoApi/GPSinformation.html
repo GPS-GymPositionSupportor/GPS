@@ -53,6 +53,13 @@
         const promises = regions.map(region => fetchGymsByRegion(region));
         await Promise.all(promises);
 
+        console.log(gymData); // 수집된 gymData 확인
+
+        // 각 gymData 항목의 gName 확인
+        gymData.forEach(gym => {
+            console.log('gName:', gym.gName); // gName 출력
+        });
+
         document.getElementById('status').innerText = `총 수집된 헬스장 수: ${gymData.length}`;
         sendGymDataToServer(gymData);
         document.getElementById('fetchButton').disabled = false; // 버튼 활성화
@@ -65,10 +72,10 @@
                 if (status === kakao.maps.services.Status.OK) {
                     for (var i = 0; i < data.length; i++) {
                         gymData.push({
-                            name: data[i].place_name,
+                            gName: data[i].place_name,
                             address: data[i].road_address_name,
-                            latitude: data[i].y,
-                            longitude: data[i].x
+                            gLatitude: data[i].y,
+                            gLongitude: data[i].x,
                         });
                     }
                     resolve();
@@ -82,6 +89,7 @@
 
     // 수집된 헬스장 데이터를 Spring Boot 서버로 전송하는 함수
     function sendGymDataToServer(gymData) {
+        console.log("Sending the following gym data to server:", gymData); // 전송되는 데이터 확인
         fetch('http://localhost:8080/api/gyms', {
             method: 'POST',
             headers: {
@@ -89,14 +97,22 @@
             },
             body: JSON.stringify(gymData)
         })
-            .then(response => response.json())
+            .then(response => {
+                // 응답이 JSON 형식인지 확인
+                if (!response.ok) {
+                    return response.json().then(err => {
+                        throw new Error(err.error); // JSON에서 오류 메시지 추출
+                    });
+                }
+                return response.json(); // 정상적인 경우 JSON 파싱
+            })
             .then(data => {
                 console.log('Success:', data);
                 document.getElementById('status').innerText = '헬스장 정보가 서버에 저장되었습니다.';
             })
             .catch((error) => {
                 console.error('Error:', error);
-                document.getElementById('status').innerText = '헬스장 정보 저장 중 오류가 발생했습니다.';
+                document.getElementById('status').innerText = '헬스장 정보 저장 중 오류가 발생했습니다: ' + error.message;
             });
     }
 </script>
