@@ -2,7 +2,9 @@ package gps.base.gymdata.controller;
 
 import gps.base.gymdata.repository.GymRepository;
 import gps.base.gymdata.model.Gym;
+import org.aspectj.apache.bcel.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,15 +13,13 @@ import java.util.List;
 @RequestMapping("/api/gyms")
 public class GymController {
     @Autowired
-    private GymRepository gymRepository;
+    private GymService gymService;
 
     @PostMapping
-    public List<Gym> saveGyms(@RequestBody List<Gym> gyms) {
-        return gymRepository.saveAll(gyms);
-    }
-
-    @GetMapping
-    public List<Gym> getAllGyms() {
-        return gymRepository.findAll();
+    public ResponseEntity<String> saveGyms(@RequestBody List<Gym> gyms) {
+        for(Gym gym : gyms) {
+            gymService.save(gym);
+        }
+        return ResponseEntity.ok("Sucess");
     }
 }

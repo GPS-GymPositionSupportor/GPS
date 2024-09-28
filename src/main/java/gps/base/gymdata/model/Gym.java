@@ -21,7 +21,7 @@ public class Gym {
     private String address;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @JoinColumn(name = "admin_id")
     private Admin admin;
 
     @Column(name = "g_name", nullable = false)
@@ -33,25 +33,25 @@ public class Gym {
     @Column(name = "g_latitude", nullable = false)
     private double gLatitude;
 
-    @Column(name = "information", nullable = false, columnDefinition = "TINYTEXT")
+    @Column(name = "information", columnDefinition = "TINYTEXT")
     private String information;
 
-    @Column(name = "gym_image", nullable = false)
+    @Column(name = "gym_image")
     private String gymImage;
 
-    @Column(name = "rating", nullable = false)
+    @Column(name = "rating")
     private Byte rating;
 
-    @Column(name = "g_created_by", nullable = false)
+    @Column(name = "g_created_by")
     private String gCreatedBy;
 
-    @Column(name = "g_deleted_by", nullable = false)
+    @Column(name = "g_deleted_by")
     private String gDeletedBy;
 
-    @Column(name = "g_created_at", nullable = false)
+    @Column(name = "g_created_at")
     private LocalDateTime gCreatedAt;
 
-    @Column(name = "g_deleted_at", nullable = false)
+    @Column(name = "g_deleted_at")
     private LocalDateTime gDeletedAt;
 
 
