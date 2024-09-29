@@ -18,7 +18,7 @@ public class GymController {
     public ResponseEntity<String> saveGyms(@RequestBody List<Gym> gyms) {
         try {
             for (Gym gym : gyms) {
-                if (gym.getGName() == null) {
+                if (gym.getGName() == null || gym.getGName().isEmpty()) {
                     return ResponseEntity.badRequest().body("gName 필드는 null일 수 없습니다.");
                 }
                 gymService.save(gym);
