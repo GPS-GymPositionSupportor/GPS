@@ -23,8 +23,9 @@ public class Comment {
     @JoinColumn(name = "user_id", nullable = false)
     private Long userId;
 
-    @JoinColumn(name = "gym_id", nullable = false)
-    private Long gymId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "r_id")
+    private Review review;
 
     @Column(name = "c_comment", nullable = false, columnDefinition = "TEXT")
     private String comment;
@@ -34,9 +35,9 @@ public class Comment {
     public Comment() {
     }
 
-    public Comment(Long userId, Long gymId, String comment) {
+    public Comment(Long userId, Review review, String comment) {
         this.userId = userId;
-        this.gymId = gymId;
+        this.review = review;
         this.comment = comment;
     }
 

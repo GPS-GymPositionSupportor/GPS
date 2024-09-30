@@ -15,12 +15,6 @@ public interface GymRepository extends JpaRepository<Gym, Long> {
     // 체육관 이름으로 검색 (부분 일치)
     List<Gym> findBygNameContaining(String gName);
 
-    // 특정 관리자가 등록한 체육관 목록 조회
-    List<Gym> findByAdminAdminId(Long adminId);
-
-
-
-
     // 평점 순으로 체육관 정렬
     List<Gym> findAllByOrderByRatingDesc();
 
