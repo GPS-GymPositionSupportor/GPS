@@ -11,13 +11,14 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
 
-@RestController
+@Controller
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
@@ -60,7 +61,7 @@ public class ReviewController {
     }
 
     // 리뷰 수정
-    @PutMapping("/{rId}}")
+    @PutMapping("/{rId}")
     public ResponseEntity<Review> updateReview(@PathVariable Long rId, @RequestBody ReviewDTO reviewDTO, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
 
@@ -125,7 +126,7 @@ public class ReviewController {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
-        Comment savedComment = reviewService.addComment(rId, userId, commentDTO.getGymId(), commentDTO);
+        Comment savedComment = reviewService.addComment(rId, userId, commentDTO);
         return new ResponseEntity<>(savedComment, HttpStatus.CREATED);
     }
 
