@@ -7,20 +7,52 @@
         body { font-family: Arial, sans-serif; }
         form { max-width: 500px; margin: 0 auto; }
         input, textarea { width: 100%; padding: 10px; margin: 10px 0; }
-        button { width: 105%; padding: 10px; }
+        button { padding: 10px; cursor: pointer; } /* 커서 스타일 추가 */
         h1 { text-align: center; }
+        .address-container { display: flex; justify-content: space-between; }
+        .address-container input { flex: 1; margin-right: 10px; }
+        .address-container button { flex: 0 0 auto; } /* 버튼 크기 조정 */
     </style>
+    <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=023855f0a78a87bb9407e335c59f0005"></script>
 </head>
 <body>
-    <h1>체육관 등록</h1>
-    <form action="/register-gym" method="post" enctype="multipart/form-data">
-        <input type="text" name="gName" placeholder="체육관 이름" required>
-        <input type="text" name="address" placeholder="주소" required>
-        <input type="number" name="gLongitude" placeholder="경도" step="any" required>
-        <input type="number" name="gLatitude" placeholder="위도" step="any" required>
-        <textarea name="information" placeholder="체육관 정보" required></textarea>
-        <input type="file" name="gymImage" accept="image/*" required>
-        <button type="submit">체육관 등록</button>
-    </form>
+<h1>체육관 등록</h1>
+<form action="/api/admin/gyms" method="post" enctype="multipart/form-data">
+    <input type="text" name="gName" placeholder="체육관 이름" required>
+
+    <div class="address-container">
+        <input type="text" id="address" name="address" placeholder="주소" required>
+        <button type="button" onclick="searchAddress()">주소 검색</button>
+    </div>
+
+    <input type="hidden" name="gLongitude" id="gLongitude">
+    <input type="hidden" name="gLatitude" id="gLatitude">
+
+    <textarea name="information" placeholder="체육관 정보" rows="5" required></textarea>
+    <input type="file" name="gymImage" accept="image/*" required>
+    <button type="submit">체육관 등록</button>
+</form>
+
+<script>
+    function searchAddress() {
+        const address = document.getElementById('address').value;
+        const geocoder = new kakao.maps.services.Geocoder();
+
+        geocoder.addressSearch(address, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const latitude = result[0].y; // 위도
+                const longitude = result[0].x; // 경도
+
+                // 위도와 경도를 폼에 숨겨진 필드에 설정
+                document.getElementById('gLatitude').value = latitude;
+                document.getElementById('gLongitude').value = longitude;
+
+                alert(`위도: ${latitude}, 경도: ${longitude}`);
+            } else {
+                alert('주소를 찾을 수 없습니다. 다시 시도하세요.');
+            }
+        });
+    }
+</script>
 </body>
 </html>

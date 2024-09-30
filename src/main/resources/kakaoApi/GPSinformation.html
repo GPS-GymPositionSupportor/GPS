@@ -55,11 +55,6 @@
 
         console.log(gymData); // 수집된 gymData 확인
 
-        // 각 gymData 항목의 gName 확인
-        gymData.forEach(gym => {
-            console.log('gName:', gym.gName); // gName 출력
-        });
-
         document.getElementById('status').innerText = `총 수집된 헬스장 수: ${gymData.length}`;
         sendGymDataToServer(gymData);
         document.getElementById('fetchButton').disabled = false; // 버튼 활성화
@@ -74,8 +69,8 @@
                         gymData.push({
                             gName: data[i].place_name,
                             address: data[i].road_address_name,
-                            gLatitude: data[i].y,
-                            gLongitude: data[i].x,
+                            gLatitude: parseFloat(data[i].y),
+                            gLongitude: parseFloat(data[i].x),
                         });
                     }
                     resolve();

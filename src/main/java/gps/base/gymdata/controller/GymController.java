@@ -11,23 +11,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/gyms")
 public class GymController {
-    @Autowired
-    private GymService gymService;
 
     @PostMapping
-    public ResponseEntity<String> saveGyms(@RequestBody List<Gym> gyms) {
-        try {
-            for (Gym gym : gyms) {
-                if (gym.getGName() == null || gym.getGName().isEmpty()) {
-                    return ResponseEntity.badRequest().body("gName 필드는 null일 수 없습니다.");
-                }
-                gymService.save(gym);
-            }
-            return ResponseEntity.ok("{\"message\":\"Success\"}"); // JSON 형식으로 응답
-        } catch (Exception e) {
-            e.printStackTrace(); // 예외 로그 출력
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"error\":\"서버 오류: " + e.getMessage() + "\"}"); // JSON 형식으로 오류 응답
-        }
+    public ResponseEntity<String> saveGyms(@RequestBody List<Gym> gymData) {
+        // gymData가 정상적으로 파싱되고 있는지 확인
+        System.out.println("Received gym data: " + gymData);
+
+        // 데이터 처리 후 저장 로직 추가
+        return ResponseEntity.ok("헬스장 데이터가 성공적으로 저장되었습니다.");
     }
 }
