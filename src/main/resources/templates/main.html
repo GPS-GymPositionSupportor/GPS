@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>환영합니다, <span id="mId"></span>님!</h1>
+        <h1>환영합니다, <span id="name"></span>님!</h1>
         <ul class="menu">
             <li><a href="/api/member/profile">프로필 관리</a></li>
             <li><a href="/api/gym/list">체육관 목록</a></li>
@@ -29,7 +29,10 @@
         function loadUserInfo() {
             fetch('/api/user-info', {
                 method: 'GET',
-                credentials: 'include'
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json; charset=UTF-8'
+                }
             })
                 .then(response => {
                     if(!response.ok) {
@@ -38,7 +41,8 @@
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById('mId').textContent = data.mId;
+                    console.log(data);
+                    document.getElementById('name').textContent = data.name;
                 })
                 .catch(error => {
                     console.error('Error: ', error);
