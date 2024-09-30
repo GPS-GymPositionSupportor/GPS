@@ -4,18 +4,63 @@
     <meta charset="UTF-8">
     <title>Test Board</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        .container { max-width: 100%; margin: auto; }
-        table { width: 100%; border-collapse: collapse }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #f2f2f2; }
-        .btn { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; }
+
+        body {
+            font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        .container {
+            max-width: 100%; margin: auto;
+        }
+        table {
+            width: 100%; border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd; padding: 8px; text-align: left;
+        }
+        th {
+            background: #f2f2f2;
+        }
+        .btn {
+            display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            z-index: 1000;
+        }
+
+        .popup input, .popup textarea {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
         <h1>게시판</h1>
+        <p>현재 사용자 : <span id="currentUser"></span></p>
         <a href="#" class="btn" id="writePost">글쓰기</a>
         <table id="postList">
             <thead>
@@ -27,11 +72,24 @@
                     <th>내용</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="reviewTable">
 
             </tbody>
         </table>
     </div>
+
+    <div id="gymPopup" class="popup">
+        <h2>체육관 정보 입력</h2>
+        <input type="text" id="gymName" placeholder="체육관 이름">
+        <input type="text" id="gymAddress" placeholder="주소">
+        <input type="number" id="gymLatitude" placeholder="위도">
+        <input type="number" id="gymLongitude" placeholder="경도">
+        <textarea id="gymInfo" placeholder="체육관 정보"></textarea>
+        <input type="file" id="gymImage" accept="image/*">
+        <button onclick="submitGymInfo()">확인</button>
+        <button onclick="closePopup()">취소</button>
+    </div>
+    <div id="overlay" class="overlay"></div>
     <script>
         // 현재 로그인한 사용자 정보 (서버에서 제공해야 함)
         let currentUser = {
@@ -40,42 +98,68 @@
         };
 
         // 사용자 정보 가져오기
-        function fetcUserInfo() {
-            fetch('/api/user/info')
-                .then(response => response.json())
+        function fetchUserInfo() {
+            fetch('/api/user-info', {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+
+                    if(!response.ok) {
+                        throw new Error('로그인 상태가 아닙니다.');
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    currentUser.userId = data.userId;
-                    currentUser.isAdmin = data.isAdmin;
-                    document.getElementById('currentUser').textContent = currentUser.userId + (currentUser.isAdmin ? '(관리자)' : '');
+                    currentUser.userId = data.name;
+                    document.getElementById('currentUser').textContent = data.name;
+                })
+                .catch(error => {
+                    console.error('Error: ', error);
+                    alert('사용자 정보를 불러오는데 실패했습니다. 다시 로그인해주세요.');
+                    window.location.href = '/api/login';
                 });
         }
 
         // 리뷰 목록 가져오기
         function fetchReviews() {
-            fetch('/api/reviews/all')
+            fetch('/api/reviews/all', {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then(response => response.json())
                 .then(reviews => {
-                    const tbody = document.querySelector('#postList tbody');
+                    const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
                     reviews.forEach(review => {
-                        const row = `
-                            <tr>
-                                <td>${review.rId}</td>
-                                <td>${review.gymId}</td>
-                                <td>${review.userId}</td>
-                                <td>${review.comment}</td>
-                                <td>${new Date(review.addedAt).toLocaleString()}</td>
-                                <td>
-                                    ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
-                                        <button onclick="editReview(${review.rId}, ${review.gymId}, '${review.userId}')">수정</button>
-                                        <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
-                                    ` : ''}
-                                </td>
-                            </tr>
+
+                        const row = document.createElement('tr');
+                        row.innerHTML =  `
+                            <td>${review.rId}</td>
+                            <td>${new Date(review.addedAt).toLocaleString()}</td>
+                            <td>${review.userId}</td>
+                            <td>${review.gymId}</td>
+                            <td>${review.comment}</td>
+                            <td>
+                                ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
+                                <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
+                                <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
+                                ` : ''}
+                            </td>
                         `;
-                        tbody.insertAdjacentHTML('beforeend', row);
+                        tbody.insertAdjacentHTML(row);
                     });
-                });
+                })
+                .catch(error => {
+                    console.error('Error : ', error);
+                    alert('리뷰를 불러오는데 실패했습니다.');
+                })
         }
 
         // 리뷰 작성
@@ -143,8 +227,51 @@
             }
         }
 
+        // 글 작성 버튼 Event Listener
+        document.getElementById('writePost').addEventListener('click', () => {
+            document.getElementById('gymPopup').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        });
+
+        function closePopup() {
+            document.getElementById('gymPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        function submitGymInfo() {
+            const gymName = document.getElementById('gymName').value;
+            const gymAddress = document.getElementById('gymAddress').value;
+            const gymLatitude = document.getElementById('gymLatitude').value;
+            const gymLongitude = document.getElementById('gymLongitude').value;
+            const gymInfo = document.getElementById('gymInfo').value;
+            const gymImage = document.getElementById('gymImage').files[0];
+
+            const formData = new FormData();
+            formData.append('name', gymName);
+            formData.append('address', gymAddress);
+            formData.append('latitude', gymLatitude);
+            formData.append('longitude', gymLongitude);
+            formData.append('info', gymInfo);
+            formData.append('image', gymImage);
+
+
+            fetch('/api/gym', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('체육관 정보가 성공적으로 저장되었습니다.');
+                    closePopup();
+                })
+                .catch(error => {
+                    console.error('Error : ', error);
+                    alert('체육관 정보 저장에 실패했습니다.');
+                });
+        }
+
         // 초기화
-        fetcUserInfo();
+        fetchUserInfo();
         fetchReviews();
     </script>
 </body>
