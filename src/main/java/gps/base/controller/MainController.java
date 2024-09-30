@@ -173,7 +173,7 @@ public class MainController {
         if(loggedInUser != null) {
             logger.info("User info requested for: {}", loggedInUser.getMId());
             Map<String, String> userInfo = new HashMap<>();
-            userInfo.put("mId", loggedInUser.getMId());
+            userInfo.put("name", loggedInUser.getName());
             return ResponseEntity.ok(userInfo);
         } else {
             logger.warn("User info requested but no user in session, Session ID : {}", session.getId());
