@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -94,11 +95,14 @@ public class ReviewService {
 
 
     // 댓글 작성
-    public Comment addComment(Long rId, Long userId, Long gymId, CommentDTO commentDTO) {
+    public Comment addComment(Long rId, Long userId,  CommentDTO commentDTO) {
         Review review = reviewRepository.findById(rId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
 
-        Comment comment = new Comment(userId, gymId, commentDTO.getComment());
+        Comment comment = new Comment();
+        comment.setUserId(userId);
+        comment.setReview(review);
+        comment.setComment(commentDTO.getComment());
         Comment savedComment = commentRepository.save(comment);
 
         messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 댓글이 작성되었습니다.");
@@ -123,7 +127,7 @@ public class ReviewService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
-        if(!comment.getUserId().equals(userId) || !comment.getGymId().equals(review.getGymId())) {
+        if(!comment.getUserId().equals(userId) || !comment.getReview().equals(rId)) {
             throw new IllegalArgumentException("댓글을 수정할 권한이 없습니다.");
         }
 
@@ -143,7 +147,7 @@ public class ReviewService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
-        if(!comment.getUserId().equals(userId) || !comment.getGymId().equals(review.getGymId())) {
+        if(!comment.getUserId().equals(userId) || !comment.getReview().equals(rId)) {
             throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
         }
 
@@ -153,7 +157,13 @@ public class ReviewService {
 
     // gym_id 값에 의해서 gym 데이터 요청
     public List<Comment> getCommentsByGym(Long gymId) {
-        return commentRepository.findByGymId(gymId);
+        List<Review> reviews = getReviewsByGym(gymId);
+        List<Comment> comments = new ArrayList<>();
+        for (Review review : reviews) {
+            comments.addAll(commentRepository.findByReview(review));
+        }
+
+        return comments;
     }
 
 }
