@@ -1,5 +1,6 @@
 package gps.base.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "r_id")
+    @JsonProperty("rId")
     private Long rId;
 
     @Column(name = "added_at", nullable = false, updatable = false)
@@ -43,4 +45,16 @@ public class Review {
         addedAt = LocalDateTime.now();
     }
 
+
+    @Override
+    public String toString() {
+        return "Review{" +
+                "rId=" + rId +
+                ", addedAt=" + addedAt +
+                ", userId=" + userId +
+                ", gymId=" + gymId +
+                ", comment='" + comment + '\'' +
+                ", comments=" + comments +
+                '}';
+    }
 }
