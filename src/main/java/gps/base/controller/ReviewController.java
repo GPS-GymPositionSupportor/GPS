@@ -8,6 +8,8 @@ import gps.base.model.Review;
 import gps.base.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,11 +28,16 @@ public class ReviewController {
     private ReviewService reviewService;
 
 
+    private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
+
+
     // 리뷰 보드 페이지 반환
     @GetMapping("/board")
     public String getReviewBoard(Model model, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
-        if(userId == null) {
+
+        logger.debug("Review Board 접근하는 중....   Session ID: {}, User ID: {}", session.getId(), userId);
+        if(userId != null) {
             List<Review> reviews = reviewService.getAllReviews();
             model.addAttribute("reviews", reviews);
             model.addAttribute("userId", userId);
@@ -43,14 +50,23 @@ public class ReviewController {
     // 리뷰 작성
     @PostMapping
     public ResponseEntity<Review> createReview(@RequestBody ReviewDTO reviewDTO, HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
-        if(userId == null) {
-            reviewDTO.setUserId(userId);
-            Review createdReview = reviewService.createReview(reviewDTO);
-            return ResponseEntity.ok(createdReview);
-        } else {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+        Long sessionUserId = (Long) session.getAttribute("userId");
+
+        // 세션 정보 로깅
+        logger.info("Session ID: " + session.getId());
+        logger.info("Session userId: " + session.getAttribute("userId"));
+        logger.info("Request userId: " + reviewDTO.getUserId());
+
+
+        // 세션의 userId와 요청의 userId가 일치하는지 확인
+        if(sessionUserId == null || !sessionUserId.equals(reviewDTO.getUserId())) {
+            throw new UnauthorizedException("로그인이 필요하거나 유효하지 않은 사용자입니다.");
         }
+
+        reviewDTO.setUserId(sessionUserId);
+
+        Review createdReview = reviewService.createReview(reviewDTO);
+        return ResponseEntity.ok(createdReview);
     }
 
     // 특정 체육관의 리뷰 가져오기
@@ -106,6 +122,11 @@ public class ReviewController {
     @ResponseBody
     public ResponseEntity<List<Review>> getAllReviews() {
         List<Review> reviews = reviewService.getAllReviews();
+        for (Review review : reviews) {
+            logger.info("Review - rId: {}, userId: {}, gymId: {}, comment: {}, addedAt: {}",
+                    review.getRId(), review.getUserId(), review.getGymId(),
+                    review.getComment(), review.getAddedAt());
+        }
         return ResponseEntity.ok(reviews);
     }
 
