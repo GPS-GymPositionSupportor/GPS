@@ -1,8 +1,6 @@
 package gps.base.controller;
 
 
-import gps.base.DTO.CommentDTO;
-import gps.base.DTO.ReviewDTO;
 import gps.base.model.*;
 import gps.base.service.GymService;
 import gps.base.service.MemberService;
@@ -21,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -85,30 +82,35 @@ public class MainController {
     // 로그인 데이터 POST
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestParam String mId, @RequestParam String mPassword, HttpSession session) {
-        Member member = memberService.authenticateMember(mId, mPassword);
         Map<String, String> response = new HashMap<>();
 
-        if( member != null ) {
-            // 인증 성공 시 회원 정보를 조회하여 세션에 저장
-            try {
-                session.setAttribute("loggedInUser", member);
+        try {
+            Member member = memberService.authenticateMember(mId, mPassword);
+
+            if(member != null) {
+                // 인증 성공 시 회원 정보를 세션에 저장
+                session.setAttribute("loggedInUser", member);   //  전체 Member 객체 저장
+                session.setAttribute("userId", member.getUserId());
+                session.setAttribute("name", member.getName()); // 사용자 식별을 위해 지정
                 session.setMaxInactiveInterval(1800);   // 세션 30분
-                logger.info("User logged in: {}. Session ID : {}", member.getMId(), session.getId());
+
+                logger.info("User logged in: {}.   User ID: {}. Session ID : {}", member.getMId(), member.getUserId(), session.getId());
+
                 response.put("status", "success");
                 response.put("message", "로그인 성공");
                 response.put("redirect", "/api/main");
                 return ResponseEntity.ok(response);
-            } catch (EntityNotFoundException e) {
-                // 회원 정보 조회 실패 시
+            } else {
+                logger.warn("Login failed for user: {}.  Invalid credentials.", mId);
                 response.put("status", "error");
-                response.put("message", "로그인 처리 중 오류 발생");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                response.put("message", "아이디 또는 비밀번호가 올바르지 않습니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-        } else {
-            logger.warn("Login failed for user : {}", mId);
+        } catch (Exception e) {
+            logger.warn("Error during login process for user: {}. Error : {}", mId, e.getMessage());
             response.put("status", "error");
-            response.put("message", "로그인 실패");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            response.put("message", "로그인 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
@@ -171,9 +173,10 @@ public class MainController {
         Member loggedInUser = (Member) session.getAttribute("loggedInUser");
 
         if(loggedInUser != null) {
-            logger.info("User info requested for: {}", loggedInUser.getMId());
+            logger.info("User info requested for: {}", loggedInUser.getUserId());
             Map<String, String> userInfo = new HashMap<>();
             userInfo.put("name", loggedInUser.getName());
+            userInfo.put("userId", String.valueOf(loggedInUser.getUserId()));
             return ResponseEntity.ok(userInfo);
         } else {
             logger.warn("User info requested but no user in session, Session ID : {}", session.getId());
