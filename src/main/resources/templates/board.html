@@ -61,7 +61,7 @@
     <div class="container">
         <h1>게시판</h1>
         <p>현재 사용자 : <span id="currentUser"></span></p>
-        <a href="#" class="btn" id="writePost">글쓰기</a>
+        <a href="#" class="btn" id="writeReview">글쓰기</a>
         <table id="postList">
             <thead>
                 <tr>
@@ -78,15 +78,12 @@
         </table>
     </div>
 
-    <div id="gymPopup" class="popup">
-        <h2>체육관 정보 입력</h2>
-        <input type="text" id="gymName" placeholder="체육관 이름">
-        <input type="text" id="gymAddress" placeholder="주소">
-        <input type="number" id="gymLatitude" placeholder="위도">
-        <input type="number" id="gymLongitude" placeholder="경도">
-        <textarea id="gymInfo" placeholder="체육관 정보"></textarea>
-        <input type="file" id="gymImage" accept="image/*">
-        <button onclick="submitGymInfo()">확인</button>
+    <div id="reviewPopup" class="popup">
+        <!-- 리뷰 작성 팝업 추가 -->
+        <h2>리뷰 작성</h2>
+        <input type="number" id="reviewGymId" placeholder="체육관 ID">
+        <textarea id="reviewComment" placeholder="리뷰 내용"></textarea>
+        <button onclick="submitReview()">확인</button>
         <button onclick="closePopup()">취소</button>
     </div>
     <div id="overlay" class="overlay"></div>
@@ -114,7 +111,8 @@
                     return response.json();
                 })
                 .then(data => {
-                    currentUser.userId = data.name;
+                    currentUser.userId = data.userId;
+                    currentUser.name = data.name;
                     document.getElementById('currentUser').textContent = data.name;
                 })
                 .catch(error => {
@@ -135,25 +133,26 @@
             })
                 .then(response => response.json())
                 .then(reviews => {
+                    console.log("Received Reviews : ", reviews);
                     const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
                     reviews.forEach(review => {
 
                         const row = document.createElement('tr');
                         row.innerHTML =  `
-                            <td>${review.rId}</td>
-                            <td>${new Date(review.addedAt).toLocaleString()}</td>
-                            <td>${review.userId}</td>
-                            <td>${review.gymId}</td>
-                            <td>${review.comment}</td>
-                            <td>
-                                ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
-                                <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
-                                <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
-                                ` : ''}
-                            </td>
+                            <td>${review.rId || 'N/A'}</td>
+                <td>${new Date(review.addedAt).toLocaleString()}</td>
+                <td>${currentUser.name || 'N/A'}</td>
+                <td>${review.gymId || 'N/A'}</td>
+                <td>${review.comment || 'N/A'}</td>
+                <td>
+                    ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
+                    <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
+                    <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
+                    ` : ''}
+                </td>
                         `;
-                        tbody.insertAdjacentHTML(row);
+                        tbody.appendChild(row);
                     });
                 })
                 .catch(error => {
@@ -162,28 +161,7 @@
                 })
         }
 
-        // 리뷰 작성
-        document.getElementById('writePost').addEventListener('click', () => {
-            const gymId = prompt('체육관 ID를 입력하세요:');
-            const comment = prompt('리뷰 내용을 입력하세요:');
-            if (gymId && comment) {
-                fetch('/api/reviews', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ userId: currentUser.userId, gymId, comment }),
-                })
-                    .then(response => response.json())
-                    .then(() => {
-                        fetchReviews(); // 목록 새로고침
-                    })
-                    .catch(error => {
-                        console.error('Error : ', error);
-                        alert('리뷰 작성에 실패했습니다.');
-                    });
-            }
-        });
+
 
         // 리뷰 수정
         function editReview(reviewId, gymId) {
@@ -228,47 +206,59 @@
         }
 
         // 글 작성 버튼 Event Listener
-        document.getElementById('writePost').addEventListener('click', () => {
-            document.getElementById('gymPopup').style.display = 'block';
+        document.getElementById('writeReview').addEventListener('click', () => {
+            document.getElementById('reviewPopup').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         });
 
         function closePopup() {
-            document.getElementById('gymPopup').style.display = 'none';
+            document.getElementById('reviewPopup').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
+            // 입력 필드 초기화
+            document.getElementById('reviewGymId').value = '';
+            document.getElementById('reviewComment').value = '';
         }
 
-        function submitGymInfo() {
-            const gymName = document.getElementById('gymName').value;
-            const gymAddress = document.getElementById('gymAddress').value;
-            const gymLatitude = document.getElementById('gymLatitude').value;
-            const gymLongitude = document.getElementById('gymLongitude').value;
-            const gymInfo = document.getElementById('gymInfo').value;
-            const gymImage = document.getElementById('gymImage').files[0];
+        // 리뷰작성
+       function submitReview() {
+            const gymId = document.getElementById('reviewGymId').value;
+            const comment = document.getElementById('reviewComment').value;
 
-            const formData = new FormData();
-            formData.append('name', gymName);
-            formData.append('address', gymAddress);
-            formData.append('latitude', gymLatitude);
-            formData.append('longitude', gymLongitude);
-            formData.append('info', gymInfo);
-            formData.append('image', gymImage);
-
-
-            fetch('/api/gym', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert('체육관 정보가 성공적으로 저장되었습니다.');
-                    closePopup();
+            if(gymId && comment) {
+                fetch('/api/reviews' , {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        gymId,
+                        comment,
+                        userId: currentUser.userId  // 현재 로그인한 사용자의 ID를 포함
+                    }),
+                    credentials: 'include' // 세션 쿠키를 포함시키기 위해 적용
                 })
-                .catch(error => {
-                    console.error('Error : ', error);
-                    alert('체육관 정보 저장에 실패했습니다.');
-                });
-        }
+                    .then(response => {
+                        if(!response.ok) {
+                            if(response.status === 401) {
+                                throw new Error('로그인이 필요합니다.');
+                            }
+                            throw new Error('리뷰 작성에 실패하였습니다.');
+                        }
+                        return response.json();
+                    })
+                    .then(() => {
+                        alert('리뷰가 성공적으로 작성되었습니다.');
+                        closePopup();
+                        fetchReviews(); // 목록 새로고침
+                    })
+                    .catch(error => {
+                        console.error('Error : ', error);
+                        alert(error.message);
+                    });
+            } else {
+                alert('체육관 ID와 리뷰 내용을 모두 입력해주세요.');
+            }
+       }
 
         // 초기화
         fetchUserInfo();
