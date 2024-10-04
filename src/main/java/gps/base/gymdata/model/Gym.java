@@ -20,10 +20,6 @@ public class Gym {
     @Column(name = "address", nullable = false)
     private String address;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = true) // admin_id는 nullable로 설정
-    private Admin admin;
-
     @Column(name = "g_name", nullable = false)
     private String gName;
 
