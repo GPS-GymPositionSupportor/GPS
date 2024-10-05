@@ -2,6 +2,7 @@ package gps.base.controller;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
+import gps.base.DTO.ReviewWithUserNameDTO;
 import gps.base.exception.UnauthorizedException;
 import gps.base.model.Comment;
 import gps.base.model.Review;
@@ -120,14 +121,10 @@ public class ReviewController {
     // 모든 리뷰 가져오기
     @GetMapping("/all")
     @ResponseBody
-    public ResponseEntity<List<Review>> getAllReviews() {
-        List<Review> reviews = reviewService.getAllReviews();
-        for (Review review : reviews) {
-            logger.info("Review - rId: {}, userId: {}, gymId: {}, comment: {}, addedAt: {}",
-                    review.getRId(), review.getUserId(), review.getGymId(),
-                    review.getComment(), review.getAddedAt());
-        }
-        return ResponseEntity.ok(reviews);
+    public ResponseEntity<List<ReviewWithUserNameDTO>> getAllReviews() {
+            List<ReviewWithUserNameDTO> reviews = reviewService.getAllReviewsWithUserName();
+            return ResponseEntity.ok(reviews);
+
     }
 
 

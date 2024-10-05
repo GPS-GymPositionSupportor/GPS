@@ -2,6 +2,7 @@ package gps.base.service;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
+import gps.base.DTO.ReviewWithUserNameDTO;
 import gps.base.model.Comment;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
@@ -64,6 +65,12 @@ public class ReviewService {
     // 모든 리뷰 가져오기
     public List<Review> getAllReviews() {
         return reviewRepository.findAll();
+    }
+
+
+    // Review와 Member 정보 함께 가져오기
+    public List<ReviewWithUserNameDTO> getAllReviewsWithUserName() {
+        return reviewRepository.findAllReviewsWithUserName();
     }
     
     

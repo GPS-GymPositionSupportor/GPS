@@ -11,5 +11,6 @@ public class ReviewDTO {
 
     private Long userId;
     private Long gymId;
+    private String userName;    // Member의 이름
     private String comment;
 }
