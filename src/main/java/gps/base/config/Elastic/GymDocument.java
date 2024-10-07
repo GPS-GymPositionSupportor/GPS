@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -15,21 +16,19 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @AllArgsConstructor
 @Builder
 public class GymDocument {
+    @Id
     @Field(type = FieldType.Keyword)
-    private String id;
+    private String g_name;
 
     @Field(type = FieldType.Text)
-    private String name;
+    private String information;
 
     @Field(type = FieldType.Text)
     private String address;
 
-    @Field(type = FieldType.Text)
-    private String intro;
+    @Field(type = FieldType.Double)
+    private Double g_latitude;
 
     @Field(type = FieldType.Double)
-    private Double latitude;
-
-    @Field(type = FieldType.Double)
-    private Double longitude;
+    private Double g_longitude;
 }
