@@ -2,10 +2,13 @@ package gps.base.service;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.DTO.ReviewWithUserNameDTO;
+import gps.base.exception.GymNotFoundException;
 import gps.base.model.Comment;
+import gps.base.model.Member;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
+import gps.base.repository.GymRepository;
+import gps.base.repository.MemberRepository;
 import gps.base.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -15,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewService {
@@ -27,6 +31,12 @@ public class ReviewService {
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private GymRepository gymRepository;
     
     
     /*
@@ -35,8 +45,12 @@ public class ReviewService {
 
     
     // 리뷰 작성
-    public Review createReview(ReviewDTO reviewDTO) {
+    public ReviewDTO createReview(ReviewDTO reviewDTO) {
         Review review = new Review();
+
+        if(!gymRepository.existsById(reviewDTO.getGymId())) {
+            throw new GymNotFoundException(reviewDTO.getGymId());
+        }
 
         // DTO 에서 엔티티로 데이터 복사
         review.setUserId(reviewDTO.getUserId());
@@ -48,7 +62,22 @@ public class ReviewService {
         // websocket을 통해 실시간 알림 전송
         messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 리뷰가 작성되었습니다.");
 
-        return savedReview;
+        return convertToDTO(savedReview);
+    }
+
+    private ReviewDTO convertToDTO(Review review) {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setGymId(review.getGymId());
+        dto.setUserId(review.getUserId());
+        dto.setComment(review.getComment());
+        dto.setAddedAt(review.getAddedAt());
+        dto.setRId(review.getRId());
+
+        // userId를 이용해서 Member 정보를 조회하고 이름을 설정
+        memberRepository.findById(review.getUserId())
+                .ifPresent(member -> dto.setUserName(member.getName()));
+
+        return dto;
     }
 
     // Gym_id 값으로 리뷰 가져오기
@@ -69,8 +98,21 @@ public class ReviewService {
 
 
     // Review와 Member 정보 함께 가져오기
-    public List<ReviewWithUserNameDTO> getAllReviewsWithUserName() {
-        return reviewRepository.findAllReviewsWithUserName();
+    public List<ReviewDTO> getAllReviewsWithUserName() {
+        List<ReviewDTO> reviews = reviewRepository.findAllReviewsWithUserName();
+        return reviews.stream().map(review -> {
+            ReviewDTO dto = new ReviewDTO();
+            dto.setRId(review.getRId());
+            dto.setAddedAt(review.getAddedAt());
+            dto.setUserId(review.getUserId());
+            dto.setGymId(review.getGymId());
+            dto.setComment(review.getComment());
+
+            // 사용자 이름 가져오기
+            Member member = memberRepository.findById(review.getUserId()).orElse(null);
+            dto.setUserName(member != null ? member.getName() : "Unknown");
+            return dto;
+        }).collect(Collectors.toList());
     }
     
     

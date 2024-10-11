@@ -2,7 +2,7 @@ package gps.base.controller;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.DTO.ReviewWithUserNameDTO;
+import gps.base.exception.GymNotFoundException;
 import gps.base.exception.UnauthorizedException;
 import gps.base.model.Comment;
 import gps.base.model.Review;
@@ -50,14 +50,8 @@ public class ReviewController {
 
     // 리뷰 작성
     @PostMapping
-    public ResponseEntity<Review> createReview(@RequestBody ReviewDTO reviewDTO, HttpSession session) {
+    public ResponseEntity<?> createReview(@RequestBody ReviewDTO reviewDTO, HttpSession session) {
         Long sessionUserId = (Long) session.getAttribute("userId");
-
-        // 세션 정보 로깅
-        logger.info("Session ID: " + session.getId());
-        logger.info("Session userId: " + session.getAttribute("userId"));
-        logger.info("Request userId: " + reviewDTO.getUserId());
-
 
         // 세션의 userId와 요청의 userId가 일치하는지 확인
         if(sessionUserId == null || !sessionUserId.equals(reviewDTO.getUserId())) {
@@ -66,8 +60,14 @@ public class ReviewController {
 
         reviewDTO.setUserId(sessionUserId);
 
-        Review createdReview = reviewService.createReview(reviewDTO);
-        return ResponseEntity.ok(createdReview);
+        try {
+            ReviewDTO createdReview = reviewService.createReview(reviewDTO);
+            return ResponseEntity.ok(createdReview);
+        } catch (GymNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(e.getMessage());
+        }
     }
 
     // 특정 체육관의 리뷰 가져오기
@@ -120,11 +120,9 @@ public class ReviewController {
 
     // 모든 리뷰 가져오기
     @GetMapping("/all")
-    @ResponseBody
-    public ResponseEntity<List<ReviewWithUserNameDTO>> getAllReviews() {
-            List<ReviewWithUserNameDTO> reviews = reviewService.getAllReviewsWithUserName();
-            return ResponseEntity.ok(reviews);
-
+    public ResponseEntity<List<ReviewDTO>> getAllReviews() {
+        List<ReviewDTO> reviews = reviewService.getAllReviewsWithUserName();
+        return ResponseEntity.ok(reviews);
     }
 
 

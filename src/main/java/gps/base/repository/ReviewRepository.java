@@ -1,6 +1,6 @@
 package gps.base.repository;
 
-import gps.base.DTO.ReviewWithUserNameDTO;
+import gps.base.DTO.ReviewDTO;
 import gps.base.model.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +15,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     Optional<Review> findByrIdAndGymIdAndUserId(Long rId, Long gymId, Long userId);
 
-    @Query("SELECT new gps.base.DTO.ReviewWithUserNameDTO(r.rId as rId, r.addedAt, r.userId, m.name, r.gymId, r.comment) " +
-            "FROM Review r, Member m WHERE r.userId = m.userId")
-    List<ReviewWithUserNameDTO> findAllReviewsWithUserName();
+    @Query("SELECT new gps.base.DTO.ReviewDTO(r.rId as rId, r.addedAt, r.userId, r.gymId, m.name, r.comment) " +
+            "FROM Review r JOIN Member m ON r.userId = m.userId")
+    List<ReviewDTO> findAllReviewsWithUserName();
 }

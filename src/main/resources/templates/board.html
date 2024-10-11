@@ -140,7 +140,7 @@
 
                         const row = document.createElement('tr');
                         row.innerHTML =  `
-                            <td>${review.rId || 'N/A'}</td>
+                            <td>${review.rid || 'N/A'}</td>
                 <td>${new Date(review.addedAt).toLocaleString()}</td>
                 <td>${review.userName || 'N/A'}</td>
                 <td>${review.gymId || 'N/A'}</td>
@@ -239,6 +239,8 @@
                 })
                     .then(response => {
                         if(!response.ok) {
+                            return response.text().then(text => { throw new Error(text) });
+
                             if(response.status === 401) {
                                 throw new Error('로그인이 필요합니다.');
                             }
