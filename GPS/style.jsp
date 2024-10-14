@@ -101,78 +101,106 @@ body::-webkit-scrollbar {
 }
 
 .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3; /* 로그인 폼을 메인 콘텐츠 위에 배치 */
-            display: none; /* 기본적으로 숨김 */
-        }
-
-        .login-form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .login-form input {
-            display: block;
-            margin: 10px 0;
-            padding: 10px;
-            width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        .login-form button {
-            padding: 10px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .login-form button:hover {
-            background-color: #0056b3;
-        }
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(255, 255, 255, 0.73);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 3;
+	display: none;
+}
         
-        .social-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
+.images {
+	display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-        .social-buttons button {
-            flex: 1;
-            margin: 5px;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+.images img {
+	margin-bottom: 5%;
+}
 
-        .kakao-btn {
-            background-color: #FEE500; /* 카카오톡 색상 */
-            color: black;
-        }
+.login-form {
+	width: 80%;
+	align-items: center;
+}
+		
+.login-form input {
+	display: block;
+	margin: 10px 0px 10px 0px;
+	padding: 10px 15px 10px 15px;
+	width: 91%;
+	background-color: #f2f2f2;
+	border: 0px solid;
+	border-radius: 12px 12px 0 0;
+	font-size: 16px;
+	box-shadow: 0 1px 0px #999999;
+}
 
-        .google-btn {
-            background-color: #DB4437; /* 구글 색상 */
-            color: white;
-        }
+.login-form button {
+	width: 100%;
+	padding: 10px;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	margin: 10px 0px 10px 0px;
+}
 
-        .register-btn {
-            margin-top: 10px;
-            background-color: #28a745; /* 회원가입 버튼 색상 */
-            color: white;
-        }
+.register-btn {
+	width: 25% !important;
+	color: #555 !important;
+	font-size: 12px !important;
+	background-color: #ffffff00 !important;
+}
+.register-botton {
+	display: flex;
+	justify-content: center;
+	margin-top: 20px;
+}
+.kakao-btn {
+	background-color: #FEE500 !important; /* 카카오톡 색상 */
+	color: #000!important;
+	width: 60% !important;
+	align-self: center;
+	border-radius: 6px !important;
+	box-shadow: 0 1px 0px #00000040;
+}
+
+.google-btn {
+	background-color: #fff !important; /* 구글 색상 */
+	color: #000 !important;
+	width: 60% !important;
+	align-self: center;
+	border-radius: 2px !important;
+	box-shadow: 0 1px 0px #00000040;
+}
+        
+.login-form button:hover {
+	background-color: #0056b3;
+}
+        
+.social-buttons {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 10px;
+	flex-direction: column;
+}
+
+.social-buttons button {
+	flex: 1;
+	margin: 5px;
+	padding: 10px;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+}
         
 @media only screen and (max-width: 767px) {
 
@@ -185,6 +213,19 @@ body::-webkit-scrollbar {
 		z-index: 10;
 	}
 	
+	.navbar {
+	    background-color: #747474;
+	    display: flex;
+	    justify-content: space-around;
+	    align-items: center;
+	    padding: 0;
+	    width: 100%;
+	    position: -webkit-sticky;
+	    position: sticky;
+	    top: 0;
+	    z-index: 10;
+	}
+
 	#nav-links {
 		position: fixed;
 	    right: 0;
@@ -219,4 +260,42 @@ body::-webkit-scrollbar {
 		font-size: 16px;
 		font-family: 'NanumSquare', sans-serif;
 		z-index: 3;
+	}
+	
+	.images {
+		display: flex;
+	    flex-direction: column;
+	    align-items: center;
+	    margin-bottom: 5%;
+	    padding: 0% 0% 10% 0%;
+	}
+	
+	.images img {
+		margin-bottom: 10%;
+	}
+	
+	.login-form {
+		width: 80%;
+		height: 80%;
+	}
+	
+	.login-form input {
+		display: block;
+		margin: 5% 0% 5% 0%;
+		padding: 5% 5% 5% 5%;
+		width: 91%;
+		border: 0px solid;
+		border-radius: 12px 12px 0 0;
+	}
+	
+	.login-form button {
+		width: 100%;
+		padding: 10px;
+		background-color: #402E32;
+		color: white;
+		border: none;
+		border-radius: 12px;
+		cursor: pointer;
+		font-size: 14px;
+		margin: 2% 0% 2% 0%;
 	}

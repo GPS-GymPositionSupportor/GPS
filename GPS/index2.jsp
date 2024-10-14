@@ -41,14 +41,14 @@
     request.setCharacterEncoding("UTF-8");
     response.setCharacterEncoding("UTF-8");
     %>
-
-    <!-- 햄버거 버튼 -->
-    <div class="navbar">
-        <div class="burbutton" id="burbutton">
+		<div class="burbutton" id="burbutton">
             <span></span>
             <span class="middle"></span>
             <span></span>
         </div>
+
+    <div class="navbar">
+        
 
         <div id="nav-links">
             <form id="navForm" method="get">
@@ -94,18 +94,26 @@
     <!-- 로그인 오버레이 -->
     <div class="login-overlay" id="loginOverlay" style="display: <%= (session.getAttribute("userID") == null) ? "flex" : "none" %>;">
     <div class="login-form">
-        <h2>로그인</h2>
+    	<div class="images">
+    		<img src="image/logo.png" alt="logo1" title="logo" class="picture">
+    		<img src="image/LookForYourMovement.png" alt="moto" title="moto" class="picture">
+    	</div>
         <form action="loginProcess.jsp" method="post">
-            <input type="text" name="username" placeholder="사용자 이름" required>
-            <input type="password" name="password" placeholder="비밀번호" required>
-            <button type="submit">로그인</button>
-             <button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
+            <input type="text" name="username" placeholder="아이디를 입력해주세요" required>
+            <input type="password" name="password" placeholder="비밀번호를 입력해주세요" required>
+            <button type="submit">로그인 하기</button> 
         </form>
+        
+        <div class="register-botton">
+        	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
+		</div>
+		
         <div class="social-buttons">
-                <button class="kakao-btn">카카오톡 로그인</button>
-                <button class="google-btn">구글 로그인</button>
-            </div>
+	        <button class="google-btn">Sign in with Google</button>
+	        <button class="kakao-btn">Login with Kakao</button>
+        </div>
     </div>
+    	
 </div>
 </body>
 </html>
