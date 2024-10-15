@@ -4,6 +4,7 @@ import gps.base.model.Member;
 import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,6 +28,9 @@ public class MemberService {
     @Autowired
     MemberRepository memberRepository;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
 
 
     @Transactional
@@ -36,12 +40,18 @@ public class MemberService {
         }
 
         try {
-            member.setMPassword(member.getMPassword());
+            member.setMPassword(passwordEncoder.encode(member.getMPassword()));
             member.setMCreatedAt(LocalDateTime.now());
             return memberRepository.save(member);
         } catch (Exception e) {
             throw new RuntimeException("회원 저장 중 오류 발생 : " + e.getMessage(), e);
         }
+    }
+    
+    public void registerMember(Member member) {
+        // 유효성 검사 가능
+
+        memberRepository.save(member);
     }
 
 
@@ -64,7 +74,7 @@ public class MemberService {
                     .orElse(null);
 
 
-            if (member != null && mPassword.equals((member.getMPassword()))) {
+            if (member != null && passwordEncoder.matches(mPassword, member.getMPassword())) {
                 return member;
             }
             return null;

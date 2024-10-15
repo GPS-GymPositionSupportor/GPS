@@ -5,13 +5,13 @@ import gps.base.model.*;
 import gps.base.service.GymService;
 import gps.base.service.MemberService;
 import gps.base.service.ReviewService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +33,8 @@ public class MainController {
 
     @Autowired
     private ReviewService reviewService;
+
+
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
@@ -59,7 +61,6 @@ public class MainController {
         logger.info("회원 등록 요청을 받았습니다. : {}", member.getMId());
         try {
             member.setAuthority(Authority.USER);
-
             Member savedMember = memberService.saveMember(member);
             logger.info("회원 등록 완료 : {}", savedMember.getMId());
             model.addAttribute("message", "회원가입이 성공적으로 완료되었습니다.");
@@ -75,7 +76,7 @@ public class MainController {
     // 로그인 폼
     @GetMapping("/login")
     public String loginForm() {
-        return "/login";
+        return "login";
     }
 
 
@@ -163,6 +164,7 @@ public class MainController {
         }
         return "main";
     }
+
 
     // 사용자 정보 Get
     @GetMapping("/user-info")
