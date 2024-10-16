@@ -1,6 +1,5 @@
 package gps.base.controller;
 
-import gps.base.DTO.GymDTO;
 import gps.base.KakaoGymCrawler;
 import gps.base.model.Authority;
 import gps.base.service.MemberService;
@@ -16,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -30,14 +28,6 @@ public class MainController {
     private MemberService memberService;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
-
-
-    // 크롤링
-    @GetMapping("/gyms/crawl")
-    public ResponseEntity<List<GymDTO>> crawlGyms() {
-        List<GymDTO> gyms = kakaoGymCrawler.crawlAllGyms();
-        return ResponseEntity.ok(gyms);
-    }
 
     // 회원가입 폼
     @GetMapping("/register")
