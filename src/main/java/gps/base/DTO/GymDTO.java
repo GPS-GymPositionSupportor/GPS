@@ -1,4 +1,4 @@
-package gps.base.gymdata.DTO;
+package gps.base.DTO;
 
 public class GymDTO {
     private String gName;

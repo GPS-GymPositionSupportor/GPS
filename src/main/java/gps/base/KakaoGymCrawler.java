@@ -1,6 +1,6 @@
-package gps.base.gymdata;
+package gps.base;
 
-import gps.base.gymdata.DTO.GymDTO;
+import gps.base.DTO.GymDTO;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;

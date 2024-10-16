@@ -1,4 +1,4 @@
-package gps.base.gymdata.model;
+package gps.base.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;

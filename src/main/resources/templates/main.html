@@ -13,63 +13,68 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>환영합니다, <span id="mId"></span>님!</h1>
-        <ul class="menu">
-            <li><a href="/api/member/profile">프로필 관리</a></li>
-            <li><a href="/api/gym/list">체육관 목록</a></li>
-            <li><a href="/api/review/my">내 리뷰</a></li>
-            <li><a href="/api/logout" id="logout">로그 아웃</a></li>
-        </ul>
-    </div>
+<div class="container">
+    <h1>환영합니다, <span id="name"></span>님!</h1>
+    <ul class="menu">
+        <li><a href="/api/member/profile">프로필 관리</a></li>
+        <li><a href="/api/gym/list">체육관 목록</a></li>
+        <li><a href="/api/reviews/my">내 리뷰</a></li>
+        <li><a href="/api/reviews/board">게시판</a></li>
+        <li><a href="/api/logout" id="logout">로그 아웃</a></li>
+    </ul>
+</div>
 
-    <script>
-        // 페이지 로드 시 사용자 정보를 Get 하는 함수
-        function loadUserInfo() {
-            fetch('/api/user-info', {
-                method: 'GET',
-                credentials: 'include'
-            })
-                .then(response => {
-                    if(!response.ok) {
-                        throw new Error('로그인 상태가 아닙니다.');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById('mId').textContent = data.mId;
-                })
-                .catch(error => {
-                    console.error('Error: ', error);
-                    alert('사용자 정보를 불러오는데 실패했습니다. 다시 로그인해주세요.');
-                    window.location.href = '/api/login';
-                });
-        }
-
-        // 로그아웃 기능
-        document.getElementById('logout').addEventListener('click', function (e) {
-            e.preventDefault();
-            fetch('/api/logout', {
-                method: 'GET',
-                credentials: 'include'
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert(data.message);
-                        window.location.href = data.redirect;
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error : ', error);
-                    alert('로그아웃 처리 중 오류가 발생했습니다.');
-                })
+<script>
+    // 페이지 로드 시 사용자 정보를 Get 하는 함수
+    function loadUserInfo() {
+        fetch('/api/user-info', {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json; charset=UTF-8'
+            }
         })
+            .then(response => {
+                if(!response.ok) {
+                    throw new Error('로그인 상태가 아닙니다.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log(data);
+                document.getElementById('name').textContent = data.name;
+            })
+            .catch(error => {
+                console.error('Error: ', error);
+                alert('사용자 정보를 불러오는데 실패했습니다. 다시 로그인해주세요.');
+                window.location.href = '/api/login';
+            });
+    }
 
-        // 페이지 로드 시 사용자 정보 로드 함수 호출
-        window.onload = loadUserInfo();
-    </script>
+    // 로그아웃 기능
+    document.getElementById('logout').addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('/api/logout', {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error : ', error);
+                alert('로그아웃 처리 중 오류가 발생했습니다.');
+            })
+    })
+
+    // 페이지 로드 시 사용자 정보 로드 함수 호출
+    window.onload = loadUserInfo();
+</script>
 </body>
 </html>

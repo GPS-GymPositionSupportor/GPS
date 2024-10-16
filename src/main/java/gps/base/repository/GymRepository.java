@@ -1,6 +1,6 @@
-package gps.base.gymdata.repository;
+package gps.base.repository;
 
-import gps.base.gymdata.model.Gym;
+import gps.base.model.Gym;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
