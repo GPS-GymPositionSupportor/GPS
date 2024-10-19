@@ -133,12 +133,13 @@ body::-webkit-scrollbar {
 	display: block;
 	margin: 10px 0px 10px 0px;
 	padding: 10px 15px 10px 15px;
-	width: 91%;
+	width: 100%;
 	background-color: #f2f2f2;
 	border: 0px solid;
 	border-radius: 12px 12px 0 0;
 	font-size: 16px;
 	box-shadow: 0 1px 0px #999999;
+	box-sizing: border-box;
 }
 
 .login-form button {
@@ -151,6 +152,11 @@ body::-webkit-scrollbar {
 	cursor: pointer;
 	font-size: 16px;
 	margin: 10px 0px 10px 0px;
+	box-shadow: 0px 1px 1px 0px #00000017,
+	0px 1px 1px 0px #0000000D,
+	0px 2px 1px 0px #00000003,
+	0px 3px 1px 0px #00000000;
+	
 }
 
 .register-btn {
@@ -158,11 +164,11 @@ body::-webkit-scrollbar {
 	color: #555 !important;
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
+	box-shadow: none !important;
 }
-.register-botton {
+.register-button {
 	display: flex;
 	justify-content: center;
-	margin-top: 20px;
 }
 .kakao-btn {
 	background-color: #FEE500 !important; /* 카카오톡 색상 */
@@ -170,7 +176,7 @@ body::-webkit-scrollbar {
 	width: 60% !important;
 	align-self: center;
 	border-radius: 6px !important;
-	box-shadow: 0 1px 0px #00000040;
+	box-shadow: 0 1px 0px #00000040 !important;
 }
 
 .google-btn {
@@ -179,7 +185,7 @@ body::-webkit-scrollbar {
 	width: 60% !important;
 	align-self: center;
 	border-radius: 2px !important;
-	box-shadow: 0 1px 0px #00000040;
+	box-shadow: 0 1px 0px #00000040 !important;
 }
         
 .login-form button:hover {
@@ -202,6 +208,17 @@ body::-webkit-scrollbar {
 	cursor: pointer;
 }
         
+.sns {
+	display: grid;
+	text-align: center;
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.divideLine {
+	width: 80%;
+	border: 1px solid #CCCCCC;
+}
 @media only screen and (max-width: 767px) {
 
     .burbutton {
@@ -283,7 +300,6 @@ body::-webkit-scrollbar {
 		display: block;
 		margin: 5% 0% 5% 0%;
 		padding: 5% 5% 5% 5%;
-		width: 91%;
 		border: 0px solid;
 		border-radius: 12px 12px 0 0;
 	}

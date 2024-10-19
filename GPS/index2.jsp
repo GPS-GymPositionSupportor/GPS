@@ -104,10 +104,11 @@
             <button type="submit">로그인 하기</button> 
         </form>
         
-        <div class="register-botton">
+        <div class="register-button">
         	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
 		</div>
-		
+		<p class="sns">sns로 시작하기</p>
+		<hr class="divideLine">
         <div class="social-buttons">
 	        <button class="google-btn">Sign in with Google</button>
 	        <button class="kakao-btn">Login with Kakao</button>
