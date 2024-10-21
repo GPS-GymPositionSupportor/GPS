@@ -1,6 +1,5 @@
 package gps.base.controller;
 
-import gps.base.KakaoGymCrawler;
 import gps.base.model.Authority;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
@@ -20,9 +19,6 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api")
 public class MainController {
-
-    @Autowired
-    private KakaoGymCrawler kakaoGymCrawler;
 
     @Autowired
     private MemberService memberService;
