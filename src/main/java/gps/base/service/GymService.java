@@ -45,7 +45,6 @@ public class GymService {
         gym.setGLongitude(gymDetails.getGLongitude());
         gym.setGLatitude(gymDetails.getGLatitude());
         gym.setInformation(gymDetails.getInformation());
-        gym.setGymImage(gymDetails.getGymImage());
 
         return gymRepository.save(gym);
     }
