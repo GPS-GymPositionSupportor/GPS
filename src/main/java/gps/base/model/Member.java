@@ -1,14 +1,14 @@
 package gps.base.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "member")
 public class Member {
 
@@ -53,14 +53,17 @@ public class Member {
     @Column(name = "m_created_by")
     private String mCreatedBy;
 
-    @Column(name = "m_deleted_bv")
-    private Long mDeletedBv;
+    @Column(name = "m_deleted_by")
+    private Long mDeletedBy;
 
     @Column(name = "m_created_at")
     private LocalDateTime mCreatedAt;
 
     @Column(name = "m_deleted-at")
     private LocalDateTime mDeletedAt;
+
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
 
     
@@ -69,11 +72,13 @@ public class Member {
     @PrePersist
     protected void onCreate() {
         mCreatedAt = LocalDateTime.now();
+        lastLogin = LocalDateTime.now();
     }
 
     @PreRemove
     protected void onRemove() {
         mDeletedAt = LocalDateTime.now();
     }
+
 
 }

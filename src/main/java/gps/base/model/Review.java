@@ -2,6 +2,7 @@ package gps.base.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
@@ -9,8 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Setter
-@Getter
+@Data
 @Table(name = "review")
 public class Review {
 
@@ -22,7 +22,6 @@ public class Review {
 
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
-
     @JoinColumn(name = "user_id", nullable = false)
     private Long userId;
 
