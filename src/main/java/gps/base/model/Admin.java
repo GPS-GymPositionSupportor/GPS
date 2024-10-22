@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Setter
@@ -22,6 +24,8 @@ public class Admin {
     @Column(name = "a_id", nullable = false)
     private String aId;
 
+    @Column(name = "last_login", nullable = true)
+    private LocalDateTime lastLogin;
 
     // 비밀번호 필드가 JSON 직렬화 과정에서 제외될 수 있게, JsonIgnore 어노테이션을 추가.
     @JsonIgnore
@@ -36,6 +40,12 @@ public class Admin {
     public Admin(String aId, String aPassword) {
         this.aId = aId;
         this.aPassword = aPassword;
+    }
+
+    // 현재시간 자동 설정
+    @PrePersist
+    protected void onCreate() {
+        lastLogin = LocalDateTime.now();
     }
 
 
