@@ -1,14 +1,14 @@
 package gps.base.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "gym")
 public class Gym {
 
@@ -32,11 +32,8 @@ public class Gym {
     @Column(name = "information", nullable = false, columnDefinition = "TINYTEXT")
     private String information;
 
-    @Column(name = "gym_image", nullable = false)
-    private String gymImage;
-
-    @Column(name = "rating", nullable = false)
-    private Byte rating;
+    @Column(name = "avg_rating", nullable = false)
+    private double rating;
 
     @Column(name = "g_created_by", nullable = false)
     private String gCreatedBy;
