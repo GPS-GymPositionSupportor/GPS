@@ -4,6 +4,7 @@ import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
 import gps.base.exception.GymNotFoundException;
 import gps.base.model.Comment;
+import gps.base.model.Gym;
 import gps.base.model.Member;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
@@ -12,14 +13,25 @@ import gps.base.repository.MemberRepository;
 import gps.base.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class ReviewService {
 
@@ -32,20 +44,20 @@ public class ReviewService {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
     @Autowired
-    private MemberService memberService;
-    @Autowired
     private MemberRepository memberRepository;
     @Autowired
     private GymRepository gymRepository;
+
+    @Value("${upload.path}")
+    private String uploadPath;
     
     
     /*
     리뷰 관련
      */
 
-    
     // 리뷰 작성
-    public ReviewDTO createReview(ReviewDTO reviewDTO) {
+    public ReviewDTO createReview(ReviewDTO reviewDTO, MultipartFile file) throws IOException, GymNotFoundException {
         Review review = new Review();
 
         if(!gymRepository.existsById(reviewDTO.getGymId())) {
@@ -57,6 +69,10 @@ public class ReviewService {
         review.setGymId(reviewDTO.getGymId());
         review.setComment(reviewDTO.getComment());
 
+        if(reviewDTO.getFile() != null && !reviewDTO.getFile().isEmpty()) {
+            String imagePath = saveImage(reviewDTO.getFile());
+        }
+
         Review savedReview = reviewRepository.save(review);
 
         // websocket을 통해 실시간 알림 전송
@@ -65,13 +81,20 @@ public class ReviewService {
         return convertToDTO(savedReview);
     }
 
+    private String saveImage(MultipartFile file) throws IOException {
+        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        Path path = Paths.get(uploadPath + File.separator + fileName);
+        Files.copy(file.getInputStream(), path);
+        return fileName;
+    }
+
     private ReviewDTO convertToDTO(Review review) {
         ReviewDTO dto = new ReviewDTO();
-        dto.setGymId(review.getGymId());
+        dto.setRId(review.getRId());
         dto.setUserId(review.getUserId());
+        dto.setGymId(review.getGymId());
         dto.setComment(review.getComment());
         dto.setAddedAt(review.getAddedAt());
-        dto.setRId(review.getRId());
 
         // userId를 이용해서 Member 정보를 조회하고 이름을 설정
         memberRepository.findById(review.getUserId())

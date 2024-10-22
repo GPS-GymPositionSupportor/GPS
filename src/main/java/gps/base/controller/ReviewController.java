@@ -17,7 +17,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,7 +52,10 @@ public class ReviewController {
 
     // 리뷰 작성
     @PostMapping
-    public ResponseEntity<?> createReview(@RequestBody ReviewDTO reviewDTO, HttpSession session) {
+    public ResponseEntity<?> createReview(
+            @RequestBody ReviewDTO reviewDTO,
+            @RequestParam(required = false)MultipartFile file,
+            HttpSession session) {
         Long sessionUserId = (Long) session.getAttribute("userId");
 
         // 세션의 userId와 요청의 userId가 일치하는지 확인
@@ -61,12 +66,16 @@ public class ReviewController {
         reviewDTO.setUserId(sessionUserId);
 
         try {
-            ReviewDTO createdReview = reviewService.createReview(reviewDTO);
+            ReviewDTO createdReview = reviewService.createReview(reviewDTO, file);
             return ResponseEntity.ok(createdReview);
         } catch (GymNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("파일 업로드 중 오류가 발생했습니다.");
         }
     }
 
