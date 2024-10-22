@@ -4,6 +4,7 @@ import gps.base.model.Member;
 import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,8 +20,8 @@ import java.util.UUID;
 @Service
 public class MemberService {
 
-    // application.properties 에서 설정
-    //@Value("${upload.path}") <- 설정 한후에 주석 제거하셈
+    // 환경 변수로 설정
+    @Value("${upload.path}")
     private String uploadPath;
 
 
@@ -104,12 +105,11 @@ public class MemberService {
     }
 
 
-    // 회원 삭제 기능
+    // 회원 삭제 기능 (수정 필요)
     @Transactional
     public void deleteMember(Long userId) {
         Member member = getMemberById(userId);
         member.setMDeletedAt(LocalDateTime.now());
-        member.setMDeletedBv(userId);
         memberRepository.save(member);
     }
 }
