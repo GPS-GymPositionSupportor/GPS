@@ -18,8 +18,9 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
 
     // Review와 Member 정보를 동시에 가져오기 (외래키)
-    @Query("SELECT new gps.base.DTO.ReviewDTO(r.rId as rId, r.addedAt, r.userId, r.gymId, m.name, r.comment) " +
-            "FROM Review r JOIN Member m ON r.userId = m.userId")
+    @Query("SELECT new gps.base.DTO.ReviewDTO(r.rId, r.addedAt, r.userId, r.gymId, m.name, r.comment) " +
+            "FROM Review r JOIN Member m ON r.userId = m.userId " +
+            "ORDER BY r.addedAt DESC")
     List<ReviewDTO> findAllReviewsWithUserName();
 
 

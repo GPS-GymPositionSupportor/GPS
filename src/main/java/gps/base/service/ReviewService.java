@@ -2,30 +2,36 @@ package gps.base.service;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.exception.GymNotFoundException;
+import gps.base.error.ErrorCode;
+import gps.base.error.exception.CustomException;
 import gps.base.model.*;
 import gps.base.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
+@AllArgsConstructor
+@Builder
+@Slf4j
 @Service
 public class ReviewService {
 
@@ -56,60 +62,100 @@ public class ReviewService {
      */
 
     // 리뷰 작성
-    public ReviewDTO createReview(ReviewDTO reviewDTO, MultipartFile file) throws IOException, GymNotFoundException {
-        Review review = new Review();
-
-        if(!gymRepository.existsById(reviewDTO.getGymId())) {
-            throw new GymNotFoundException(reviewDTO.getGymId());
+    @Transactional
+    public ReviewDTO createReview(ReviewDTO reviewDTO, MultipartFile file) throws IOException {
+        // 체육관 존재 여부 확인
+        if (!gymRepository.existsById(reviewDTO.getGymId())) {
+            throw new CustomException(ErrorCode.GYM_NOT_FOUND);
         }
 
-        // DTO 에서 엔티티로 데이터 복사
-        review.setUserId(reviewDTO.getUserId());
-        review.setGymId(reviewDTO.getGymId());
-        review.setComment(reviewDTO.getComment());
-        review.setAddedAt(LocalDateTime.now());
+        try {
+            // Review 엔티티 생성 및 저장
+            Review review = new Review();
+            review.setUserId(reviewDTO.getUserId());
+            review.setGymId(reviewDTO.getGymId());
+            review.setComment(reviewDTO.getComment());
+            review.setAddedAt(LocalDateTime.now());
 
-        Review savedReview = reviewRepository.save(review);
+            Review savedReview = reviewRepository.save(review);
 
-        // 이미지 파일이 있는 경우 처리
-        if(file != null && !file.isEmpty()) {
-            try {
-                // 이미지 파일 저장
-                String fileName = saveImage(file);
-
-                // Image 엔티티 생성 및 저장
-                Image image = new Image();
-                image.setImageUrl(fileName);
-                image.setUserId(reviewDTO.getUserId());
-                image.setGymId(reviewDTO.getGymId());
-                image.setReviewId(savedReview.getRId());
-                image.setCaption(file.getOriginalFilename());
-                image.setAddedAt(LocalDateTime.now());
-                imageRepository.save(image);
-            } catch (IOException e) {
-                throw new IOException("이미지 저장에 실패했습니다: " + e.getMessage());
+            // 이미지 파일이 있는 경우 처리
+            if (file != null && !file.isEmpty()) {
+                saveImageForReview(file, savedReview, reviewDTO.getUserId());
             }
+
+            // 웹소켓 알림
+            messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 리뷰가 작성되었습니다.");
+
+            return convertToDTO(savedReview);
+        } catch (Exception e) {
+            log.error("리뷰 생성 중 오류 발생: ", e);
+            throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
-
-        // websocket을 통해 실시간 알림 전송
-        messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 리뷰가 작성되었습니다.");
-
-        return convertToDTO(savedReview);
     }
 
+    // 이미지 타입 검증
+    private boolean isValidImageType(String contentType) {
+        return contentType.equals("image/jpeg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/gif") ||
+                contentType.equals("image/webp");
+    }
+
+    @Transactional
+    private void saveImageForReview(MultipartFile file, Review savedReview, Long userId) throws IOException {
+        String fileName = null;
+        try {
+            // 이미지 파일 저장
+            fileName = saveImage(file);
+
+            // Image 엔티티 생성 및 저장
+            Image image = Image.builder()
+                    .imageUrl(fileName)
+                    .userId(userId)
+                    .gymId(savedReview.getGymId())
+                    .reviewId(savedReview.getRId())
+                    .caption(file.getOriginalFilename())
+                    .addedAt(LocalDateTime.now())
+                    .build();
+
+            imageRepository.save(image);
+
+        } catch (Exception e) {
+            // 파일이 이미 저장된 경우 삭제 시도
+            if (fileName != null) {
+                try {
+                    deleteImageFile(fileName);
+                } catch (IOException deleteError) {
+                    log.error("Failed to delete image file after upload failure: {}", deleteError.getMessage());
+                }
+            }
+            log.error("이미지 저장 중 오류 발생: ", e);
+            throw new IOException("이미지 저장에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+
+    // 이미지 저장
     private String saveImage(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get(uploadPath, fileName);
+        Path uploadDir = Paths.get(uploadPath);
 
         // 업로드 디렉토리가 없으면 생성
-
-        if(!Files.exists(uploadDir)) {
+        if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
 
         Path filePath = uploadDir.resolve(fileName);
-        Files.copy(file.getInputStream(), filePath);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         return fileName;
+    }
+
+
+    // 이미지 삭제
+    private void deleteImageFile(String filename) throws IOException {
+        Path filePath = Paths.get(uploadPath).resolve(filename);
+        Files.deleteIfExists(filePath);
     }
 
     private ReviewDTO convertToDTO(Review review) {
@@ -128,6 +174,7 @@ public class ReviewService {
         List<Image> images = imageRepository.findByReviewId(review.getRId());
         if(!images.isEmpty()) {
             Image image = images.get(0); // 첫 번째 이미지 정보만 사용
+            log.debug("Image URL being set: {}", image.getImageUrl());
             dto.setReviewImage(image.getImageUrl());
             dto.setCaption(image.getCaption());
         }
@@ -155,35 +202,27 @@ public class ReviewService {
     // Review와 Member 정보 함께 가져오기
     public List<ReviewDTO> getAllReviewsWithUserName() {
         List<ReviewDTO> reviews = reviewRepository.findAllReviewsWithUserName();
-        return reviews.stream().map(review -> {
-            ReviewDTO dto = new ReviewDTO();
-            dto.setRId(review.getRId());
-            dto.setAddedAt(review.getAddedAt());
-            dto.setUserId(review.getUserId());
-            dto.setGymId(review.getGymId());
-            dto.setComment(review.getComment());
 
-            // 사용자 이름 가져오기
-            Member member = memberRepository.findById(review.getUserId()).orElse(null);
-            dto.setUserName(member != null ? member.getName() : "Unknown");
 
-            // 이미지 정보 설정
-            List<Image> images = imageRepository.findByUserId(review.getUserId());
-            if(!images.isEmpty()) {
+        // 각 리뷰에 대해 이미지 정보 추가
+        reviews.forEach(review -> {
+            List<Image> images = imageRepository.findByReviewId(review.getRId());
+            if (!images.isEmpty()) {
                 Image image = images.get(0);
-                dto.setReviewImage(image.getImageUrl());
-                dto.setCaption(image.getCaption());
+                review.setReviewImage(image.getImageUrl());
+                review.setCaption(image.getCaption());
             }
+        });
 
-            return dto;
-        }).collect(Collectors.toList());
+            return reviews;
     }
+
     
     
     // 리뷰 수정
     @Transactional
     public Review updateReview(Long rId , Long gymId, Long userId, ReviewDTO reviewDTO) {
-        Review review = getReviewById(rId, gymId, userId);
+        Review review = validateReviewAndImage(rId, gymId, userId, null);  // 검증 재사용
         review.setComment(reviewDTO.getComment());
         // 추후 다른 필드들도 업데이트가 필요하면 코드추가
 
@@ -196,7 +235,7 @@ public class ReviewService {
     // 리뷰 삭제
     @Transactional
     public void deleteReview(Long rId, Long gymId, Long userId) {
-        Review review = getReviewById(rId, gymId, userId);
+        Review review = validateReviewAndImage(rId, gymId, userId, null);   // 검증 재사용
         
         // 연관된 이미지 삭제
         imageRepository.deleteByReviewId(rId);
@@ -204,6 +243,83 @@ public class ReviewService {
         // 리뷰 삭제
         reviewRepository.delete(review);
         messagingTemplate.convertAndSend("/topic/gym/" + gymId, "리뷰가 삭제되었습니다.");
+    }
+
+    // 리뷰와 댓글 검증
+    public void validateReviewAndComment(Long reviewId, Long commentId, Long userId) {
+        // 리뷰 존재 여부 확인
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        // 댓글 존재 여부와 작성자 확인
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+        
+        // 댓글이 해당 리뷰의 댓글이 맞는지 확인
+        if (!comment.getReview().getRId().equals(reviewId)) {
+            throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+        
+        // 댓글 작성자 확인
+        if(!comment.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
+        }
+    }
+
+    // 리뷰만 검증
+    public Review validateReview(Long reviewId, Long userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        // 리뷰 작성자 확인
+        if(!review.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
+        }
+
+        return review;
+    }
+
+    // 리뷰 & 이미지 검증
+    public Review validateReviewAndImage(Long reviewId, Long gymId, Long userId, MultipartFile file) {
+        // 체육관 존재 여부 확인
+        if (!gymRepository.existsById(gymId)) {
+            throw new CustomException(ErrorCode.GYM_NOT_FOUND);
+        }
+
+        // 리뷰 존재 여부와 작성자 확인
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
+
+        if (!review.getUserId().equals(userId)) {
+            throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
+        }
+
+        // 파일이 있는 경우 이미지 검증
+        if (file != null && !file.isEmpty()) {
+            validateImageFile(file);
+        }
+
+        return review;
+    }
+
+    // 이미지 파일 검증 메서드
+    private void validateImageFile(MultipartFile file) {
+        // 파일이 비어있는지 확인
+        if (file.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_FILE_PROVIDED);
+        }
+
+        // 파일 형식 검증
+        String contentType = file.getContentType();
+        if (contentType == null || !isValidImageType(contentType)) {
+            throw new CustomException(ErrorCode.NOT_IMAGE_FILE);
+        }
+
+        // 파일 크기 검증 (예: 5MB)
+        long maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxSize) {
+            throw new CustomException(ErrorCode.FILE_SIZE_EXCEED);
+        }
     }
 
     

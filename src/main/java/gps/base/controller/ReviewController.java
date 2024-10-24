@@ -2,10 +2,11 @@ package gps.base.controller;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.exception.GymNotFoundException;
-import gps.base.exception.UnauthorizedException;
+import gps.base.error.ErrorCode;
+import gps.base.error.exception.CustomException;
 import gps.base.model.Comment;
 import gps.base.model.Review;
+import gps.base.repository.CommentRepository;
 import gps.base.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
@@ -30,6 +31,9 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
 
@@ -46,36 +50,40 @@ public class ReviewController {
             model.addAttribute("userId", userId);
             return "board";
         } else {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
     }
 
-    // 리뷰 작성
     @PostMapping
     public ResponseEntity<?> createReview(
-            @RequestBody ReviewDTO reviewDTO,
-            @RequestParam(required = false)MultipartFile file,
+            @RequestParam("gymId") Long gymId,
+            @RequestParam("userId") Long userId,
+            @RequestParam("comment") String comment,
+            @RequestParam(value = "file", required = false) MultipartFile file,
             HttpSession session) {
         Long sessionUserId = (Long) session.getAttribute("userId");
 
-        // 세션의 userId와 요청의 userId가 일치하는지 확인
-        if(sessionUserId == null || !sessionUserId.equals(reviewDTO.getUserId())) {
-            throw new UnauthorizedException("로그인이 필요하거나 유효하지 않은 사용자입니다.");
+
+        if(sessionUserId == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        reviewDTO.setUserId(sessionUserId);
+        if(!sessionUserId.equals(userId)) {
+            throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
+        }
+
+        // ReviewDTO 생성
+        ReviewDTO reviewDTO = ReviewDTO.builder()
+                .userId(userId)
+                .gymId(gymId)
+                .comment(comment)
+                .build();
 
         try {
             ReviewDTO createdReview = reviewService.createReview(reviewDTO, file);
             return ResponseEntity.ok(createdReview);
-        } catch (GymNotFoundException e) {
-            return ResponseEntity
-                    .status(HttpStatus.NOT_FOUND)
-                    .body(e.getMessage());
         } catch (IOException e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("파일 업로드 중 오류가 발생했습니다.");
+            throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
 
@@ -92,19 +100,12 @@ public class ReviewController {
         Long userId = (Long) session.getAttribute("userId");
 
         if(userId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        try {
-            Review review = reviewService.getReviewById(rId, reviewDTO.getGymId(), userId);
-            if(!Objects.equals(review.getUserId(), userId)) {
-                throw new UnauthorizedException("리뷰를 수정할 권한이 없습니다.");
-            }
-            Review updatedReview = reviewService.updateReview(rId, reviewDTO.getGymId(), userId, reviewDTO);
-            return ResponseEntity.ok(updatedReview);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        reviewService.validateReviewAndImage(rId, reviewDTO.getGymId(), userId, null);  // 이미지 없이 검증
+        Review updatedReview = reviewService.updateReview(rId, reviewDTO.getGymId(), userId, reviewDTO);
+        return ResponseEntity.ok(updatedReview);
 
     }
 
@@ -113,17 +114,12 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReview(@PathVariable Long rId, @RequestParam Long gymId , HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
         if(userId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        try {
-            reviewService.deleteReview(rId, gymId, userId);
-            return ResponseEntity.ok().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            throw new UnauthorizedException("리뷰를 삭제할 권한이 없습니다.");
-        }
+        reviewService.validateReviewAndImage(rId, gymId, userId, null);  // 이미지 없이 검증
+        reviewService.deleteReview(rId, gymId, userId);
+        return ResponseEntity.ok().build();
     }
 
 
@@ -148,8 +144,10 @@ public class ReviewController {
     public ResponseEntity<Comment> addComent(@PathVariable Long rId, @RequestBody CommentDTO commentDTO, HttpSession session) {
         Long userId =  (Long) session.getAttribute("userId");
         if(userId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
+
+        reviewService.validateReview(rId, userId);
 
         Comment savedComment = reviewService.addComment(rId, userId, commentDTO);
         return new ResponseEntity<>(savedComment, HttpStatus.CREATED);
@@ -159,9 +157,13 @@ public class ReviewController {
     @PutMapping("/{rId}/comments/{cId}")
     public ResponseEntity<Comment> updateComment(@PathVariable Long rId, @PathVariable Long cId, @RequestBody CommentDTO commentDTO, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
+
+        // 로그인 여부 확인
         if(userId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
+
+        reviewService.validateReviewAndComment(rId, cId, userId);
         Comment updatedComment = reviewService.updateComment(rId, cId, userId, commentDTO);
         return ResponseEntity.ok(updatedComment);
     }
@@ -170,9 +172,13 @@ public class ReviewController {
     @DeleteMapping("/{rId}/comments/{cId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long rId, @PathVariable Long cId, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
+        
+        // 로그인 여부 확인
         if(userId == null) {
-            throw new UnauthorizedException("로그인이 필요합니다.");
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
+
+        reviewService.validateReviewAndComment(rId, cId, userId);
 
         reviewService.deleteComment(rId, cId, userId);
         return ResponseEntity.noContent().build();

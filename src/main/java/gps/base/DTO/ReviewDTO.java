@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ReviewDTO {
 
     private Long rId;   // 리뷰 ID 추가
@@ -32,6 +33,17 @@ public class ReviewDTO {
 
 
     public ReviewDTO(Long userId, Long gymId, String userName, String comment) {
+        this.userId = userId;
+        this.gymId = gymId;
+        this.userName = userName;
+        this.comment = comment;
+    }
+
+
+    // JPQL 쿼리용 생성자
+    public ReviewDTO(Long rId, LocalDateTime addedAt, Long userId, Long gymId, String userName, String comment) {
+        this.rId = rId;
+        this.addedAt = addedAt;
         this.userId = userId;
         this.gymId = gymId;
         this.userName = userName;
