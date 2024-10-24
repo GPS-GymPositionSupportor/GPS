@@ -1,0 +1,7 @@
+server:
+  error:
+    whitelabel:
+      enabled: false  # Spring Boot 기본 에러 페이지 비활성화
+    path: /error      # 에러 발생시 포워딩 될 경로
+    include-exception: false  # 응답에 예외 내용 포함 여부
+    include-stacktrace: never   # 응답에 StackTrace 포함 여부
