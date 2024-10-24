@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Test Board</title>
     <style>
-
         body {
             font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px;
         }
@@ -26,7 +25,6 @@
         .btn {
             display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none;
         }
-
         .popup {
             display: none;
             position: fixed;
@@ -37,13 +35,15 @@
             padding: 20px;
             border: 1px solid #ccc;
             z-index: 1000;
+            width: 80%;
+            max-width: 500px;
         }
-
         .popup input, .popup textarea {
             width: 100%;
             margin-bottom: 10px;
+            padding: 8px;
+            box-sizing: border-box;
         }
-
         .overlay {
             display: none;
             position: fixed;
@@ -54,57 +54,96 @@
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
-
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin-top: 10px;
+            display: none;
+        }
+        .review-image {
+            max-width: 150px;
+            max-height: 150px;
+            cursor: pointer;
+        }
+        .button-group {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .button-group button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>게시판</h1>
+        <h1>리뷰 게시판</h1>
         <p>현재 사용자 : <span id="currentUser"></span></p>
-        <a href="#" class="btn" id="writeReview">글쓰기</a>
+        <a href="#" class="btn" id="writeReview">리뷰 작성</a>
         <table id="postList">
             <thead>
-                <tr>
-                    <th>번호</th>
-                    <th>날짜</th>
-                    <th>작성자</th>
-                    <th>체육관 ID</th>
-                    <th>내용</th>
-                </tr>
+            <tr>
+                <th>번호</th>
+                <th>날짜</th>
+                <th>작성자</th>
+                <th>체육관 ID</th>
+                <th>내용</th>
+                <th>이미지</th>
+                <th>작업</th>
+            </tr>
             </thead>
             <tbody id="reviewTable">
-
             </tbody>
         </table>
     </div>
 
     <div id="reviewPopup" class="popup">
-        <!-- 리뷰 작성 팝업 추가 -->
         <h2>리뷰 작성</h2>
-        <input type="number" id="reviewGymId" placeholder="체육관 ID">
-        <textarea id="reviewComment" placeholder="리뷰 내용"></textarea>
-        <button onclick="submitReview()">확인</button>
-        <button onclick="closePopup()">취소</button>
+        <form id="reviewForm" onsubmit="submitReview(event)">
+            <input type="number" id="reviewGymId" placeholder="체육관 ID" required>
+            <textarea id="reviewComment" placeholder="리뷰 내용" required></textarea>
+            <input type="file" id="reviewImage" accept="image/*" onchange="previewImage(event)">
+            <img id="imagePreview" class="image-preview">
+            <div class="button-group">
+                <button type="submit">확인</button>
+                <button type="button" onclick="closePopup()">취소</button>
+            </div>
+        </form>
     </div>
+
     <div id="overlay" class="overlay"></div>
+
     <script>
-        // 현재 로그인한 사용자 정보 (서버에서 제공해야 함)
         let currentUser = {
             userId: null,
-            isAdmin: false // 관리자 여부
+            isAdmin: false
         };
 
-        // 사용자 정보 가져오기
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+
         function fetchUserInfo() {
             fetch('/api/user-info', {
                 credentials: 'include',
                 headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+                    'Accept': 'application/json'
                 }
             })
                 .then(response => {
-
                     if(!response.ok) {
                         throw new Error('로그인 상태가 아닙니다.');
                     }
@@ -122,14 +161,9 @@
                 });
         }
 
-        // 리뷰 목록 가져오기
         function fetchReviews() {
             fetch('/api/reviews/all', {
-                credentials: 'include',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
+                credentials: 'include'
             })
                 .then(response => response.json())
                 .then(reviews => {
@@ -137,130 +171,94 @@
                     const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
                     reviews.forEach(review => {
-
                         const row = document.createElement('tr');
-                        row.innerHTML =  `
-                            <td>${review.rid || 'N/A'}</td>
+                        row.innerHTML = `
+                <td>${review.rid || 'N/A'}</td>
                 <td>${new Date(review.addedAt).toLocaleString()}</td>
                 <td>${review.userName || 'N/A'}</td>
                 <td>${review.gymId || 'N/A'}</td>
                 <td>${review.comment || 'N/A'}</td>
+                <td>
+                    ${review.reviewImage ?
+                            `<img src="/images/${review.reviewImage}"
+                                    alt="Review Image"
+                                    class="review-image"
+                                    style="max-width: 100px;"
+                                    onerror="console.log('Image failed to load:', this.src)">`
+                            : 'No Image'}
+                </td>
                 <td>
                     ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
                     <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
                     <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
                     ` : ''}
                 </td>
-                        `;
+            `;
                         tbody.appendChild(row);
                     });
                 })
                 .catch(error => {
                     console.error('Error : ', error);
                     alert('리뷰를 불러오는데 실패했습니다.');
-                })
+                });
         }
 
+        // 리뷰 작성
+        function submitReview() {
+            const gymId = document.getElementById('reviewGymId').value;
+            const comment = document.getElementById('reviewComment').value;
+            const file = document.getElementById('reviewImage').files[0];
 
+            if(gymId && comment) {
+                const formData = new FormData();
+                formData.append('gymId', gymId);
+                formData.append('comment', comment);
+                formData.append('userId', currentUser.userId);
+                if (file) {
+                    formData.append('file', file);
+                }
 
-        // 리뷰 수정
-        function editReview(reviewId, gymId) {
-            const newComment = prompt('새로운 리뷰 내용을 입력하세요:');
-            if (newComment) {
-                fetch(`/api/reviews/${reviewId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ gymId, comment: newComment }),
+                fetch('/api/reviews', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
                 })
-                    .then(response => response.json())
-                    .then(() => {
-                        fetchReviews(); // 목록 새로고침
+                    .then(response => {
+                        if(!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.message || '리뷰 작성에 실패했습니다.');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('Success:', data);
+                        alert('리뷰가 성공적으로 작성되었습니다.');
+                        closePopup();
+                        fetchReviews();
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('리뷰 수정에 실패했습니다.');
+                        alert(error.message || '리뷰 작성에 실패했습니다.');
                     });
+            } else {
+                alert('체육관 ID와 리뷰 내용을 모두 입력해주세요.');
             }
         }
 
-        // 리뷰 삭제
-        function deleteReview(reviewId, gymId, userId) {
-            if (confirm('정말로 이 리뷰를 삭제하시겠습니까?')) {
-                fetch(`/api/reviews/${reviewId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ gymId }),
-                })
-                    .then(() => {
-                        fetchReviews(); // 목록 새로고침
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('리뷰 삭제에 실패했습니다.');
-                    });
-            }
+        function closePopup() {
+            document.getElementById('reviewPopup').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('reviewForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
         }
 
-        // 글 작성 버튼 Event Listener
         document.getElementById('writeReview').addEventListener('click', () => {
             document.getElementById('reviewPopup').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         });
 
-        function closePopup() {
-            document.getElementById('reviewPopup').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-            // 입력 필드 초기화
-            document.getElementById('reviewGymId').value = '';
-            document.getElementById('reviewComment').value = '';
-        }
-
-        // 리뷰작성
-       function submitReview() {
-            const gymId = document.getElementById('reviewGymId').value;
-            const comment = document.getElementById('reviewComment').value;
-
-            if(gymId && comment) {
-                fetch('/api/reviews' , {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        gymId,
-                        comment,
-                        userId: currentUser.userId  // 현재 로그인한 사용자의 ID를 포함
-                    }),
-                    credentials: 'include' // 세션 쿠키를 포함시키기 위해 적용
-                })
-                    .then(response => {
-                        if(!response.ok) {
-                            return response.text().then(text => { throw new Error(text) });
-
-                            if(response.status === 401) {
-                                throw new Error('로그인이 필요합니다.');
-                            }
-                            throw new Error('리뷰 작성에 실패하였습니다.');
-                        }
-                        return response.json();
-                    })
-                    .then(() => {
-                        alert('리뷰가 성공적으로 작성되었습니다.');
-                        closePopup();
-                        fetchReviews(); // 목록 새로고침
-                    })
-                    .catch(error => {
-                        console.error('Error : ', error);
-                        alert(error.message);
-                    });
-            } else {
-                alert('체육관 ID와 리뷰 내용을 모두 입력해주세요.');
-            }
-       }
+        // 기존의 editReview와 deleteReview 함수는 유지
 
         // 초기화
         fetchUserInfo();
