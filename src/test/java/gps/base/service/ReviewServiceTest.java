@@ -2,7 +2,6 @@ package gps.base.service;
 
 import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
-import gps.base.exception.GymNotFoundException;
 import gps.base.model.Comment;
 import gps.base.model.Image;
 import gps.base.model.Member;

@@ -59,6 +59,7 @@ public class ReviewController {
         }
     }
 
+    // 리뷰 생성
     @PostMapping
     public ResponseEntity<?> createReview(
             @RequestParam("gymId") Long gymId,

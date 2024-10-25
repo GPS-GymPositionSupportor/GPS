@@ -1,5 +1,7 @@
 package gps.base.service;
 
+import gps.base.error.ErrorCode;
+import gps.base.error.exception.CustomException;
 import gps.base.model.Member;
 import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -21,9 +23,11 @@ import java.util.UUID;
 public class MemberService {
 
     // 환경 변수로 설정
-    @Value("${upload.path}")
+    @Value("${UPLOAD_PATH}")
     private String uploadPath;
 
+    @Value("${RESOURCE_PATH}")
+    private String resourcePath;
 
 
     @Autowired
@@ -58,33 +62,44 @@ public class MemberService {
 
     public Member getMemberById(Long userId) {
         return memberRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + userId));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
     public Member getMemberBymId(String mId) {
         return memberRepository.findBymId(mId)
-                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + mId));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
 
     // 로그인 허가 메소드
     public Member authenticateMember(String mId, String mPassword) {
+        Member member = memberRepository.findBymId(mId)
+                .orElse(null);
 
-        try {
-            Member member = memberRepository.findBymId(mId)
-                    .orElse(null);
+        if (member != null) {
+            String storedPassword = member.getMPassword();
 
+            // BCrypt로 암호화된 비밀번호는 항상 $2a$, $2b$ 또는 $2y$로 시작
+            boolean isEncrypted = storedPassword.startsWith("$2a$") ||
+                    storedPassword.startsWith("$2b$") ||
+                    storedPassword.startsWith("$2y$");
 
-            if (member != null && passwordEncoder.matches(mPassword, member.getMPassword())) {
-                return member;
+            if (isEncrypted) {
+                // 암호화된 비밀번호인 경우
+                if (passwordEncoder.matches(mPassword, storedPassword)) {
+                    return member;
+                }
+            } else {
+                // 평문 비밀번호인 경우
+                if (mPassword.equals(storedPassword)) {
+                    // 로그인 성공 시 비밀번호를 암호화하여 업데이트
+                    member.setMPassword(passwordEncoder.encode(mPassword));
+                    memberRepository.save(member);
+                    return member;
+                }
             }
-            return null;
-        } catch (EntityNotFoundException e) {
-            // 사용자를 찾을 수 없는 경우
-            return null;
         }
-
-
+        return null;
     }
 
 
@@ -92,7 +107,7 @@ public class MemberService {
     @Transactional
     public void updateProfileImage(Long userId, MultipartFile file) throws IOException {
         Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("유저를 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // UUID.randomUUID() 를 통해 고유한 식별자를 생성하고, 원본 파일 이름을 붙여 파일명 충돌을 방지함.
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();

@@ -15,18 +15,19 @@ import java.nio.file.Paths;
 @Configuration
 @Slf4j
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${upload.path")
+    @Value("${UPLOAD_PATH}")
     private String uploadPath;
+
+    @Value("${RESOURCE_PATH}")
+    private String resourcePath;
 
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        String realPath = uploadPath.replace("\\", "/");
-        if (!realPath.endsWith("/")) {
-            realPath += "/";
-        }
+        log.info("Resource Path: {}", resourcePath);
+        String realPath = resourcePath.replace("\\", "/");
 
-        registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:///" + realPath);
+        registry.addResourceHandler(uploadPath)  // 가상 URL 패턴
+                .addResourceLocations("file:///" + realPath + "/");
     }
 }

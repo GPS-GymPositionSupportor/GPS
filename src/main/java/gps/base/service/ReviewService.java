@@ -54,8 +54,11 @@ public class ReviewService {
     @Autowired
     private ImageRepository imageRepository;
 
-    @Value("${upload.path}")
+    @Value("${UPLOAD_PATH}")
     private String uploadPath;
+
+    @Value("${RESOURCE_PATH}")
+    private String resourcePath;
     
     
     /*
@@ -82,8 +85,7 @@ public class ReviewService {
 
             // 이미지 파일이 있는 경우 처리
             if (file != null && !file.isEmpty()) {
-                String fileName = saveImage(file);  // 이미지 파일 저장
-                saveImageEntity(fileName, file.getOriginalFilename(), savedReview, reviewDTO.getUserId());  // 이미지 정보 DB 저장
+                saveImageForReview(file, savedReview, reviewDTO.getUserId());  // 파라미터 수정
             }
 
             // 웹소켓 알림
@@ -107,23 +109,19 @@ public class ReviewService {
 
 
     @Transactional
-    protected void saveImageForReview(MultipartFile file, Review savedReview, Long userId) throws IOException {
-        String fileName = null;
+    protected void saveImageForReview(MultipartFile file, Review savedReview, Long userId) {
         try {
-            // UUID와 원본 파일명으로 새 파일명 생성
-            fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
             // 파일 저장
-            Path uploadDir = Paths.get(uploadPath);
-            if (!Files.exists(uploadDir)) {
-                Files.createDirectories(uploadDir);
-            }
+            Path uploadDir = Paths.get(resourcePath);
+            Path targetPath = uploadDir.resolve(fileName);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("File saved to: {}", targetPath);
 
-            Files.copy(file.getInputStream(), uploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
-
-            // Image 엔티티 생성 시 fileName만 저장 (중복 방지)
+            // Image 엔티티 생성 및 저장
             Image image = Image.builder()
-                    .imageUrl(fileName)  // fileName만 저장, 중복된 경로 제거
+                    .imageUrl(fileName)
                     .userId(userId)
                     .gymId(savedReview.getGymId())
                     .reviewId(savedReview.getRId())
@@ -132,50 +130,29 @@ public class ReviewService {
                     .build();
 
             imageRepository.save(image);
+            log.debug("Saved image entity with URL: {}", fileName);
+
         } catch (IOException e) {
-            log.error("Failed to save image: {}", e.getMessage());
-            if (fileName != null) {
-                try {
-                    Files.deleteIfExists(Paths.get(uploadPath).resolve(fileName));
-                } catch (IOException ex) {
-                    log.error("Failed to delete file after error: {}", ex.getMessage());
-                }
-            }
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
 
 
     // 이미지 저장
-    private String saveImage(MultipartFile file) throws IOException {
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        Path uploadDir = Paths.get(uploadPath);
-
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
+    private String saveImage(MultipartFile file) throws CustomException {
+        try {
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            Path uploadDir = Paths.get(resourcePath);
+            Path targetPath = uploadDir.resolve(fileName);
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            log.info("File saved to: {}", targetPath);
+            return fileName;
+        } catch (IOException e) {
+            throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
-
-        Path filePath = uploadDir.resolve(fileName);
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-        log.info("Saved image file: {}", fileName);  // 로깅 추가
-        return fileName;
     }
 
-    // 이미지 엔티티 저장
-    private void saveImageEntity(String fileName, String originalFileName, Review review, Long userId) {
-        Image image = Image.builder()
-                .imageUrl(fileName)  // 생성된 파일명만 저장
-                .userId(userId)
-                .gymId(review.getGymId())
-                .reviewId(review.getRId())
-                .caption(originalFileName)
-                .addedAt(LocalDateTime.now())
-                .build();
 
-        imageRepository.save(image);
-        log.debug("Saved image entity with URL: {}", fileName);  // 로깅 추가
-    }
 
 
     // 이미지 삭제
