@@ -21,33 +21,12 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 실제 경로 로깅
-        log.info("Actual upload path: {}", uploadPath);
-
-        try {
-            // 경로 정규화
-            Path path = Paths.get(uploadPath).toAbsolutePath().normalize();
-            String resourceLocation = path.toUri().toString();
-
-            log.info("Resource location: {}", resourceLocation);
-
-            registry.addResourceHandler("/images/**")
-                    .addResourceLocations(resourceLocation)
-                    .setCachePeriod(3600)
-                    .resourceChain(true)
-                    .addResolver(new PathResourceResolver() {
-                        @Override
-                        protected Resource getResource(String resourcePath, Resource location) throws IOException {
-                            Resource resource = super.getResource(resourcePath, location);
-                            if (resource == null || !resource.exists()) {
-                                log.debug("Resource not found: {}", resourcePath);
-                                return null;
-                            }
-                            return resource;
-                        }
-                    });
-        } catch (Exception e) {
-            log.error("Failed to configure resource handler", e);
+        String realPath = uploadPath.replace("\\", "/");
+        if (!realPath.endsWith("/")) {
+            realPath += "/";
         }
+
+        registry.addResourceHandler("/images/**")
+                .addResourceLocations("file:///" + realPath);
     }
 }

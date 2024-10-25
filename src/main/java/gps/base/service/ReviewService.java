@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -81,13 +82,15 @@ public class ReviewService {
 
             // 이미지 파일이 있는 경우 처리
             if (file != null && !file.isEmpty()) {
-                saveImageForReview(file, savedReview, reviewDTO.getUserId());
+                String fileName = saveImage(file);  // 이미지 파일 저장
+                saveImageEntity(fileName, file.getOriginalFilename(), savedReview, reviewDTO.getUserId());  // 이미지 정보 DB 저장
             }
 
             // 웹소켓 알림
             messagingTemplate.convertAndSend("/topic/gym/" + review.getGymId(), "새로운 리뷰가 작성되었습니다.");
 
             return convertToDTO(savedReview);
+
         } catch (Exception e) {
             log.error("리뷰 생성 중 오류 발생: ", e);
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
@@ -102,16 +105,25 @@ public class ReviewService {
                 contentType.equals("image/webp");
     }
 
+
     @Transactional
-    private void saveImageForReview(MultipartFile file, Review savedReview, Long userId) throws IOException {
+    protected void saveImageForReview(MultipartFile file, Review savedReview, Long userId) throws IOException {
         String fileName = null;
         try {
-            // 이미지 파일 저장
-            fileName = saveImage(file);
+            // UUID와 원본 파일명으로 새 파일명 생성
+            fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-            // Image 엔티티 생성 및 저장
+            // 파일 저장
+            Path uploadDir = Paths.get(uploadPath);
+            if (!Files.exists(uploadDir)) {
+                Files.createDirectories(uploadDir);
+            }
+
+            Files.copy(file.getInputStream(), uploadDir.resolve(fileName), StandardCopyOption.REPLACE_EXISTING);
+
+            // Image 엔티티 생성 시 fileName만 저장 (중복 방지)
             Image image = Image.builder()
-                    .imageUrl(fileName)
+                    .imageUrl(fileName)  // fileName만 저장, 중복된 경로 제거
                     .userId(userId)
                     .gymId(savedReview.getGymId())
                     .reviewId(savedReview.getRId())
@@ -120,18 +132,16 @@ public class ReviewService {
                     .build();
 
             imageRepository.save(image);
-
-        } catch (Exception e) {
-            // 파일이 이미 저장된 경우 삭제 시도
+        } catch (IOException e) {
+            log.error("Failed to save image: {}", e.getMessage());
             if (fileName != null) {
                 try {
-                    deleteImageFile(fileName);
-                } catch (IOException deleteError) {
-                    log.error("Failed to delete image file after upload failure: {}", deleteError.getMessage());
+                    Files.deleteIfExists(Paths.get(uploadPath).resolve(fileName));
+                } catch (IOException ex) {
+                    log.error("Failed to delete file after error: {}", ex.getMessage());
                 }
             }
-            log.error("이미지 저장 중 오류 발생: ", e);
-            throw new IOException("이미지 저장에 실패했습니다: " + e.getMessage());
+            throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
         }
     }
 
@@ -141,14 +151,30 @@ public class ReviewService {
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         Path uploadDir = Paths.get(uploadPath);
 
-        // 업로드 디렉토리가 없으면 생성
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
 
         Path filePath = uploadDir.resolve(fileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        log.info("Saved image file: {}", fileName);  // 로깅 추가
         return fileName;
+    }
+
+    // 이미지 엔티티 저장
+    private void saveImageEntity(String fileName, String originalFileName, Review review, Long userId) {
+        Image image = Image.builder()
+                .imageUrl(fileName)  // 생성된 파일명만 저장
+                .userId(userId)
+                .gymId(review.getGymId())
+                .reviewId(review.getRId())
+                .caption(originalFileName)
+                .addedAt(LocalDateTime.now())
+                .build();
+
+        imageRepository.save(image);
+        log.debug("Saved image entity with URL: {}", fileName);  // 로깅 추가
     }
 
 
@@ -203,18 +229,25 @@ public class ReviewService {
     public List<ReviewDTO> getAllReviewsWithUserName() {
         List<ReviewDTO> reviews = reviewRepository.findAllReviewsWithUserName();
 
-
-        // 각 리뷰에 대해 이미지 정보 추가
-        reviews.forEach(review -> {
+        for(ReviewDTO review : reviews) {
             List<Image> images = imageRepository.findByReviewId(review.getRId());
-            if (!images.isEmpty()) {
+            if(!images.isEmpty()) {
                 Image image = images.get(0);
-                review.setReviewImage(image.getImageUrl());
-                review.setCaption(image.getCaption());
+                // DB에 저장된 파일명만 사용
+                review.setReviewImage(image.getImageUrl());  // 예: "123e4567-e89b-12d3-a456-426614174000_image.jpg"
             }
-        });
+        }
+        return reviews;
+    }
 
-            return reviews;
+    private String extractFileName(String fullPath) {
+        if (fullPath == null) return null;
+        try {
+            return Paths.get(fullPath).getFileName().toString();
+        } catch (Exception e) {
+            log.error("Failed to extract filename from path: {}", fullPath, e);
+            return fullPath;
+        }
     }
 
     

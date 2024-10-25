@@ -167,10 +167,13 @@
             })
                 .then(response => response.json())
                 .then(reviews => {
-                    console.log("Received Reviews : ", reviews);
+                    console.log("Received Reviews:", reviews);  // 이 로그로 실제 데이터 확인
                     const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
                     reviews.forEach(review => {
+                        const imageUrl = review.reviewImage ? `/images/${review.reviewImage}` : null;
+                        console.log(`Review ${review.rId} image URL:`, imageUrl);  // 이 로그로 URL 확인
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                 <td>${review.rid || 'N/A'}</td>
@@ -180,12 +183,12 @@
                 <td>${review.comment || 'N/A'}</td>
                 <td>
                     ${review.reviewImage ?
-                            `<img src="/images/${review.reviewImage}"
-                                    alt="Review Image"
-                                    class="review-image"
-                                    style="max-width: 100px;"
-                                    onerror="console.log('Image failed to load:', this.src)">`
-                            : 'No Image'}
+                            `<img src="${imageUrl}"
+                             alt="Review Image"
+                             class="review-image"
+                             onload="console.log('Image loaded:', '${imageUrl}')"
+                             onerror="console.log('Image load failed:', '${imageUrl}')">`
+                            : '이미지 없음'}
                 </td>
                 <td>
                     ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
@@ -198,7 +201,7 @@
                     });
                 })
                 .catch(error => {
-                    console.error('Error : ', error);
+                    console.error('Error:', error);
                     alert('리뷰를 불러오는데 실패했습니다.');
                 });
         }

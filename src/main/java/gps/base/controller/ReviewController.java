@@ -5,8 +5,10 @@ import gps.base.DTO.ReviewDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.Comment;
+import gps.base.model.Image;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
+import gps.base.repository.ImageRepository;
 import gps.base.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
@@ -36,6 +38,9 @@ public class ReviewController {
 
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
+
+    @Autowired
+    private ImageRepository imageRepository;
 
 
     // 리뷰 보드 페이지 반환
@@ -129,6 +134,7 @@ public class ReviewController {
         List<ReviewDTO> reviews = reviewService.getAllReviewsWithUserName();
         return ResponseEntity.ok(reviews);
     }
+
 
 
 
