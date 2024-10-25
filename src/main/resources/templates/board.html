@@ -167,12 +167,12 @@
             })
                 .then(response => response.json())
                 .then(reviews => {
-                    console.log("Received Reviews:", reviews);  // 이 로그로 실제 데이터 확인
                     const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
                     reviews.forEach(review => {
-                        const imageUrl = review.reviewImage ? `/images/${review.reviewImage}` : null;
-                        console.log(`Review ${review.rId} image URL:`, imageUrl);  // 이 로그로 URL 확인
+                        // '/images/' 를 '/upload/'로 수정
+                        const imageUrl = review.reviewImage ? `/upload/${review.reviewImage}` : null;
+                        console.log(`Review ${review.rId} image URL:`, imageUrl);
 
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -185,17 +185,10 @@
                     ${review.reviewImage ?
                             `<img src="${imageUrl}"
                              alt="Review Image"
-                             class="review-image"
-                             onload="console.log('Image loaded:', '${imageUrl}')"
-                             onerror="console.log('Image load failed:', '${imageUrl}')">`
+                             class="review-image">`
                             : '이미지 없음'}
                 </td>
-                <td>
-                    ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
-                    <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
-                    <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
-                    ` : ''}
-                </td>
+                <!-- ... 나머지 코드 ... -->
             `;
                         tbody.appendChild(row);
                     });

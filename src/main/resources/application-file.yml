@@ -1,6 +1,6 @@
 spring:
   mvc:
-    static-path-pattern: /images/**
+    static-path-pattern: ${UPLOAD_PATH}
   web:
     resources:
-      static-locations: file:${upload.path}
+      static-locations: ${RESOURCE_PATH}
