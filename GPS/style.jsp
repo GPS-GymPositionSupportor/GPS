@@ -1,5 +1,5 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Roboto;
     margin: 0;
     padding: 0;
     background-color: #F5F5F5;
@@ -11,11 +11,8 @@ body::-webkit-scrollbar {
     display: none;
 }
 
-
-
-
 .navbar {
-    background-color: #747474;
+    background-color: #402E32;
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -31,7 +28,7 @@ body::-webkit-scrollbar {
 .navbar label {
     background-color: transparent;
     border: none;
-    color: white;
+    color: black;
     cursor: pointer;
     font-size: 14px;
     padding: 0.5rem 1rem;
@@ -87,17 +84,21 @@ body::-webkit-scrollbar {
 	-webkit-transform: translateY (0.6rem) rotate (-45deg);
 	transform: translateY(0.6rem) rotate(-45deg);
 	transition: all 0.35s;
+	background-color: #999999;
+	
 }
 
 .burbutton.active span:nth-of-type(2) {
 	opacity: 0;
 	transition: all 0.35s;
+	background-color: #999999;
 }
 
 .burbutton.active span:nth-of-type(3) {
 	-webkit-transform: translateY(-0.5rem) rotate(45deg);
 	transform: translateY(-0.55rem) rotate(45deg);
 	transition: all 0.35s;
+	background-color: #999999;
 }
 
 .login-overlay {
@@ -159,6 +160,11 @@ body::-webkit-scrollbar {
 	
 }
 
+.login-form input.error {
+    color: #FF3B30 !important;
+    box-shadow: 0px 1px 1px 0px #FF3B30 !important;
+}
+
 .register-btn {
 	width: 25% !important;
 	color: #555 !important;
@@ -216,9 +222,10 @@ body::-webkit-scrollbar {
 }
 
 .divideLine {
-	width: 80%;
+	width: 50%;
 	border: 1px solid #CCCCCC;
 }
+
 @media only screen and (max-width: 767px) {
 
     .burbutton {
@@ -231,11 +238,10 @@ body::-webkit-scrollbar {
 	}
 	
 	.navbar {
-	    background-color: #747474;
+	    background-color: #402E32;
 	    display: flex;
 	    justify-content: space-around;
 	    align-items: center;
-	    padding: 0;
 	    width: 100%;
 	    position: -webkit-sticky;
 	    position: sticky;
@@ -245,15 +251,15 @@ body::-webkit-scrollbar {
 
 	#nav-links {
 		position: fixed;
-	    right: 0;
+	    left: 0;
 	    top: 0;
 	    width: 70%;
 		height: 100%;
-	    background-color: #5d5d5d;
-	    transform: translateX(100%);
+	    background-color: #ffffff;
+	    transform: translateX(-100%);
 		transition: transform .3s ease-in-out;
 		z-index: 1;
-    	padding-top: 30%;
+    	padding-top: 2rem;
     	opacity: 95%;
 		
 	}
@@ -262,11 +268,13 @@ body::-webkit-scrollbar {
 		transform : translateX(0);
 		display:block;
 		z-index: 1;
+		
 	}
 	
 	#navForm {
-         display:flex !important; 
-         flex-direction: column;
+		display:flex !important; 
+		flex-direction: column;
+		align-items: flex-start;
 	}
 	
 	.navbar button,
@@ -275,7 +283,7 @@ body::-webkit-scrollbar {
 		padding-bottom: 1rem;
 		padding-top: 1rem;
 		font-size: 16px;
-		font-family: 'NanumSquare', sans-serif;
+		font-family: Roboto;
 		z-index: 3;
 	}
 	
@@ -314,4 +322,72 @@ body::-webkit-scrollbar {
 		cursor: pointer;
 		font-size: 14px;
 		margin: 2% 0% 2% 0%;
+	}
+	
+	.exit-button {
+		display: block;
+		margin: 2%;
+		background: url('image/icon_back.png') no-repeat center center; /* 이미지 경로 */
+		width: 24px;
+		height: 24px;
+		background-size: cover;
+	}
+	
+	.register-form {
+		display: flex;
+		justify-content: center; /* 수평 중앙 정렬 */
+		align-items: center; /* 수직 중앙 정렬 */
+		flex-direction: column;
+	}
+	
+	.regist {
+		font-size: 24px;
+		font-weight: 400;
+		line-height: 17px;
+	}
+	
+	#logoutButton {
+		display: flex;
+		align-items: center;
+		font-size: 12px;
+	}
+	
+	.myPage {
+    	display: grid;
+	}
+	
+	.user-info {
+	    display: flex;
+	    align-items: center;
+	}
+	
+	.greeting {
+	    margin-left: 1rem;
+	}
+	
+	.hello {
+		font-size: 16px;
+	}
+	
+	.mrUser {
+		margin-left: 1rem;
+		margin-top: 0.5rem;
+	}
+	
+	.mrUserName {
+		font-family: 'Roboto';
+		font-style: normal;
+		font-weight: 500;
+		font-size: 20px;
+		line-height: 23px;
+	}
+	
+	.mr {
+		font-size: 14px;
+	}
+	
+	#logoutContainer {
+		position: absolute;
+	    bottom: 3rem;
+	    right: -0.5rem;
 	}
