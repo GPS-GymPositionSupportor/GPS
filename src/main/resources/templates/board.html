@@ -35,8 +35,6 @@
             padding: 20px;
             border: 1px solid #ccc;
             z-index: 1000;
-            width: 80%;
-            max-width: 500px;
         }
         .popup input, .popup textarea {
             width: 100%;
@@ -55,10 +53,8 @@
             z-index: 999;
         }
         .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            margin-top: 10px;
-            display: none;
+            max-width: 100px;
+            margin: 5px;
         }
         .review-image {
             max-width: 150px;
@@ -73,6 +69,12 @@
         .button-group button {
             padding: 8px 15px;
             cursor: pointer;
+        }
+        #imagePreviewContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -103,8 +105,8 @@
         <form id="reviewForm" onsubmit="submitReview(event)">
             <input type="number" id="reviewGymId" placeholder="체육관 ID" required>
             <textarea id="reviewComment" placeholder="리뷰 내용" required></textarea>
-            <input type="file" id="reviewImage" accept="image/*" onchange="previewImage(event)">
-            <img id="imagePreview" class="image-preview">
+            <input type="file" id="reviewImages" accept="image/*" multiple onchange="previewImages(event)">
+            <div id="imagePreviewContainer"></div>
             <div class="button-group">
                 <button type="submit">확인</button>
                 <button type="button" onclick="closePopup()">취소</button>
@@ -120,19 +122,22 @@
             isAdmin: false
         };
 
-        function previewImage(event) {
-            const file = event.target.files[0];
-            const preview = document.getElementById('imagePreview');
+        function previewImages(event) {
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = ''; // 기존 미리보기 초기화
 
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
+            const files = event.target.files;
+            for (const file of files) {
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'image-preview';
+                        container.appendChild(img);
+                    }
+                    reader.readAsDataURL(file);
                 }
-                reader.readAsDataURL(file);
-            } else {
-                preview.style.display = 'none';
             }
         }
 
@@ -167,28 +172,50 @@
             })
                 .then(response => response.json())
                 .then(reviews => {
+                    console.log("Reviews Data:", reviews);  // 전체 데이터 구조 확인
                     const tbody = document.getElementById('reviewTable');
                     tbody.innerHTML = '';
+                    console.log("Reviews raw data : ", JSON.stringify(reviews, null, 2));
+
                     reviews.forEach(review => {
-                        // '/images/' 를 '/upload/'로 수정
-                        const imageUrl = review.reviewImage ? `/upload/${review.reviewImage}` : null;
-                        console.log(`Review ${review.rId} image URL:`, imageUrl);
+                        console.log(`Review ID ${review.rid}:`, {
+                            reviewImages: review.reviewImages,
+                            isArray: Array.isArray(review.reviewImages),
+                            length: review.reviewImages ? review.reviewImages.length : 0,
+                            type: typeof review.reviewImages
+                        });
 
                         const row = document.createElement('tr');
+
+                        let imagesHtml;
+                        // reviewImages가 배열이고 길이가 있는 경우
+                        if (Array.isArray(review.reviewImages) && review.reviewImages.length > 0) {
+                            console.log(`Review ${review.rId} has ${review.reviewImages.length} images`);
+                            imagesHtml = review.reviewImages
+                                .map(imageUrl => {
+                                    console.log("Processing image URL:", imageUrl);
+                                    return `<img src="/upload/${imageUrl}" alt="Review Image" class="review-image" style="max-width: 100px; margin: 5px;">`;
+                                })
+                                .join('');
+                        } else if (review.reviewImage) {  // 단일 이미지 체크
+                            imagesHtml = `<img src="/upload/${review.reviewImage}" alt="Review Image" class="review-image" style="max-width: 100px; margin: 5px;">`;
+                        } else {
+                            imagesHtml = '이미지 없음';
+                        }
+
                         row.innerHTML = `
                 <td>${review.rid || 'N/A'}</td>
                 <td>${new Date(review.addedAt).toLocaleString()}</td>
                 <td>${review.userName || 'N/A'}</td>
                 <td>${review.gymId || 'N/A'}</td>
                 <td>${review.comment || 'N/A'}</td>
+                <td>${imagesHtml}</td>
                 <td>
-                    ${review.reviewImage ?
-                            `<img src="${imageUrl}"
-                             alt="Review Image"
-                             class="review-image">`
-                            : '이미지 없음'}
+                    ${(review.userId === currentUser.userId || currentUser.isAdmin) ? `
+                    <button onclick="editReview(${review.rId}, ${review.gymId})">수정</button>
+                    <button onclick="deleteReview(${review.rId}, ${review.gymId}, '${review.userId}')">삭제</button>
+                    ` : ''}
                 </td>
-                <!-- ... 나머지 코드 ... -->
             `;
                         tbody.appendChild(row);
                     });
@@ -200,18 +227,22 @@
         }
 
         // 리뷰 작성
-        function submitReview() {
+        function submitReview(event) {
+            event.preventDefault();
+
             const gymId = document.getElementById('reviewGymId').value;
             const comment = document.getElementById('reviewComment').value;
-            const file = document.getElementById('reviewImage').files[0];
+            const files = document.getElementById('reviewImages').files;
 
             if(gymId && comment) {
                 const formData = new FormData();
                 formData.append('gymId', gymId);
                 formData.append('comment', comment);
                 formData.append('userId', currentUser.userId);
-                if (file) {
-                    formData.append('file', file);
+
+                // 여러 파일 추가
+                for(let i = 0; i < files.length; i++) {
+                    formData.append('files', files[i]);
                 }
 
                 fetch('/api/reviews', {
@@ -221,21 +252,18 @@
                 })
                     .then(response => {
                         if(!response.ok) {
-                            return response.json().then(err => {
-                                throw new Error(err.message || '리뷰 작성에 실패했습니다.');
-                            });
+                            return response.text().then(text => { throw new Error(text) });
                         }
                         return response.json();
                     })
                     .then(data => {
-                        console.log('Success:', data);
                         alert('리뷰가 성공적으로 작성되었습니다.');
                         closePopup();
                         fetchReviews();
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert(error.message || '리뷰 작성에 실패했습니다.');
+                        alert(error.message);
                     });
             } else {
                 alert('체육관 ID와 리뷰 내용을 모두 입력해주세요.');
@@ -246,15 +274,13 @@
             document.getElementById('reviewPopup').style.display = 'none';
             document.getElementById('overlay').style.display = 'none';
             document.getElementById('reviewForm').reset();
-            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreviewContainer').innerHTML = '';  // 이미지 미리보기 초기화
         }
 
         document.getElementById('writeReview').addEventListener('click', () => {
             document.getElementById('reviewPopup').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         });
-
-        // 기존의 editReview와 deleteReview 함수는 유지
 
         // 초기화
         fetchUserInfo();
