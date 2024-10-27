@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @AllArgsConstructor
@@ -67,7 +68,7 @@ public class ReviewService {
 
     // 리뷰 작성
     @Transactional
-    public ReviewDTO createReview(ReviewDTO reviewDTO, MultipartFile file) throws IOException {
+    public ReviewDTO createReview(ReviewDTO reviewDTO, List<MultipartFile> files) throws IOException {
         // 체육관 존재 여부 확인
         if (!gymRepository.existsById(reviewDTO.getGymId())) {
             throw new CustomException(ErrorCode.GYM_NOT_FOUND);
@@ -84,8 +85,8 @@ public class ReviewService {
             Review savedReview = reviewRepository.save(review);
 
             // 이미지 파일이 있는 경우 처리
-            if (file != null && !file.isEmpty()) {
-                saveImageForReview(file, savedReview, reviewDTO.getUserId());  // 파라미터 수정
+            if (files != null && !files.isEmpty()) {
+                saveImageForReview(files, savedReview, reviewDTO.getUserId());  // 파라미터 수정
             }
 
             // 웹소켓 알림
@@ -109,31 +110,32 @@ public class ReviewService {
 
 
     @Transactional
-    protected void saveImageForReview(MultipartFile file, Review savedReview, Long userId) {
-        try {
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+    protected void saveImageForReview(List<MultipartFile> files, Review savedReview, Long userId) {
+        for (MultipartFile file : files) {
+            try {
+                String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-            // 파일 저장
-            Path uploadDir = Paths.get(resourcePath);
-            Path targetPath = uploadDir.resolve(fileName);
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("File saved to: {}", targetPath);
+                // 파일 저장
+                Path uploadDir = Paths.get(resourcePath);
+                Path targetPath = uploadDir.resolve(fileName);
+                Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                log.info("파일 저장 : {}", targetPath);
 
-            // Image 엔티티 생성 및 저장
-            Image image = Image.builder()
-                    .imageUrl(fileName)
-                    .userId(userId)
-                    .gymId(savedReview.getGymId())
-                    .reviewId(savedReview.getRId())
-                    .caption(file.getOriginalFilename())
-                    .addedAt(LocalDateTime.now())
-                    .build();
+                // Image 엔티티 생성 및 저장
+                Image image = Image.builder()
+                        .imageUrl(fileName)
+                        .userId(userId)
+                        .gymId(savedReview.getGymId())
+                        .reviewId(savedReview.getRId())
+                        .caption(file.getOriginalFilename())
+                        .addedAt(LocalDateTime.now())
+                        .build();
 
-            imageRepository.save(image);
-            log.debug("Saved image entity with URL: {}", fileName);
-
-        } catch (IOException e) {
-            throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
+                imageRepository.save(image);
+                log.debug("URL과 저장된 이미지 엔티티를 저장하였습니다 : {}", fileName);
+            } catch (IOException e) {
+                throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);
+            }
         }
     }
 
@@ -169,17 +171,29 @@ public class ReviewService {
         dto.setComment(review.getComment());
         dto.setAddedAt(review.getAddedAt());
 
-        // userId를 이용해서 Member 정보를 조회하고 이름을 설정
         memberRepository.findById(review.getUserId())
                 .ifPresent(member -> dto.setUserName(member.getName()));
 
-        // 리뷰에 연결된 이미지 정보 조회
+
+
+
         List<Image> images = imageRepository.findByReviewId(review.getRId());
+        log.info("Found {} images", images.size());
+
         if(!images.isEmpty()) {
-            Image image = images.get(0); // 첫 번째 이미지 정보만 사용
-            log.debug("Image URL being set: {}", image.getImageUrl());
-            dto.setReviewImage(image.getImageUrl());
-            dto.setCaption(image.getCaption());
+            List<String> imageUrls = images.stream()
+                    .map(Image::getImageUrl)
+                    .collect(Collectors.toList());
+
+            log.info("Review {} has {} images: {}", review.getRId(), imageUrls.size(), imageUrls);
+
+            // 단일 이미지용
+            dto.setReviewImage(images.get(0).getImageUrl());
+
+            // 다중 이미지 설정
+            dto.setReviewImages(imageUrls);  // 여기서 실제로 설정되는지 확인
+
+            log.info("After setting images to DTO: {}", dto.getReviewImages());
         }
 
         return dto;
@@ -209,9 +223,16 @@ public class ReviewService {
         for(ReviewDTO review : reviews) {
             List<Image> images = imageRepository.findByReviewId(review.getRId());
             if(!images.isEmpty()) {
-                Image image = images.get(0);
-                // DB에 저장된 파일명만 사용
-                review.setReviewImage(image.getImageUrl());  // 예: "123e4567-e89b-12d3-a456-426614174000_image.jpg"
+                // 단일 이미지 설정 (하위 호환성)
+                review.setReviewImage(images.get(0).getImageUrl());
+
+                // 모든 이미지 URL을 리스트로 설정
+                List<String> imageUrls = images.stream()
+                        .map(Image::getImageUrl)
+                        .collect(Collectors.toList());
+                review.setReviewImages(imageUrls);
+
+                log.info("Review {} setting multiple images: {}", review.getRId(), imageUrls);
             }
         }
         return reviews;

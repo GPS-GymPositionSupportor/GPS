@@ -5,13 +5,12 @@ import gps.base.DTO.ReviewDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.Comment;
-import gps.base.model.Image;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
 import gps.base.repository.ImageRepository;
 import gps.base.service.ReviewService;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 
+@Slf4j
 @Controller
 @RequestMapping("/api/reviews")
 public class ReviewController {
@@ -33,14 +32,8 @@ public class ReviewController {
     @Autowired
     private ReviewService reviewService;
 
-    @Autowired
-    private CommentRepository commentRepository;
-
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
-
-    @Autowired
-    private ImageRepository imageRepository;
 
 
     // 리뷰 보드 페이지 반환
@@ -62,31 +55,26 @@ public class ReviewController {
     // 리뷰 생성
     @PostMapping
     public ResponseEntity<?> createReview(
-            @RequestParam("gymId") Long gymId,
-            @RequestParam("userId") Long userId,
-            @RequestParam("comment") String comment,
-            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam("files") List<MultipartFile> files,  // files라는 이름으로 받아야 함
+            ReviewDTO reviewDTO,
             HttpSession session) {
         Long sessionUserId = (Long) session.getAttribute("userId");
-
 
         if(sessionUserId == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        if(!sessionUserId.equals(userId)) {
+        if(!sessionUserId.equals(reviewDTO.getUserId())) {
             throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
         }
 
-        // ReviewDTO 생성
-        ReviewDTO reviewDTO = ReviewDTO.builder()
-                .userId(userId)
-                .gymId(gymId)
-                .comment(comment)
-                .build();
+        log.info("Received files size: {}", files != null ? files.size() : 0);
+        if (files != null && !files.isEmpty()) {
+            files.forEach(file -> log.info("File name: {}", file.getOriginalFilename()));
+        }
 
         try {
-            ReviewDTO createdReview = reviewService.createReview(reviewDTO, file);
+            ReviewDTO createdReview = reviewService.createReview(reviewDTO, files);
             return ResponseEntity.ok(createdReview);
         } catch (IOException e) {
             throw new CustomException(ErrorCode.IMAGE_UPLOAD_FAILED);

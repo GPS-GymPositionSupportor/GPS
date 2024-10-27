@@ -1,14 +1,17 @@
 package gps.base.DTO;
 
-import gps.base.model.Gym;
-import gps.base.model.Member;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
+import java.sql.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Data
@@ -24,6 +27,7 @@ public class ReviewDTO {
     private String userName;    // Member의 이름
     private String comment;
 
+
     /*
     이미지 관련
      */
@@ -31,6 +35,11 @@ public class ReviewDTO {
     private MultipartFile file; // 파일
     private String caption; // 이미지 이름
 
+    // 다중 이미지를 위한 새 필드
+
+    @JsonProperty("reviewImages")   // JSON 필드명 명시
+    @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)    // 항상 직렬화
+    private List<String> reviewImages = new ArrayList<>();  // 초기화
 
     public ReviewDTO(Long userId, Long gymId, String userName, String comment) {
         this.userId = userId;
@@ -48,5 +57,14 @@ public class ReviewDTO {
         this.gymId = gymId;
         this.userName = userName;
         this.comment = comment;
+    }
+
+    // 명시적인 getter
+    @JsonGetter("reviewImages")
+    public List<String> getReviewImages() {
+        if(reviewImages == null) {
+            reviewImages = new ArrayList<>();
+        }
+        return reviewImages;
     }
 }
