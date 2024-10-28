@@ -17,7 +17,7 @@ public class Gym {
     @Column(name = "gym_id")
     private Long gymId;
 
-    @Column(name = "address", nullable = false)
+    @Column(name = "address1", nullable = false, unique = true)
     private String address;
 
     @Column(name = "g_name", nullable = false)
