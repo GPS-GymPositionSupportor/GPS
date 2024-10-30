@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>체육관 목록</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .gym-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .gym-card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .gym-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .gym-info {
+      padding: 15px;
+    }
+
+    .gym-name {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .gym-category {
+      display: inline-block;
+      padding: 3px 8px;
+      background-color: #007bff;
+      color: white;
+      border-radius: 15px;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+
+    .gym-details {
+      color: #666;
+      font-size: 0.9em;
+    }
+
+    .gym-rating {
+      color: #f8c51c;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="gym-container" id="gymContainer">
+    <div class="gym-card" onclick="location.href='/gyms/1'">
+      <div class="gym-info">
+        <div class="gym-name">체육관 이름</div>
+        <div class="gym-category">체육관 카테고리</div>
+        <div class="gym-details">
+          <div>주소</div>
+          <div>운영시간 정보 없음</div>
+        </div>
+        <div class="gym-rating">★ N/A</div>
+      </div>
+    </div>
+    <div class="gym-card" onclick="location.href='/gyms/2'">
+      <div class="gym-info">
+        <div class="gym-name">체육관 이름</div>
+        <div class="gym-category">체육관 카테고리</div>
+        <div class="gym-details">
+          <div>주소</div>
+          <div>운영시간 정보 없음</div>
+        </div>
+        <div class="gym-rating">★</div>
+      </div>
+    </div>
+</div>
+
+<script>
+  function fetchGyms() {
+    fetch('/api/gyms', {
+      credentials: 'include'
+    })
+            .then(response => response.json())
+            .then(gyms => {
+              const container = document.getElementById('gymContainer');
+              container.innerHTML = '';
+
+              gyms.forEach(gym => {
+                const gymCard = document.createElement('div');
+                gymCard.className = 'gym-card';
+                gymCard.onclick = () => window.location.href = `/gyms/${gym.gymId}`;
+
+                gymCard.innerHTML = `
+                       <div class="gym-info">
+                           <div class="gym-name">${gym.gName}</div>
+                           <div class="gym-category">${translateCategory(gym.category)}</div>
+                           <div class="gym-details">
+                               <div>${gym.address}</div>
+                           </div>
+                           <div class="gym-rating">★ ${gym.rating}</div>
+                       </div>
+                   `;
+
+                container.appendChild(gymCard);
+              });
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('체육관 정보를 불러오는데 실패했습니다.');
+            });
+  }
+
+  function translateCategory(category) {
+    const categories = {
+      'water': '수영',
+      'ball': '구기종목',
+      'physics': '피트니스',
+      'battle': '격투기'
+    };
+    return categories[category] || category;
+  }
+
+  // 초기 체육관 목록 로드
+  fetchGyms();
+</script>
+</body>
+</html>
