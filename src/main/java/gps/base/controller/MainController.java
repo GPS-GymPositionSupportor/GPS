@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -193,16 +194,27 @@ public class MainController {
     체육관 관리
      */
 
-    @PostMapping("/gym")
-    public ResponseEntity<Gym> registerGym(@RequestBody Gym gym) {
-        Gym savedGym = gymService.saveGym(gym);
-        return new ResponseEntity<>(savedGym, HttpStatus.CREATED);
+    // HTMl 호출
+    @GetMapping("/gyms")
+    public String showGymList(Model model, HttpSession session) {
+
+        if(session.getAttribute("loggedInUser") == null) {
+            return "redirect:/api/login";
+        }
+
+        List<Gym> gyms = gymService.getAllGyms();
+        model.addAttribute("gyms",  gyms);
+        return "gym";
     }
 
+
+
+    // 특정 체육관 ID 조회
     @GetMapping("/gym/{gymId}")
     public ResponseEntity<Gym> getGym(@PathVariable Long gymId) {
         Gym gym = gymService.getGymById(gymId);
         return ResponseEntity.ok(gym);
+
     }
 
 }
