@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Data
@@ -34,11 +35,15 @@ public class Member {
         
         이미지 파일의 경로나 URL을 저장하는데, 이 때 경로 or /url 이 문자열 이므로 String Type 으로 선언
      */
+
+    @Column(name = "nickname", nullable = true)
+    private String nickname;
+
     @Column(name = "profile_img", nullable = true)
     private String profileImg;
 
-    @Column(name = "age")
-    private Integer age;
+    @Column(name = "birth")
+    private Date birth;
 
     @Column(name = "gender")
     private String gender;

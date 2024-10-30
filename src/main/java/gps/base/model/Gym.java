@@ -23,6 +23,15 @@ public class Gym {
     @Column(name = "g_name", nullable = false)
     private String gName;
 
+    @Column(name = "opening_hours", nullable = true)
+    private String openHour;
+
+    @Column(name = "homepage", nullable = true)
+    private String homepage;
+
+    @Column(name = "phone_number", nullable = true)
+    private String phone;
+
     @Column(name = "g_longitude", nullable = false)
     private double gLongitude;
 
