@@ -1,5 +1,6 @@
 package gps.base.service;
 
+import gps.base.DTO.MemberDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.Member;
@@ -17,6 +18,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -101,6 +104,39 @@ public class MemberService {
         }
         return null;
     }
+
+    public Map<String, Object> getMemberProfile(Long userId) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        Map<String, Object> profileData = new HashMap<>();
+        profileData.put("userId", member.getUserId());
+        profileData.put("name", member.getName());
+        profileData.put("nickname", member.getNickname());
+        profileData.put("email", member.getEmail());
+        profileData.put("age", member.calculateAge());  // 계산된 나이
+        profileData.put("gender", member.getGender());
+        profileData.put("profileImg", member.getProfileImg());
+
+        return profileData;
+    }
+
+    // 프로필 정보 업데이트 (birth는 수정 불가로 가정)
+    public void updateProfileInfo(Long userId, MemberDTO profileData) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        if (profileData.getNickname() != null) {
+            member.setNickname(profileData.getNickname());
+        }
+        if (profileData.getEmail() != null) {
+            member.setEmail(profileData.getEmail());
+        }
+        // birth는 수정하지 않음 (나이는 birth에서 자동 계산)
+
+        memberRepository.save(member);
+    }
+
 
 
     // 사용자 ID와 업로드 된 파일을 받아 프로필 이미지를 업데이트 하는 함수

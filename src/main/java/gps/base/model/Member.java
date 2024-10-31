@@ -5,7 +5,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.Date;
 
 @Entity
@@ -43,7 +45,7 @@ public class Member {
     private String profileImg;
 
     @Column(name = "birth")
-    private Date birth;
+    private LocalDateTime birth;
 
     @Column(name = "gender")
     private String gender;
@@ -83,6 +85,14 @@ public class Member {
     @PreRemove
     protected void onRemove() {
         mDeletedAt = LocalDateTime.now();
+    }
+
+    // 나이 계산을 위한 메서드 추가
+    public int calculateAge() {
+        if (this.birth == null) {
+            return 0;
+        }
+        return Period.between(this.birth.toLocalDate(), LocalDate.now()).getYears();
     }
 
 

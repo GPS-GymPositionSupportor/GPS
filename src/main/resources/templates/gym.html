@@ -535,6 +535,7 @@
       })
               .then(response => response.json())
               .then(data => {
+                console.log('받은 데이터2 :', data );
                 detailContent.innerHTML = `
            <div class="gym-info">
                <div class="gym-header">
@@ -570,42 +571,38 @@
 
            <div class="gym-reviews">
                <h3>리뷰</h3>
-               <div class="reviews-container">
-                   ${data.reviews && data.reviews.length > 0 ?
-                        data.reviews.map(review => `
-                           <div class="review-card">
-                               <div class="review-header">
-                                   <div class="reviewer-info">
-                                       <img src="${review.userProfileImage || '/default-profile.png'}"
-                                            alt="프로필"
-                                            class="reviewer-profile">
-                                       <div class="reviewer-details">
-                                           <div class="reviewer-name">${review.userName || '사용자'}</div>
-                                       </div>
-                                   </div>
-                                   <div class="review-date">${formatDate(review.createdAt)}</div>
-                               </div>
-                               <div class="review-content">
-                                   ${review.comment}
-                               </div>
-                               ${review.images ? `
-                                   <div class="review-images">
-                                       ${review.images.map(img => `
-                                           <img src="${img}" alt="리뷰 이미지" class="review-image">
-                                       `).join('')}
-                                   </div>
-                               ` : ''}
-                               <div class="review-actions">
-                                   <button class="comment-button">
-                                       <i class="comment-icon">💬</i>
-                                       <span class="comment-count">${review.commentCount || 0}</span>
-                                   </button>
-                               </div>
-                           </div>
-                       `).join('') :
+            <div class="reviews-container">
+                ${data.reviews && data.reviews.length > 0 ?
+                        data.reviews.map(review => {
+                          console.log('각 리뷰:', review);  // 각 리뷰 객체 확인용
+                          return `
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="reviewer-info">
+                                        <img src="${review.userProfileImage || '/default-profile.png'}"
+                                             alt="프로필"
+                                             class="reviewer-profile">
+                                        <div class="reviewer-details">
+                                            <div class="reviewer-name">${review.userName || '사용자'}</div>
+                                        </div>
+                                    </div>
+                                    <div class="review-date">${new Date(review.createdAt).toLocaleDateString()}</div>
+                                </div>
+                                <div class="review-content">
+                                    ${Array.isArray(review.content) ? review.content.join(' ') : review.content || '내용 없음'}
+                                </div>
+                                <div class="review-actions">
+                                    <button class="comment-button">
+                                        <i class="comment-icon">💬</i>
+                                        <span class="comment-count">0</span>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        }).join('') :
                         '<p>아직 리뷰가 없습니다.</p>'
                 }
-               </div>
+            </div>
            </div>
        `;
               })

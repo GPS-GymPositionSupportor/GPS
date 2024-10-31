@@ -1,6 +1,7 @@
 package gps.base.controller;
 
 
+import gps.base.DTO.MemberDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.*;
@@ -120,16 +121,29 @@ public class MainController {
     }
 
 
-    // 프로필 Update
-    @PostMapping("/member/{userId}/profile-image")
-    public ResponseEntity<String> updateProfileImage(@PathVariable Long userId, @RequestParam("file") MultipartFile file) {
+    // 프로필 정보 업데이트 (이미지 포함)
+    @PostMapping("/member/{userId}/myProfile")
+    public ResponseEntity<?> updateProfile(
+            @PathVariable Long userId,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            @RequestPart(value = "profileData") MemberDTO profileData) {
         try {
-            memberService.updateProfileImage(userId, file);
-            return ResponseEntity.ok("프로필 이미지가 업데이트되었습니다.");
+            // 이미지가 있다면 업데이트
+            if (file != null && !file.isEmpty()) {
+                memberService.updateProfileImage(userId, file);
+            }
+
+            // 프로필 정보 업데이트
+            memberService.updateProfileInfo(userId, profileData);
+
+            return ResponseEntity.ok("프로필이 업데이트되었습니다.");
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("이미지 업로드 실패");
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     // 로그 아웃

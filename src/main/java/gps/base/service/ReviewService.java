@@ -446,8 +446,10 @@ public class ReviewService {
     public Map<String, Object> convertReviewToMap(Review review) {
         Map<String, Object> reviewMap = new HashMap<>();
         reviewMap.put("reviewId", review.getRId());
-        reviewMap.put("content", review.getComments());
+        reviewMap.put("content", review.getComment());
         reviewMap.put("createdAt", review.getAddedAt());
+
+        reviewMap.put("commentCount", review.getComments().size());
 
         // Member 정보 조회 및 추가
         Member member = memberRepository.findById(review.getUserId())
@@ -456,6 +458,7 @@ public class ReviewService {
             reviewMap.put("userProfileImage", member.getProfileImg());
             reviewMap.put("userName", member.getNickname());
         }
+
 
         return reviewMap;
     }
