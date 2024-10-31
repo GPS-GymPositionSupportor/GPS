@@ -1,10 +1,13 @@
 package gps.base.controller;
 
 
+import gps.base.error.ErrorCode;
+import gps.base.error.exception.CustomException;
 import gps.base.model.*;
 import gps.base.service.GymService;
 import gps.base.service.MemberService;
 import gps.base.service.ReviewService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -195,7 +199,7 @@ public class MainController {
      */
 
     // HTMl 호출
-    @GetMapping("/gyms")
+    @GetMapping("/showgyms")
     public String showGymList(Model model, HttpSession session) {
 
         if(session.getAttribute("loggedInUser") == null) {
@@ -207,14 +211,32 @@ public class MainController {
         return "gym";
     }
 
+    // API 엔드포인트 추가
+    @GetMapping("/gyms")
+    @ResponseBody  // JSON 응답을 위해 필요
+    public List<Gym> getGyms(HttpSession session) {
+        if(session.getAttribute("loggedInUser") == null) {
+            // 로그인 안 된 경우 빈 리스트 반환하거나 예외 처리
+            return new ArrayList<>();
+        }
+        return gymService.getAllGyms();
+    }
+
 
 
     // 특정 체육관 ID 조회
     @GetMapping("/gym/{gymId}")
-    public ResponseEntity<Gym> getGym(@PathVariable Long gymId) {
-        Gym gym = gymService.getGymById(gymId);
-        return ResponseEntity.ok(gym);
-
+    @ResponseBody
+    public ResponseEntity<?> getGym(@PathVariable Long gymId) {
+        try {
+            Map<String, Object> gymDetail = gymService.getGymDetailById(gymId);
+            return ResponseEntity.ok(gymDetail);
+        } catch (EntityNotFoundException e) {
+            throw new CustomException(ErrorCode.GYM_NOT_FOUND);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
 }

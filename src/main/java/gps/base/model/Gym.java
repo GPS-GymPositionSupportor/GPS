@@ -26,6 +26,10 @@ public class Gym {
     @Column(name = "opening_hours", nullable = true)
     private String openHour;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    private GymCategory category;
+
     @Column(name = "homepage", nullable = true)
     private String homepage;
 
@@ -38,10 +42,7 @@ public class Gym {
     @Column(name = "g_latitude", nullable = false)
     private double gLatitude;
 
-    @Column(name = "information", nullable = false, columnDefinition = "TINYTEXT")
-    private String information;
-
-    @Column(name = "avg_rating", nullable = false)
+    @Column(name = "rating", nullable = false)
     private double rating;
 
     @Column(name = "g_created_by", nullable = false)

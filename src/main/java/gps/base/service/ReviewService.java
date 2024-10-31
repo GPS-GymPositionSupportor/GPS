@@ -25,9 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -60,7 +58,8 @@ public class ReviewService {
 
     @Value("${RESOURCE_PATH}")
     private String resourcePath;
-    
+
+
     
     /*
     리뷰 관련
@@ -431,4 +430,33 @@ public class ReviewService {
         return comments;
     }
 
+    public List<Review> getReviewsByGymId(Long gymId) {
+        return reviewRepository.findByGymId(gymId);
+    }
+
+    // 새로운 메서드 추가 (Map 반환)
+    public List<Map<String, Object>> getReviewWithMember(Long gymId) {
+        List<Review> reviews = reviewRepository.findByGymId(gymId);
+        return reviews.stream()
+                .map(this::convertReviewToMap)
+                .collect(Collectors.toList());
+
+    }
+
+    public Map<String, Object> convertReviewToMap(Review review) {
+        Map<String, Object> reviewMap = new HashMap<>();
+        reviewMap.put("reviewId", review.getRId());
+        reviewMap.put("content", review.getComments());
+        reviewMap.put("createdAt", review.getAddedAt());
+
+        // Member 정보 조회 및 추가
+        Member member = memberRepository.findById(review.getUserId())
+                .orElse(null);
+        if (member != null) {
+            reviewMap.put("userProfileImage", member.getProfileImg());
+            reviewMap.put("userName", member.getNickname());
+        }
+
+        return reviewMap;
+    }
 }

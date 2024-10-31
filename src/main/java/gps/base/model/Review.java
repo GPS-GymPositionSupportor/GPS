@@ -22,6 +22,7 @@ public class Review {
 
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
+
     @JoinColumn(name = "user_id", nullable = false)
     private Long userId;
 
@@ -31,6 +32,9 @@ public class Review {
     @Column(name = "r_comment", columnDefinition = "TEXT")
     private String comment;
 
+    // Member 정보를 가져오기
+    @Transient
+    private Member member;
 
 
 
