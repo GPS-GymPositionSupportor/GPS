@@ -101,6 +101,12 @@ body::-webkit-scrollbar {
 	background-color: #999999;
 }
 
+#error-message {
+	 color: #FF3B30;
+	 text-align: center;
+	 font-size: 12px;
+	 height: 2rem;
+}
 .login-overlay {
 	position: fixed;
 	top: 0;
@@ -160,9 +166,51 @@ body::-webkit-scrollbar {
 	
 }
 
+.login-form input::placeholder {
+    color: #999 !important;
+}
+
 .login-form input.error {
     color: #FF3B30 !important;
     box-shadow: 0px 1px 1px 0px #FF3B30 !important;
+}
+
+.login-form input.error::placeholder {
+	color: #FF3B30 !important;
+}
+
+.password-container {
+	position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#togglePassword {
+	box-shadow: none !important;
+}
+
+.eye-btn {
+	position: absolute;
+    width: 3rem !important;
+    right: 0.11rem;
+    background: none;
+    background-color: #00000000 !important;
+}
+
+.find-regist-btn {
+	display: flex;
+    justify-content: space-between;
+    flex-direction: row;
+    align-items: center;
+    margin: -1rem 0% 0% 0%;
+}
+
+.findIdPw-btn {
+	width: 50% !important;
+	color: #555 !important;
+	font-size: 12px !important;
+	background-color: #ffffff00 !important;
+	box-shadow: none !important;
 }
 
 .register-btn {
@@ -172,10 +220,7 @@ body::-webkit-scrollbar {
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
 }
-.register-button {
-	display: flex;
-	justify-content: center;
-}
+
 .kakao-btn {
 	background-color: #FEE500 !important; /* 카카오톡 색상 */
 	color: #000!important;
@@ -291,8 +336,6 @@ body::-webkit-scrollbar {
 		display: flex;
 	    flex-direction: column;
 	    align-items: center;
-	    margin-bottom: 5%;
-	    padding: 0% 0% 10% 0%;
 	}
 	
 	.images img {
@@ -301,7 +344,7 @@ body::-webkit-scrollbar {
 	
 	.login-form {
 		width: 80%;
-		height: 80%;
+		height: 40rem;
 	}
 	
 	.login-form input {
@@ -324,6 +367,10 @@ body::-webkit-scrollbar {
 		margin: 2% 0% 2% 0%;
 	}
 	
+	#togglePassword {
+		box-shadow: none !important;
+	}
+
 	.exit-button {
 		display: block;
 		margin: 2%;

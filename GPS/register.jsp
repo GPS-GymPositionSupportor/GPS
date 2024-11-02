@@ -14,6 +14,7 @@
 		<a href="index.jsp" class="exit-button" title="BackToIndex"></a>
 	</div>
 	<div class="register-form">
+		<div class="login-form">
 		<p class="regist">회원가입</p>
 		
 		<form action="registerLogic.jsp" method="post"> <!-- 회원가입 로직을 처리할 파일로 이동 -->
@@ -61,6 +62,7 @@
 	        </form>
 		
 		</div>
+	</div>
 	
 	<script>
         function checkUsername() {

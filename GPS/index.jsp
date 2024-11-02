@@ -88,14 +88,35 @@
 	    		<img src="image/logo.png" alt="logo1" title="logo" class="picture">
 	    		<img src="image/LookForYourMovement.png" alt="moto" title="moto" class="picture">
 	    	</div>
+	    	
+	    	<%
+	    	String loginError = (String) session.getAttribute("loginError");
+		    %>
+		
+		    <!-- 고정된 오류 메시지 공간 -->
+		    <div id="error-message"">
+		        <%
+		        if (loginError != null) {
+		            out.print(loginError.replace("<br>", "<br/>")); // HTML 태그 출력
+		            session.removeAttribute("loginError"); // 메시지 출력 후 세션에서 제거
+		        }
+		        %>
+		    </div>
+		    
 	        <form action="loginProcess.jsp" method="post" id="loginForm">
-	            <input type="text" name="username" placeholder="아이디를 입력해주세요" required>
-	            <input type="password" name="password" placeholder="비밀번호를 입력해주세요" required>
-	            <button type="submit">로그인 하기</button> 
+	            <input type="text" name="username" placeholder="아이디를 입력해주세요">
+	            <div class="password-container">
+			        <input type="password" name="password" id="password" minlength="8" maxlength="16" placeholder="비밀번호를 입력해주세요">
+			        <button type="button" id="togglePassword" class="eye-btn">
+			        	<img src="image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon">
+			        </button>
+			    </div>
+	            <button type="submit">로그인</button> 
 	        </form>
 	        
-	        <div class="register-button">
-	        	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
+	        <div class="find-regist-btn">
+		        	<button class="findIdPw-btn" onclick="location.href='findIdPw.jsp'">아이디/비밀번호 찾기</button>
+		        	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
 			</div>
 			<p class="sns">sns로 시작하기</p>
 			<hr class="divideLine">
@@ -116,31 +137,57 @@
 		            event.preventDefault(); // 폼 제출 방지
 		        }
 		    });
-			<%-- 로그인 폼 유효성 검사 --%>
+		    
+			var loginForm = document.getElementById('loginForm');
+		    var username = loginForm.querySelector('input[name="username"]');
+		    var password = loginForm.querySelector('input[name="password"]');
+		
+		    loginForm.addEventListener('submit', function(event) {
+		        if (!validForm()) {
+		            event.preventDefault(); // 폼 제출 방지
+		        }
+		    });
+		
 		    function validForm() {
-			    var username = document.querySelector('input[name="username"]');
-			    var password = document.querySelector('input[name="password"]');
-			    var isValid = true;
-			
-			    if (username.value.trim() === "") {
-			        username.classList.add('error'); // 에러 클래스 추가
-			        console.log('Username error class added');
-			        isValid = false;
-			    } else {
-			        username.classList.remove('error'); // 에러 클래스 제거
-			    }
-			
-			    if (password.value.trim() === "") {
-			        password.classList.add('error'); // 에러 클래스 추가
-			        isValid = false;
-			    } else {
-			        password.classList.remove('error'); // 에러 클래스 제거
-			    }
-			
-			    return isValid; // 유효성 검사 결과 반환
-			}
+		        var isValid = true;
+		
+		        // 유효성 검사
+		        if (username.value.trim() === "") {
+		            username.classList.add('error'); // 에러 클래스 추가
+		            isValid = false;
+		        } else {
+		            username.classList.remove('error'); // 에러 클래스 제거
+		        }
+		
+		        if (password.value.trim() === "") {
+		            password.classList.add('error'); // 에러 클래스 추가
+		            isValid = false;
+		        } else {
+		            password.classList.remove('error'); // 에러 클래스 제거
+		        }
+		
+		        return isValid; // 유효성 검사 결과 반환
+		    }
+		
+		    // 클릭 이벤트 추가
+		    username.addEventListener('focus', function() {
+		        username.classList.remove('error'); // 에러 클래스 제거
+		    });
+		
+		    password.addEventListener('focus', function() {
+		        password.classList.remove('error'); // 에러 클래스 제거
+		    });
 		    
-		    
+		    var togglePassword = document.getElementById('togglePassword');
+		    var passwordInput = document.getElementById('password');
+		    var eyeIcon = document.getElementById('eyeIcon');
+
+		    togglePassword.addEventListener('click', function() {
+		        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+		        passwordInput.setAttribute('type', type);
+		        
+		        eyeIcon.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg'; // 비밀번호가 보일 때 아이콘 변경
+		    });
 		    
 		    <%-- 햄버거 버튼--%>
 		    var burButton = document.querySelector('.burbutton');
@@ -152,7 +199,7 @@
 		    });
 	
 		    function adjustNavLinks() {
-	            const navLinks = document.getElementById('nav-links');
+	            var navLinks = document.getElementById('nav-links');
 
 	            if (window.innerWidth <= 767) {
 	                // 모바일 구조로 변경

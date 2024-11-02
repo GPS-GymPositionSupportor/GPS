@@ -18,20 +18,20 @@
         // 로그인 검증
         if (rs.next()) {
             // 로그인 성공, 세션에 사용자 ID 저장
-            request.getSession(); // 변수 선언 없이 바로 사용
             session.setAttribute("userID", rs.getString("m_id")); // m_id를 세션에 저장
             session.setAttribute("userName", rs.getString("name")); // 이름도 세션에 저장
             session.setAttribute("authority", rs.getString("authority")); // 권한 정보도 저장
             response.sendRedirect("index.jsp"); // 로그인 성공 후 메인 페이지로 리다이렉트
         } else {
             // 로그인 실패
-            out.println("<script>alert('로그인 실패! 사용자 ID 또는 비밀번호가 잘못되었습니다.');</script>");
-            out.println("<script>window.location.href='index.jsp';</script>"); // 다시 로그인 페이지로 리다이렉트
+            session.setAttribute("loginError", "등록되지 않은 아이디이거나<br>잘못된 아이디 또는 비밀번호입니다.");
+            response.sendRedirect("index.jsp");
         }
     } catch (Exception e) {
         e.printStackTrace();
-        out.println("<script>alert('서버 오류 발생!');</script>");
-        out.println("<script>window.location.href='index.jsp';</script>"); // 오류 발생 시 로그인 페이지로 리다이렉트
+        // 서버 오류 발생 시 세션에 오류 메시지 저장
+        session.setAttribute("loginError", "일시적인 오류로 로그인할 수 없습니다.<br>잠시 후 다시 이용해 주세요.");
+        response.sendRedirect("index.jsp"); // 오류 발생 시 로그인 페이지로 리다이렉트
     } finally {
         // 자원 해제
         try {
