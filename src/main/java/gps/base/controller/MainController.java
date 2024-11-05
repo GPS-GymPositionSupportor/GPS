@@ -19,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,42 +82,45 @@ public class MainController {
     // 로그인 폼
     @GetMapping("/login")
     public String loginForm() {
-        return "login";
+        return "index";
     }
 
 
     // 로그인 데이터 POST
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestParam String mId, @RequestParam String mPassword, HttpSession session) {
-        Map<String, String> response = new HashMap<>();
+    public String login(
+            @RequestParam String username,
+            @RequestParam String password,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         try {
-            Member member = memberService.authenticateMember(mId, mPassword);
+            Member member = memberService.authenticateMember(username, password);
 
-            if(member != null) {
-                // 인증 성공 시 회원 정보를 세션에 저장
-                session.setAttribute("loggedInUser", member);   //  전체 Member 객체 저장
-                session.setAttribute("userId", member.getUserId());
-                session.setAttribute("name", member.getName()); // 사용자 식별을 위해 지정
-                session.setMaxInactiveInterval(1800);   // 세션 30분
-
-                logger.info("User logged in: {}.   User ID: {}. Session ID : {}", member.getMId(), member.getUserId(), session.getId());
-
-                response.put("status", "success");
-                response.put("message", "로그인 성공");
-                response.put("redirect", "/api/main");
-                return ResponseEntity.ok(response);
-            } else {
-                logger.warn("Login failed for user: {}.  Invalid credentials.", mId);
-                response.put("status", "error");
-                response.put("message", "아이디 또는 비밀번호가 올바르지 않습니다.");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            // 로그인 실패
+            if(member == null) {
+                session.setAttribute("loginError", "아이디 또는 비밀번호가 올바르지 않습니다.");
+                return "redirect:/";
             }
+
+            // 로그인 성공: 세션 설정
+            session.setAttribute("loggedInUser", member);
+            session.setAttribute("userId", member.getUserId());
+            session.setAttribute("nickname", member.getNickname());
+            session.setAttribute("name", member.getName());
+            session.setAttribute("authority", member.getAuthority());
+            session.setMaxInactiveInterval(1800);
+
+            // 권한 체크 및 리다이렉션
+            String authority = String.valueOf(member.getAuthority());
+            if ("ADMIN".equals(authority)) {
+                return "redirect:/api/admin";
+            }
+            return "redirect:/";
+
         } catch (Exception e) {
-            logger.warn("Error during login process for user: {}. Error : {}", mId, e.getMessage());
-            response.put("status", "error");
-            response.put("message", "로그인 처리 중 오류가 발생했습니다.");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            session.setAttribute("loginError", "로그인 처리 중 오류가 발생했습니다.");
+            return "redirect:/";
         }
     }
 
@@ -180,7 +184,7 @@ public class MainController {
         if(session.getAttribute("loggedInUser") == null) {
             return "redirect:/api/login";
         }
-        return "main";
+        return "index";
     }
 
 
@@ -204,6 +208,14 @@ public class MainController {
         }
     }
 
+    /*
+    어드민 관련
+     */
+
+    @GetMapping("/admin")
+    public String getMainPage(HttpSession session) {
+        return "admin";
+    }
 
 
 
