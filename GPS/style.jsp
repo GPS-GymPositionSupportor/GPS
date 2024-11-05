@@ -213,6 +213,16 @@ body::-webkit-scrollbar {
 	box-shadow: none !important;
 }
 
+#toLogin {
+	color: #555 !important;
+    font-size: 12px !important;
+    background-color: #ffffff00 !important;
+    box-shadow: none !important;
+    position: absolute;
+    bottom: 1rem;
+    left: 0rem;
+}
+
 .register-btn {
 	width: 25% !important;
 	color: #555 !important;
