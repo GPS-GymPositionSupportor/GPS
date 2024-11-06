@@ -17,8 +17,11 @@ public class Gym {
     @Column(name = "gym_id")
     private Long gymId;
 
-    @Column(name = "address", nullable = false)
-    private String address;
+    @Column(name = "address1", nullable = false)
+    private String address1;
+
+    @Column(name = "address2", nullable = false)
+    private String address2;
 
     @Column(name = "g_name", nullable = false)
     private String gName;
@@ -29,13 +32,19 @@ public class Gym {
     @Column(name = "g_latitude", nullable = false)
     private double gLatitude;
 
-    @Column(name = "information", columnDefinition = "TINYTEXT", nullable = true) // nullable 설정
-    private String information;
+    @Column(name = "opening_hours")
+    private String openingHours;
 
-    @Column(name = "gym_image", nullable = true) // nullable 설정
-    private String gymImage;
+    @Column(name = "homepage")
+    private String homepage;
 
-    @Column(name = "rating", nullable = true) // nullable 설정
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
+    @Column(name = "hashtag")
+    private String hashtag;
+
+    @Column(name = "avg_rating", nullable = true) // nullable 설정
     private Byte rating;
 
     @Column(name = "g_created_by", nullable = true) // nullable 설정

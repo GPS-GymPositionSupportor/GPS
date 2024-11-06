@@ -17,15 +17,8 @@
     <form id="loginForm" action="/api/login" method="post">
         <input type="text" name="mId" placeholder="아이디" required>
         <input type="password" name="mPassword" placeholder="비밀번호" required>
-        <!-- 카카오 로그인 버튼 -->
-        <a href="/oauth2/authorization/kakao">
-            <button>Login with Kakao</button>
-        </a>
-
-        <!-- 구글 로그인 버튼 -->
-        <a href="/oauth2/authorization/google">
-            <button>Login with Google</button>
-        </a>
+        <button type="button" onClick="location.href='/oauth2/authorization/kakao'">카카오로 로그인하기</button>
+        <button type="button" onClick="location.href='/oauth2/authorization/google'">구글로 로그인하기</button>
         <button type="submit">로그인</button>
     </form>
     <p>계정이 없으신가요? <a href="/api/register">회원가입</a> </p>

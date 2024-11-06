@@ -10,6 +10,9 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
@@ -45,9 +48,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             //유저 정보 저장
             Member member = new Member();
             member.setMId(mId);
+            member.setMPassword(UUID.randomUUID().toString());
             member.setEmail(oauth2Response.getEmail());
+            member.setNickname("민국1");
             member.setName(oauth2Response.getName());
             member.setAuthority(Authority.USER);
+            member.setGender("M");
+            member.setBirth(LocalDate.parse("2002-01-02"));
+
 
             memberRepository.save(member);
 

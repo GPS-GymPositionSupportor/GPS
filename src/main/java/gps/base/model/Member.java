@@ -1,14 +1,13 @@
 package gps.base.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "member")
 public class Member {
 
@@ -34,11 +33,12 @@ public class Member {
 
         이미지 파일의 경로나 URL을 저장하는데, 이 때 경로 or /url 이 문자열 이므로 String Type 으로 선언
      */
-    @Column(name = "profile_img", nullable = true)
-    private String profileImg;
 
-    @Column(name = "age")
-    private Integer age;
+    @Column(name = "nickname", nullable = true)
+    private String nickname;
+
+    @Column(name = "birth")
+    private LocalDate birth;
 
     @Column(name = "gender")
     private String gender;
@@ -62,18 +62,18 @@ public class Member {
     @Column(name = "m_deleted_at")
     private LocalDateTime mDeletedAt;
 
-
-
+    @Column(name = "last_login")
+    private LocalDateTime lastLogin;
 
     // PrePersist 로 현재 시간 설정 또는 삭제
     @PrePersist
     protected void onCreate() {
         mCreatedAt = LocalDateTime.now();
+        lastLogin = LocalDateTime.now();
     }
 
     @PreRemove
     protected void onRemove() {
         mDeletedAt = LocalDateTime.now();
     }
-
 }
