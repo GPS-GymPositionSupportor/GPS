@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity
 @Data
@@ -73,6 +74,17 @@ public class Member {
     private LocalDateTime lastLogin;
 
 
+    /*
+    SSO 구현을 위한 변수
+     */
+    @Column(name = "provider_type")
+    @Enumerated(EnumType.STRING)
+    private ProviderType providerType;  // 소셜 로그인 제공자 타입
+
+    @Column(name = "provider_id")
+    private String providerId;  // 소셜 로그인 제공자의 사용자 ID
+
+
     
     
     // PrePersist 로 현재 시간 설정 또는 삭제
@@ -93,6 +105,19 @@ public class Member {
             return 0;
         }
         return Period.between(this.birth.toLocalDate(), LocalDate.now()).getYears();
+    }
+
+
+    // 소셜 로그인 사용자용 비밀번호 생성
+    public void generateRandomPassword() {
+        // UUID를 사용하여 랜덤 비밀번호 생성
+        this.mPassword = UUID.randomUUID().toString();
+    }
+
+    // 소셜 로그인 사용자용 mId 생성
+    public void generateSocialId() {
+        // 프로바이더 타입 + 프로바이더 ID를 조합하여 고유한 mId 생성
+        this.mId = this.providerType.toString().toLowerCase() + "_" + this.providerId;
     }
 
 
