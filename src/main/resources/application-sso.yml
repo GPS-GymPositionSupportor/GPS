@@ -4,22 +4,21 @@ spring:
       client:
         registration:
           google:
-            client-id: {GOOGLE_CLIENT_ID}
-            client-secret: {GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
           kakao:
-            client-id: {KAKAO_CLIENT_ID}
-            client-secret: {KAKAO_CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/code/kakao"
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            redirect-uri: ${KAKAO_REDIRECT_URI}
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             client-name: Kakao
             scope:
               - profile_nickname
               - profile_image
-              - account_email
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize

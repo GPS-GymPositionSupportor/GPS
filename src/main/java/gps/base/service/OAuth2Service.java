@@ -32,16 +32,16 @@ public class OAuth2Service {
 
 
     // OAuth2 클라이언트 정보
-    @Value("${oauth2.kakao.client-id}")
+    @Value("${KAKAO_CLIENT_ID}")
     private String kakaoClientId;
 
-    @Value("${oauth2.kakao.client-secret}")
+    @Value("${KAKAO_CLIENT_SECRET}")
     private String kakaoClientSecret;
 
-    @Value("${oauth2.google.client-id}")
+    @Value("${GOOGLE_CLIENT_ID}")
     private String googleClientId;
 
-    @Value("${oauth2.google.client-secret}")
+    @Value("${GOOGLE_CLIENT_SECRET}")
     private String googleClientSecret;
 
 

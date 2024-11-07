@@ -12,11 +12,11 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
+    @Value("${JWT_SECRET}")
     private String jwtSecret;
 
     // 토큰 유효 시간 설정
-    @Value("${jwt.token-validity-in-seconds")
+    @Value("${JWT_TOKEN_VALIDATION_INSECONDS}")
     private long tokenValidityInSeconds;
 
     /**

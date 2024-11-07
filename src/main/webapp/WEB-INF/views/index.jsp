@@ -119,14 +119,25 @@
 			</div>
 			<p class="sns">sns로 시작하기</p>
 			<hr class="divideLine">
+
+            <script>
+                function kakaoLogin() {
+                    window.location.href = '/oauth2/authorization/kakao';  // provider-id인 'kakao' 사용
+                }
+
+                function googleLogin() {
+                    window.location.href = '/oauth2/authorization/google'; // provider-id인 'google' 사용
+                }
+            </script>
+
 	        <div class="social-buttons">
-		        <button class="google-btn">Sign in with Google</button>
-		        <button class="kakao-btn">Login with Kakao</button>
+                <button type="button" class="google-btn" onclick="googleLogin()">Sign in with Google</button>
+                <button type="button" class="kakao-btn" onclick="kakaoLogin()">Login with Kakao</button>
 	        </div>
 	    </div>
     	
 	</div>
-	<script>
+	<script type="text/javascript">
 	
     
 		document.addEventListener('DOMContentLoaded', function() {
@@ -196,6 +207,8 @@
 		        event.currentTarget.classList.toggle('active');
 		        navLinks.classList.toggle('active');
 		    });
+
+
 	
 		    function adjustNavLinks() {
 	            var navLinks = document.getElementById('nav-links');
