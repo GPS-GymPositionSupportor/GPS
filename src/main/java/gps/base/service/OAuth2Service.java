@@ -13,12 +13,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class OAuth2Service {
     private final RestTemplate restTemplate;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
 
     private static final Logger logger = LoggerFactory.getLogger(OAuth2Service.class);
 
@@ -137,23 +141,59 @@ public class OAuth2Service {
         Map<String, Object> kakaoAccount = (Map<String, Object>) userInfo.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
 
-        String email = (String) kakaoAccount.get("email");
+        // providerId 를 기본 식별자로 사용
+        String providerId = userInfo.get("id").toString();
         String nickname = (String) profile.get("nickname");
         String profileImageUrl = (String) profile.get("profile_image_url");
 
-        // 이메일로 회원 조회 후 없으면 새로 생성
-        return memberRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    Member newMember = new Member();
-                    newMember.setEmail(email);
-                    newMember.setName(nickname);
-                    newMember.setNickname(nickname);
-                    newMember.setProfileImg(profileImageUrl);
-                    newMember.setProviderType(ProviderType.valueOf(provider));
-                    newMember.setProviderId(userInfo.get("id").toString());
-                    newMember.setAuthority(Authority.USER);
-                    return memberRepository.save(newMember);
-                });
+        // 이메일은 옵셔널하게 처리
+        String email = kakaoAccount.get("email") != null ?
+                (String) kakaoAccount.get("email") :
+                "kakao_" + providerId + "@gps.com"; // 이메일이 없을 경우 대체 값
+
+
+        // providerId로 회원 조회
+        Optional<Member> existingMember = memberRepository.findByProviderIdAndProviderType(
+                ProviderType.KAKAO,
+                providerId
+        );
+
+        if(existingMember.isPresent()) {
+            Member member = existingMember.get();
+            // 기존 회원 정보 업데이트
+            member.setNickname(nickname);
+            member.setProfileImg(profileImageUrl);
+            return memberRepository.save(member);
+        }
+
+
+        // 이메일로 한번 더 체크 (이메일이 있는 경우에만)
+        if (kakaoAccount.get("email") != null) {
+            Optional<Member> memberByEmail = memberRepository.findByEmail(email);
+            if (memberByEmail.isPresent()) {
+                // 일반 회원가입 사용자가 카카오 로그인을 시도하는 경우
+                if (memberByEmail.get().getProviderType() == ProviderType.LOCAL) {
+                    throw new RuntimeException(
+                            "이미 일반 회원으로 가입된 이메일입니다. 일반 로그인을 이용해주세요."
+                    );
+                }
+            }
+        }
+        
+        // 신규 회원가입
+        Member newMember = new Member();
+        newMember.setEmail(email);
+        newMember.setName(nickname);
+        newMember.setProfileImg(profileImageUrl);
+        newMember.setProviderType(ProviderType.valueOf(providerId));
+        newMember.setProviderId(providerId);
+
+        // 소셜 로그인용 임의 ID/PW 생성
+        newMember.setMId(generateSocialMemberId(provider, providerId));
+        newMember.setMPassword(passwordEncoder.encode(generateRandomPassword()));
+        newMember.setAuthority(Authority.USER);
+
+        return memberRepository.save(newMember);
     }
 
 
@@ -283,4 +323,16 @@ public class OAuth2Service {
         private String error_description;
     }
 
+
+    // 소셜 로그인용 회원 ID 생성
+    private String generateSocialMemberId(String provider, String providerId) {
+        // 예: kakao_1234567 또는 google_abc123def 형식으로 생성
+        return provider.toLowerCase() + "_" + providerId;
+    }
+
+    // 임의의 비밀번호 생성
+    private String generateRandomPassword() {
+        // UUID를 사용하여 랜덤한 문자열 생성
+        return UUID.randomUUID().toString();
+    }
 }
