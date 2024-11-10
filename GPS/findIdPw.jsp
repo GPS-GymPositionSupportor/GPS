@@ -21,13 +21,13 @@
 			<div class="form-container">
                 <p>아이디 찾기</p>
                 <!-- action 파일명 변경 필요 -->
-                <form id="findIdForm2" action="findIdProcess.jsp" method="post"> 
+                <form id="findIdForm2" action="findIdCertification.jsp" method="post"> 
                     <input id="findIdF"type="text" name="name" placeholder="이름을 입력해주세요">
                     <p id="PlzEmail">이메일 주소를 적어주세요</p>
                     <div class="email-input">
-			            <input type="text" id="emailId" name="emailId">
+			            <input type="text" id="findIdEmailId" name="emailId">
 			            <span>@</span>
-			            <input type="text" id="emailDomain" name="emailDomain">
+			            <input type="text" id="findIdEmailDomain" name="emailDomain">
 			        </div>
                     <button type="submit">다음으로</button>
                 </form>
@@ -35,13 +35,18 @@
         </div>
 		<div id="findPwForm" style="display: none;">
 			<div class="form-container">
-                <h4>비밀번호 찾기</h4>
-                <form action="findPwProcess.jsp" method="post">
-                    <input type="text" name="username" placeholder="아이디를 입력해주세요">
-                    <input type="email" name="email" placeholder="이메일을 입력해주세요">
-                    <button type="submit">비밀번호 전송</button>
-                </form>
-                <button onclick="showForm('login')">취소</button>
+                <p>비밀번호 찾기</p>
+                <!-- action 파일명 변경 필요 -->
+                <form id="findPwForm2" action="findPwCertification.jsp" method="post"> 
+                    <input id="findPwF"type="text" name="name" placeholder="아이디를 입력해주세요">
+                    <p id="PlzEmail">이메일 주소를 적어주세요</p>
+                    <div class="email-input">
+			            <input type="text" id="findPwEmailId" name="emailId">
+			            <span>@</span>
+			            <input type="text" id="findPwEmailDomain" name="emailDomain">
+			        </div>
+                    <button type="submit">다음으로</button>
+				</form>
 			</div>
 		</div>
 	</div>
