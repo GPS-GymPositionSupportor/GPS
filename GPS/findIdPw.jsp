@@ -8,7 +8,7 @@
 	    
 	    <!-- 뒤로가기 버튼 -->
 	    <button id="cancelBtn" style="display: none;" onclick="showForm('findBtn')">
-	    <span></span>
+	    	<img src="image/icon_back.png" alt="뒤로가기">
 	    </button>
 	    
 	    <div id="idPw-btn">
@@ -18,17 +18,23 @@
 			</div>
 		</div>
 		<div id="findIdForm" style="display: none;">
-                <a>아이디 찾기</a>
+			<div class="form-container">
+                <p>아이디 찾기</p>
                 <!-- action 파일명 변경 필요 -->
-                <form action="findIdProcess.jsp" method="post"> 
-                    <input type="text" name="name" placeholder="이름을 입력해주세요">
-                    <p>이메일 주소를 적어주세요</p>
-                    <input type="email" name="email">
+                <form id="findIdForm2" action="findIdProcess.jsp" method="post"> 
+                    <input id="findIdF"type="text" name="name" placeholder="이름을 입력해주세요">
+                    <p id="PlzEmail">이메일 주소를 적어주세요</p>
+                    <div class="email-input">
+			            <input type="text" id="emailId" name="emailId">
+			            <span>@</span>
+			            <input type="text" id="emailDomain" name="emailDomain">
+			        </div>
                     <button type="submit">다음으로</button>
                 </form>
             </div>
-            
+        </div>
 		<div id="findPwForm" style="display: none;">
+			<div class="form-container">
                 <h4>비밀번호 찾기</h4>
                 <form action="findPwProcess.jsp" method="post">
                     <input type="text" name="username" placeholder="아이디를 입력해주세요">
@@ -36,6 +42,7 @@
                     <button type="submit">비밀번호 전송</button>
                 </form>
                 <button onclick="showForm('login')">취소</button>
+			</div>
 		</div>
 	</div>
     <button id="toLogin" onclick="location.reload();">로그인 화면</button>
