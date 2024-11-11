@@ -8,7 +8,7 @@
 			var loginForm = document.getElementById('loginForm');
 		    loginForm.addEventListener('submit', function(event) {
 		        if (!validForm()) {
-		            event.preventDefault(); // í¼ ì ì¶ ë°©ì§
+		            event.preventDefault();
 		        }
 		    });
 		    
@@ -18,7 +18,7 @@
 		
 		    loginForm.addEventListener('submit', function(event) {
 		        if (!validForm()) {
-		            event.preventDefault(); // í¼ ì ì¶ ë°©ì§
+		            event.preventDefault();
 		        }
 		    });
 		
@@ -131,9 +131,85 @@
 		        .then(response => response.text())
 		        .then(data => {
 		            document.querySelector('.login-form').innerHTML = data; // ì¤ë²ë ì´ ë´ì©ì ë³ê²½
-		        })
+		            
+		            // id 찾기 폼
+		            var findIdForm = document.getElementById('findIdForm2');
+		    	    if (findIdForm) {
+		    	        findIdForm.addEventListener('submit', function(event) {
+		    	            if (!validFindIdForm()) {
+		    	                event.preventDefault(); // 유효성 검사 실패 시 제출 방지
+		    	                console.log("ID validation failed, form submission prevented.");
+		    	            }
+		    	        });
+		    	    }
+		    	
+		    	    // 비밀번호 찾기 폼
+		    	    var findPwForm = document.getElementById('findPwForm2');
+		    	    if (findPwForm) {
+		    	        findPwForm.addEventListener('submit', function(event) {
+		    	            if (!validFindPwForm()) {
+		    	                event.preventDefault(); // 유효성 검사 실패 시 제출 방지
+		    	                console.log("Password validation failed, form submission prevented.");
+		    	            }
+		    	        });
+		    	    }     
+				})
 		        .catch(error => console.error('Error loading findIdPw.jsp:', error));
 		});
+		
+		//id찾기 유효성 검사 함수
+		function validFindIdForm() {
+		    var isValid = true;
+		
+		    var nameField = document.getElementById('findIdF');
+		    var emailId = document.getElementById('findIdEmailId');
+		    var emailDomain = document.getElementById('findIdEmailDomain');
+		
+		    if (nameField.value.trim() === "") {
+		        nameField.classList.add('error');
+		        isValid = false;
+		    } else {
+		        nameField.classList.remove('error');
+		    }
+		
+		    if (emailId.value.trim() === "" || emailDomain.value.trim() === "") {
+		        emailId.classList.add('error');
+		        emailDomain.classList.add('error');
+		        isValid = false;
+		    } else {
+		        emailId.classList.remove('error');
+		        emailDomain.classList.remove('error');
+		    }
+		
+		    return isValid;
+		}
+		
+		//pw찾기 유효성 검사 함수
+		function validFindPwForm() {
+		    var isValid = true;
+		
+		    var idField = document.getElementById('findPwF');
+		    var emailId = document.getElementById('findPwEmailId');
+		    var emailDomain = document.getElementById('findPwEmailDomain');
+		
+		    if (idField.value.trim() === "") {
+		        idField.classList.add('error');
+		        isValid = false;
+		    } else {
+		        idField.classList.remove('error');
+		    }
+		
+		    if (emailId.value.trim() === "" || emailDomain.value.trim() === "") {
+		        emailId.classList.add('error');
+		        emailDomain.classList.add('error');
+		        isValid = false;
+		    } else {
+		        emailId.classList.remove('error');
+		        emailDomain.classList.remove('error');
+		    }
+		
+		    return isValid;
+		}
 
 		//ê° ë²í¼ì í´ë¦­íì ë ê°ê°ì í¼ì ë³´ì¬ì£¼ë í¨ì
 		function showForm(formType) {
