@@ -343,7 +343,12 @@ public class MainController {
 
     @GetMapping("/admin")
     public String getMainPage(HttpSession session) {
-        return "admin";
+        if (session.getAttribute("userID") == null) {
+            return "redirect:/api/login";
+        } else {
+            return "admin";
+        }
+
     }
 
 

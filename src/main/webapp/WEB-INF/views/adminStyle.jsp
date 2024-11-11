@@ -9,16 +9,19 @@ display: flex;
 min-height: 100vh;
 background-color: #f0f0f0;
 font-family: 'Noto Sans KR', sans-serif;
+overflow-x: hidden;
 }
 
 
 /* 사이드바 스타일 */
 .sidebar {
-width: 240px;
-background-color: #333;
-color: #fff;
-padding: 20px 0;
-border-right: 1px solid #ddd;
+width: 250px;
+height: 100vh;
+position: sticky;
+background-color: #2C2C2C;
+color: white;
+padding: 20px;
+top: 0;
 }
 
 .logo {
@@ -27,7 +30,7 @@ border-bottom: 1px solid #444;
 }
 
 .logo img {
-max-width: 100%;
+max-width: 60%;
 height: auto;
 }
 
@@ -79,7 +82,7 @@ position: relative;
 }
 
 .nav-link:hover {
-background-color: #444;
+background-color: #3D3D3D;
 }
 
 .nav-link i {
@@ -94,7 +97,7 @@ padding-left: 42px;
 max-height: 0;
 overflow: hidden;
 transition: max-height 0.3s ease;
-background-color: #2b2b2b;
+background-color: #3D3D3D;
 }
 
 /* 펼쳐진 상태의 서브메뉴 */
@@ -140,6 +143,8 @@ margin-bottom: 10px;
 flex: 1;
 padding: 20px;
 background-color: #f0f0f0;
+min-height: 100vh;
+margin-left: 0;
 }
 
 /* 헤더 영역 */
@@ -180,7 +185,7 @@ opacity: 0.9;
 }
 
 .btn-primary {
-background-color: #ff0000;
+background-color: #B05D5D;
 color: white;
 }
 
@@ -191,8 +196,8 @@ color: white;
 
 /* 콘텐츠 그리드 */
 .content-grid {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
+display: flex;
+flex-direction: column;
 gap: 20px;
 }
 
@@ -337,4 +342,56 @@ transition: transform 0.2s ease;
 
 .rotate {
 transform: rotate(180deg);
+}
+
+/* 로그아웃 버튼 */
+.logout-btn {
+position: absolute;
+bottom: 20px;
+left: 20px;
+right: 20px;
+padding: 12px;
+background-color: transparent;
+border: none;
+color: white;
+display: flex;
+align-items: center;
+cursor: pointer;
+border-radius: 6px;
+transition: background-color 0.3s;
+}
+
+.logout-btn:hover {
+background-color: #3D3D3D;
+}
+
+.logout-btn i {
+margin-right: 10px;
+}
+
+/* 차트 컨테이너 스타일 */
+.chart-container {
+background: white;
+border-radius: 8px;
+padding: 20px;
+margin-bottom: 20px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chart-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 15px;
+}
+
+.chart-title {
+font-size: 18px;
+font-weight: 600;
+color: #333;
+}
+
+.chart-period {
+color: #666;
+font-size: 14px;
 }

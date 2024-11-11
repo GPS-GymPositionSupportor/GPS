@@ -15,7 +15,7 @@
 <div class="sidebar">
     <div class="logo">
         <a href="redirect:/">
-            <img src="../image/logo.png" alt="GPS Logo">
+            <img src="../image/gpsLogo.svg" alt="GPS Logo">
         </a>
     </div>
 
@@ -81,6 +81,9 @@
             </ul>
         </li>
     </ul>
+    <button class="logout-btn" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i>로그아웃
+    </button>
 </div>
 
 <!-- 메인 컨텐츠 -->
@@ -93,33 +96,32 @@
         </div>
     </div>
 
-    <!-- 콘텐츠 그리드 -->
-    <div class="content-grid">
-        <!-- 접속자 평균 -->
-        <div class="content-box">
-            <h3>접속자 평균</h3>
-            <div class="pagination">이번 달 통계</div>
+    <!-- 차트 컨테이너들 -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <span class="chart-title">접속자 평균</span>
+            <span class="chart-period">월별 통계</span>
         </div>
+        <div class="chart" id="visitorChart"></div>
+    </div>
 
-        <!-- 최근 댓글 -->
-        <div class="content-box">
-            <h3>최근 댓글</h3>
-            <div class="pagination">최근 댓글</div>
+    <div class="chart-container">
+        <div class="chart-header">
+            <span class="chart-title">전체 조회수</span>
+            <span class="chart-period">일별 통계</span>
         </div>
+        <div class="chart" id="viewsChart"></div>
+    </div>
 
-        <!-- 전체 조회수 -->
-        <div class="content-box">
-            <h3>전체 조회수</h3>
-            <div class="pagination">이번 달 통계</div>
+    <div class="chart-container">
+        <div class="chart-header">
+            <span class="chart-title">전체 댓글수</span>
+            <span class="chart-period">일별 통계</span>
         </div>
-
-        <!-- 전체 댓글수 -->
-        <div class="content-box">
-            <h3>전체 댓글수</h3>
-            <div class="pagination">전체 통계</div>
-        </div>
+        <div class="chart" id="commentsChart"></div>
     </div>
 </div>
+
 
 <!-- Font Awesome -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
@@ -194,6 +196,29 @@
         const profileName = document.getElementById('adminNickname');
         if (data.nickname) {
             profileName.textContent = data.nickname;
+        }
+    }
+
+    // 로그아웃 처리 함수
+    async function logout() {
+        try {
+            const response = await fetch('/api/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include' // 쿠키 포함
+            });
+
+            if (response.ok) {
+                // 로그아웃 성공 시 로그인 페이지로 리다이렉트
+                window.location.href = '/api/login';
+            } else {
+                alert('로그아웃 처리 중 오류가 발생했습니다.');
+            }
+        } catch (error) {
+            console.error('로그아웃 에러:', error);
+            alert('로그아웃 처리 중 오류가 발생했습니다.');
         }
     }
 
