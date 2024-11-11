@@ -77,12 +77,14 @@
 	                navLinks.innerHTML = `
 	                	<div class="myPage">
 		                    <div class="user-info">
-		                        <img src="../image/myPage_image.png" alt="myPage_image" title="myPage_image" class="picture">
+		                        <img
+            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.png" %>"
+            alt="myPage_image" title="myPage_image" class="picture">
 		                        <div class="greeting">
-		                            <a class="hello">ìëíì¸ì</a>
+		                            <a class="hello">안녕하세요</a>
 		                            <div class="mrUser">
 		                                <a class="mrUserName"><%= session.getAttribute("userID") %></a>
-		                                <a class="mr">ë</a>
+		                                <a class="mr">님</a>
 		                            </div>
 		                        </div>
 		                    </div>
@@ -386,5 +388,8 @@
                     alert('회원가입 처리 중 오류가 발생했습니다.');
                 });
         });
+
+
+
 
     </script>

@@ -107,7 +107,10 @@ public class MainController {
             @RequestParam("nickname") String nickname,
             @RequestParam("birthdate") String birthdate,
             @RequestParam("gender") String gender,
+            @RequestParam("profileImage") String profileImage,
             @RequestParam(value = "privacy", required = true) boolean privacy,
+            @RequestParam(value = "provider", defaultValue = "LOCAL") String provider, // 기본 값은 LOCAL
+            @RequestParam(value = "kakaoId") String kakaoId,
             Model model
     ) {
         logger.info("회원 등록 요청을 받았습니다. ID: {}", username);
@@ -119,11 +122,13 @@ public class MainController {
 
             Member member = new Member();
             member.setMId(username);
-            member.setMPassword(passwordEncoder.encode(password));
+            member.setMPassword(password);
             member.setName(name);
             member.setEmail(email);
             member.setNickname(nickname);
             member.setGender(gender);
+            member.setProfileImg(profileImage);
+            member.setProviderId(kakaoId);
 
             // 생년월일 변환
             if (birthdate != null && !birthdate.isEmpty()) {
@@ -133,14 +138,25 @@ public class MainController {
                 member.setBirth(birth);
             }
 
+            // ProviderType 설정
+            switch (provider.toUpperCase()) {
+                case "KAKAO":
+                    member.setProviderType(ProviderType.KAKAO);
+                    break;
+                case "GOOGLE":
+                    member.setProviderType(ProviderType.GOOGLE);
+                    break;
+                default:
+                    member.setProviderType(ProviderType.LOCAL);
+            }
+
             member.setAuthority(Authority.USER);
-            member.setProviderType(ProviderType.LOCAL);
 
             Member savedMember = memberService.saveMember(member);
 
             logger.info("회원 등록 완료 : {}", savedMember.getMId());
             model.addAttribute("message", "회원가입이 성공적으로 완료되었습니다.");
-            return "redirect:/login";
+            return "redirect:/api/login";
 
         } catch (Exception e) {
             logger.error("회원 등록 실패", e);
@@ -149,21 +165,38 @@ public class MainController {
         }
     }
 
-    // ID 중복 체크
+    // id 중복 체크
     @PostMapping("/check-id")
     @ResponseBody
-    public Map<String, Boolean> checkUsername(@RequestParam String username) {
+    public Map<String, Boolean> checkUsername(@RequestBody Map<String, String> requestBody) {
+        String username = requestBody.get("username");
+
+        if (username == null || username.trim().isEmpty()) {
+            return Map.of("isDuplicate", false);  // username이 비어있거나 공백일 경우 바로 false 반환
+        }
+
         boolean isDuplicate = memberService.existsBymId(username);
+
         return Map.of("isDuplicate", isDuplicate);
     }
+
+
 
     // 닉네임 중복 체크
     @PostMapping("/check-nickname")
     @ResponseBody
-    public Map<String, Boolean> checkNickname(@RequestParam String nickname) {
+    public Map<String, Boolean> checkNickname(@RequestBody Map<String, String> requestBody) {
+        String nickname = requestBody.get("nickname");
+
+        if (nickname == null || nickname.trim().isEmpty()) {
+            return Map.of("isDuplicate", false);  // 닉네임이 비어있거나 공백일 경우 바로 false 반환
+        }
+
         boolean isDuplicate = memberService.existsByNickname(nickname);
+
         return Map.of("isDuplicate", isDuplicate);
     }
+
 
 
     // 로그인 폼
@@ -195,6 +228,7 @@ public class MainController {
             session.setAttribute("nickname", member.getNickname());
             session.setAttribute("name", member.getName());
             session.setAttribute("authority", member.getAuthority());
+            session.setAttribute("profile_img", member.getProfileImg());
             session.setMaxInactiveInterval(1800);
 
             // 권한 체크 및 리다이렉션

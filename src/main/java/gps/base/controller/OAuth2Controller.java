@@ -14,9 +14,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,9 +44,11 @@ public class OAuth2Controller {
                     result.get("providerId")
             );
 
+
             if (existingMember.isPresent()) {
                 Member member = existingMember.get();
                 setMemberSession(session, member);
+
                 return "redirect:/";
             } else {
                 // RedirectAttributes를 사용하여 파라미터 전달
@@ -66,15 +65,6 @@ public class OAuth2Controller {
         }
     }
 
-    private String buildRegisterParams(Map<String, String> result) throws UnsupportedEncodingException {
-        return String.format(
-                "provider=KAKAO&kakaoId=%s&nickname=%s&email=%s&profileImage=%s",
-                result.get("providerId"),
-                URLEncoder.encode(result.get("nickname"), "UTF-8"),
-                URLEncoder.encode(result.get("email"), "UTF-8"),
-                URLEncoder.encode(result.get("profileImage"), "UTF-8")
-        );
-    }
 
     private void setMemberSession(HttpSession session, Member member) {
         session.setAttribute("loggedInUser", member);
@@ -83,6 +73,7 @@ public class OAuth2Controller {
         session.setAttribute("name", member.getName());
         session.setAttribute("authority", member.getAuthority());
         session.setMaxInactiveInterval(1800);
+        log.info("Session set for user: {}", member.getMId());  // 세션 저장 후 로그 추가
     }
 
     /**
