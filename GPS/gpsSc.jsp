@@ -164,7 +164,8 @@
 		    var nameField = document.getElementById('findIdF');
 		    var emailId = document.getElementById('findIdEmailId');
 		    var emailDomain = document.getElementById('findIdEmailDomain');
-		
+			var plzEmailId = document.getElementById('plzEmailId');
+			
 		    if (nameField.value.trim() === "") {
 		        nameField.classList.add('error');
 		        isValid = false;
@@ -173,12 +174,14 @@
 		    }
 		
 		    if (emailId.value.trim() === "" || emailDomain.value.trim() === "") {
-		        emailId.classList.add('error');
-		        emailDomain.classList.add('error');
+		    	plzEmailId.classList.add('error');
+		    	//emailId.classList.add('error');
+		        //emailDomain.classList.add('error');
 		        isValid = false;
 		    } else {
-		        emailId.classList.remove('error');
-		        emailDomain.classList.remove('error');
+		    	plzEmailId.classList.remove('error');
+		        //emailId.classList.remove('error');
+		        //emailDomain.classList.remove('error');
 		    }
 		
 		    return isValid;
@@ -191,7 +194,8 @@
 		    var idField = document.getElementById('findPwF');
 		    var emailId = document.getElementById('findPwEmailId');
 		    var emailDomain = document.getElementById('findPwEmailDomain');
-		
+		    var plzEmailPw = document.getElementById('plzEmailPw');
+		    
 		    if (idField.value.trim() === "") {
 		        idField.classList.add('error');
 		        isValid = false;
@@ -200,12 +204,14 @@
 		    }
 		
 		    if (emailId.value.trim() === "" || emailDomain.value.trim() === "") {
-		        emailId.classList.add('error');
-		        emailDomain.classList.add('error');
+		    	plzEmailPw.classList.add('error');
+		        //emailId.classList.add('error');
+		        //emailDomain.classList.add('error');
 		        isValid = false;
 		    } else {
-		        emailId.classList.remove('error');
-		        emailDomain.classList.remove('error');
+		    	plzEmailPw.classList.remove('error');
+		        //emailId.classList.remove('error');
+		        //emailDomain.classList.remove('error');
 		    }
 		
 		    return isValid;

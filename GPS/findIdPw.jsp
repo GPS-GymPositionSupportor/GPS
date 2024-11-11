@@ -8,7 +8,7 @@
 	    
 	    <!-- 뒤로가기 버튼 -->
 	    <button id="cancelBtn" style="display: none;" onclick="showForm('findBtn')">
-	    	<img src="image/icon_back.png" alt="뒤로가기">
+	    	<img src="image/icon_back.png" alt="back">
 	    </button>
 	    
 	    <div id="idPw-btn">
@@ -23,7 +23,7 @@
                 <!-- action 파일명 변경 필요 -->
                 <form id="findIdForm2" action="findIdCertification.jsp" method="post"> 
                     <input id="findIdF"type="text" name="name" placeholder="이름을 입력해주세요">
-                    <p id="PlzEmail">이메일 주소를 적어주세요</p>
+                    <p id="plzEmailId">이메일 주소를 적어주세요</p>
                     <div class="email-input">
 			            <input type="text" id="findIdEmailId" name="emailId">
 			            <span>@</span>
@@ -39,7 +39,7 @@
                 <!-- action 파일명 변경 필요 -->
                 <form id="findPwForm2" action="findPwCertification.jsp" method="post"> 
                     <input id="findPwF"type="text" name="name" placeholder="아이디를 입력해주세요">
-                    <p id="PlzEmail">이메일 주소를 적어주세요</p>
+                    <p id="PlzEmailPw">이메일 주소를 적어주세요</p>
                     <div class="email-input">
 			            <input type="text" id="findPwEmailId" name="emailId">
 			            <span>@</span>
@@ -49,6 +49,21 @@
 				</form>
 			</div>
 		</div>
+	</div>
+	
+		<%
+			String emailError = (String) session.getAttribute("emailError");
+		%>
+		
+		<!-- 고정된 오류 메시지 공간 -->
+		<div id="error-message">
+		<%
+			if (emailError != null) {
+				out.print(emailError.replace("<br>", "<br/>"));
+				session.removeAttribute("emailError"); // 메시지 출력 후 세션에서 제거
+				//세션에 등록되지 않은 계정입니다. 메시지 저장 필요
+			}
+		%>
 	</div>
     <button id="toLogin" onclick="location.reload();">로그인 화면</button>
 </div>

@@ -310,17 +310,21 @@ body::-webkit-scrollbar {
     text-align: center;
 }
 
-#findIdForm2 {
+#findIdForm2, #findPwForm2 {
 	display: contents;
 	
 }
 
-#findIdF {
+#findIdF, #findPwF{
 	margin: 5% 0% 15% 0%;
 }
 
-#PlzEmail {
+#plzEmailId, #plzEmailPw {
 	color: #616161;
+}
+
+#plzEmail.error, #plzEmailPw.error {
+	color: #FF3B30 !important;
 }
 
 .email-input {
@@ -343,6 +347,19 @@ body::-webkit-scrollbar {
 
 .email-input span {
     font-size: 14px;
+}
+
+#findCId {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+#sendMail {
+	text-align: center;
+	color: #616161;
+	font-size: 16px;
+	
 }
 
 @media only screen and (max-width: 767px) {
