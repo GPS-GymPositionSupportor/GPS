@@ -202,7 +202,7 @@ body::-webkit-scrollbar {
     justify-content: space-between;
     flex-direction: row;
     align-items: center;
-    margin: -1rem 0% 0% 0%;
+    margin: -1rem -1rem 0% -2rem;
 }
 
 .findIdPw-btn {
@@ -211,6 +211,16 @@ body::-webkit-scrollbar {
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
+}
+
+#toLogin {
+	color: #555 !important;
+    font-size: 12px !important;
+    background-color: #ffffff00 !important;
+    box-shadow: none !important;
+    position: absolute;
+    bottom: 1rem;
+    left: 0rem;
 }
 
 .register-btn {
@@ -222,27 +232,29 @@ body::-webkit-scrollbar {
 }
 
 .kakao-btn {
-	background-color: #FEE500 !important; /* 카카오톡 색상 */
-	color: #000!important;
-	width: 60% !important;
+	background-color: transparent !important;
+    color: inherit !important;
+	width: auto !important;
 	align-self: center;
-	border-radius: 6px !important;
-	box-shadow: 0 1px 0px #00000040 !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+    border-radius: 5px !important;
 }
 
 .google-btn {
-	background-color: #fff !important; /* 구글 색상 */
-	color: #000 !important;
-	width: 60% !important;
+	background-color: transparent !important;
+    color: inherit !important;
+	width: auto !important;
 	align-self: center;
-	border-radius: 2px !important;
-	box-shadow: 0 1px 0px #00000040 !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+    border-radius: 5px !important;
 }
-        
+
 .login-form button:hover {
 	background-color: #0056b3;
 }
-        
+
 .social-buttons {
 	display: flex;
 	justify-content: space-between;
@@ -252,13 +264,12 @@ body::-webkit-scrollbar {
 
 .social-buttons button {
 	flex: 1;
-	margin: 5px;
-	padding: 10px;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
+	display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
 }
-        
+
 .sns {
 	display: grid;
 	text-align: center;
@@ -269,6 +280,69 @@ body::-webkit-scrollbar {
 .divideLine {
 	width: 50%;
 	border: 1px solid #CCCCCC;
+}
+
+#cancelBtn {
+	position: absolute;
+    top: 2rem;
+    left: 1.5rem;
+    width: auto !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+    color: inherit !important;
+    border: none !important;
+    border-radius: 0 !important;
+    cursor: pointer !important;
+    font-size: inherit !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.form-container p {
+    text-align: center;
+}
+
+#findIdForm2 {
+	display: contents;
+	
+}
+
+#findIdF {
+	margin: 5% 0% 15% 0%;
+}
+
+#PlzEmail {
+	color: #616161;
+}
+
+.email-input {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20%;
+    width: 70%;
+}
+
+.email-input input {
+    border: none;
+    outline: none;
+    flex: 1;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    background-color: inherit;
+    border-bottom: 1px solid #616161 !important;
+}
+
+.email-input span {
+    font-size: 14px;
 }
 
 @media only screen and (max-width: 767px) {
@@ -357,7 +431,7 @@ body::-webkit-scrollbar {
 	
 	.login-form button {
 		width: 100%;
-		padding: 10px;
+		padding: 0.8rem;
 		background-color: #402E32;
 		color: white;
 		border: none;
@@ -437,4 +511,37 @@ body::-webkit-scrollbar {
 		position: absolute;
 	    bottom: 3rem;
 	    right: -0.5rem;
+	}
+
+	.form-group {
+		margin-bottom: 1rem;
+	}
+
+	.form-group.hidden {
+		display: none;
+	}
+
+	.form-group label {
+		display: block;
+		margin-bottom: 0.5rem;
+	}
+
+	.form-group input[readonly] {
+		background-color: #f8f9fa;
+		cursor: not-allowed;
+	}
+
+	.social-login-info {
+		background-color: #FEE500;
+		color: #000000;
+		padding: 15px;
+		border-radius: 5px;
+		margin-bottom: 20px;
+		text-align: center;
+		font-weight: bold;
+	}
+
+	.required-field::after {
+		content: " *";
+		color: red;
 	}

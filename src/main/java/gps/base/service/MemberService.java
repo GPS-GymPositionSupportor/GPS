@@ -163,4 +163,16 @@ public class MemberService {
         member.setMDeletedAt(LocalDateTime.now());
         memberRepository.save(member);
     }
+
+    public boolean existsBymId(String mId) {
+        return memberRepository.existsBymId(mId);
+    }
+
+    public boolean existsByName(String name) {
+        return memberRepository.existsByName(name);
+    }
+
+    public boolean existsByNickname(String nickname) {
+        return memberRepository.existsByNickname(nickname);
+    }
 }

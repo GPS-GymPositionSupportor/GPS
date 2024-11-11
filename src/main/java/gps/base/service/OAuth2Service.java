@@ -9,6 +9,7 @@ import gps.base.repository.MemberRepository;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,11 +20,13 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class OAuth2Service {
 
@@ -55,19 +58,43 @@ public class OAuth2Service {
      * @return JWT 토큰이 포함된 Map
      */
     public Map<String, String> kakaoLogin(String code) {
-        // 1. 카카오 액세스 토큰 받기
-        String accessToken = getKakaoAccessToken(code);
+        try {
+            log.info("Starting Kakao login process with code");
 
-        // 2. 액세스 토큰으로 카카오 사용자 정보 가져오기
-        Map<String, Object> userInfo = getKakaoUserInfo(accessToken);
+            // 1. 액세스 토큰 받기
+            String accessToken = getKakaoAccessToken(code);
+            log.info("Access token received successfully");
 
-        // 3. 카카오 사용자 정보로 회원가입/로그인 처리
-        Member member = processMemberInfo(userInfo, "KAKAO");
+            // 2. 사용자 정보 받기
+            Map<String, Object> userInfo = getKakaoUserInfo(accessToken);
+            log.info("User info received: {}", userInfo);
 
-        // 4. JWT 토큰 생성하여 반환
-        String token = jwtTokenProvider.createToken(member.getEmail(), member.getAuthority().toString());
+            // 3. 필요한 정보 추출
+            String providerId = String.valueOf(userInfo.get("id"));
+            Map<String, Object> kakaoAccount = (Map<String, Object>) userInfo.get("kakao_account");
+            Map<String, Object> profile = kakaoAccount != null ?
+                    (Map<String, Object>) kakaoAccount.get("profile") : null;
 
-        return Map.of("token", token);
+            if (profile == null) {
+                throw new RuntimeException("Failed to get profile information from Kakao");
+            }
+
+            // 4. 결과 매핑
+            Map<String, String> result = new HashMap<>();
+            result.put("providerId", providerId);
+            result.put("nickname", (String) profile.get("nickname"));
+            result.put("email", kakaoAccount.get("email") != null ?
+                    (String) kakaoAccount.get("email") :
+                    "kakao_" + providerId + "@placeholder.com");
+            result.put("profileImage", (String) profile.get("profile_image_url"));
+
+            log.info("Kakao login process completed successfully");
+            return result;
+
+        } catch (Exception e) {
+            log.error("Error in kakaoLogin", e);
+            throw new RuntimeException("Failed to process Kakao login: " + e.getMessage(), e);
+        }
     }
 
 

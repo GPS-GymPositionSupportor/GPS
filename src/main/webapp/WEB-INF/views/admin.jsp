@@ -355,7 +355,7 @@
 <div class="sidebar">
     <div class="logo">
         <a href="redirect:/">
-            <img src="../img/logo.png" alt="GPS Logo">
+            <img src="../image/logo.png" alt="GPS Logo">
         </a>
     </div>
 
@@ -366,7 +366,7 @@
                     <img src="${sessionScope.profileImage}" alt="Admin Profile" id="adminProfileImage">
                 </c:when>
                 <c:otherwise>
-                    <img src="../img/logo.png" alt="Admin Profile" id="adminProfileImage">
+                    <img src="../image/logo.png" alt="Admin Profile" id="adminProfileImage">
                 </c:otherwise>
             </c:choose>
         </div>

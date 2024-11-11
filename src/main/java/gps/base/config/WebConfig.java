@@ -24,8 +24,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler(uploadPath)  // 가상 URL 패턴
                 .addResourceLocations("file:///" + realPath + "/");
 
-        registry.addResourceHandler("/img/**")
-                .addResourceLocations("/WEB-INF/img/");
+        registry.addResourceHandler("/image/**")
+                .addResourceLocations("/WEB-INF/image/");
     }
 
 }

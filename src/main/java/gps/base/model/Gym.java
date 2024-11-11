@@ -30,7 +30,7 @@ public class Gym {
     @Column(name = "category", nullable = false)
     private GymCategory category;
 
-    @Column(name = "homepage", nullable = true)
+    @Column(name = "homepage", nullable = true, length = 1000)
     private String homepage;
 
     @Column(name = "phone_number", nullable = true)
