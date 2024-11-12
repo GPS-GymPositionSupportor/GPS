@@ -22,7 +22,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -117,10 +120,15 @@ public class ReviewController {
     }
 
 
-    // 모든 리뷰 가져오기
     @GetMapping("/all")
     public ResponseEntity<List<ReviewDTO>> getAllReviews() {
         List<ReviewDTO> reviews = reviewService.getAllReviewsWithUserName();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        reviews.forEach(review ->
+                review.setFormattedDate(
+                        review.getAddedAt() != null ? review.getAddedAt().format(formatter) : ""
+                )
+        );
         return ResponseEntity.ok(reviews);
     }
 

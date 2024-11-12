@@ -41,6 +41,8 @@ public class ReviewDTO {
     @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)    // 항상 직렬화
     private List<String> reviewImages = new ArrayList<>();  // 초기화
 
+    private String formattedDate;
+
     public ReviewDTO(Long userId, Long gymId, String userName, String comment) {
         this.userId = userId;
         this.gymId = gymId;
@@ -66,5 +68,9 @@ public class ReviewDTO {
             reviewImages = new ArrayList<>();
         }
         return reviewImages;
+    }
+
+    public void setFormattedDate(String format) {
+
     }
 }

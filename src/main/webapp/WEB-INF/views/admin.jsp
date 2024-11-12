@@ -1,4 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +11,7 @@
     <style>
         <%@include file="adminStyle.jsp"%>
     </style>
+
 </head>
 <body>
 
@@ -41,44 +45,28 @@
     <ul class="nav-menu">
         <li class="nav-item">
             <a href="#" class="nav-link">
-                <i class="fas fa-chart-line"></i> 통계
+                <i class="fas fa-chart-line"></i>통계
             </a>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
-                <i class="fas fa-store"></i> 시설 관리
+                <i class="fas fa-store"></i>시설 관리
             </a>
-            <ul class="sub-menu">
-                <li><a href="#">헬스장 전체 리스트</a></li>
-                <li><a href="#">수정 및 삭제</a></li>
-            </ul>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
-                <i class="fas fa-users"></i> 회원 관리
+                <i class="fas fa-users"></i>회원 관리
             </a>
-            <ul class="sub-menu">
-                <li><a href="#">회원 전체 리스트</a></li>
-                <li><a href="#">수정 및 삭제</a></li>
-            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link", onclick="loadReviews()">
+                <i class="fas fa-edit"></i>리뷰 관리
+            </a>
         </li>
         <li class="nav-item">
             <a href="#" class="nav-link">
-                <i class="fas fa-edit"></i> 리뷰 관리
+                <i class="fas fa-comment"></i>댓글 관리
             </a>
-            <ul class="sub-menu">
-                <li><a href="#">전체 리뷰</a></li>
-                <li><a href="#">삭제</a></li>
-            </ul>
-        </li>
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-comment"></i> 댓글 관리
-            </a>
-            <ul class="sub-menu">
-                <li><a href="#">전체 댓글</a></li>
-                <li><a href="#">삭제</a></li>
-            </ul>
         </li>
     </ul>
     <button class="logout-btn" onclick="logout()">
@@ -127,6 +115,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
 
 <script>
+
     document.addEventListener('DOMContentLoaded', function() {
         const navItems = document.querySelectorAll('.nav-item');
 
@@ -221,6 +210,59 @@
             alert('로그아웃 처리 중 오류가 발생했습니다.');
         }
     }
+
+    async function loadReviews() {
+        const mainContent = document.querySelector('.main-content');
+        // 메인 컨텐트 내용 변경
+        mainContent.innerHTML = `
+        <div class="review-header">
+            <h2>리뷰 관리</h2>
+            <div class="buttons">
+                <button class="btn btn-primary">변경 저장</button>
+                <button class="btn btn-secondary">나가기</button>
+            </div>
+        </div>
+        <div class="review-list"></div>
+        <div class="pagination">
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button>4</button>
+            <button>5</button>
+        </div>
+    `;
+
+        try {
+            const response = await fetch('/api/reviews/all');
+            const reviews = await response.json();
+            displayReviews(reviews);
+        } catch (error) {
+            console.error('리뷰 로드 실패:', error);
+        }
+    }
+
+    function displayReviews(reviews) {
+        const reviewList = document.querySelector('.review-list');
+        reviewList.innerHTML = '';
+
+        reviews.forEach(review => {
+            const reviewElement = document.createElement('div');
+            reviewElement.className = 'review-item';
+            reviewElement.innerHTML = `
+            <input type="checkbox" class="review-select">
+            <img src="${review.image || '../image/logo.png'}" class="review-img">
+            <div class="review-text">${review.r_comment}</div>
+            <div class="review-info">
+                <span class="review-writer">${review.writer}</span>
+                <span class="review-date">${review.addedAt}</span>
+            </div>
+        `;
+            reviewList.appendChild(reviewElement);
+        });
+    }
+
+
+
 
 
 </script>

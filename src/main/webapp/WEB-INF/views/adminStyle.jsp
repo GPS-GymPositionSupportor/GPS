@@ -36,29 +36,17 @@ height: auto;
 
 .nav-menu .nav-item {
 position: relative;
-cursor: pointer;
 }
 
 .nav-item > a {
 display: flex;
 align-items: center;
-justify-content: space-between;
+justify-content: space-evenly;
 padding: 12px 20px;
 color: #fff;
 text-decoration: none;
 }
 
-/* 삼각형 아이콘 */
-.nav-item > a::after {
-content: '▼';
-font-size: 10px;
-transition: transform 0.3s ease;
-}
-
-/* 펼쳐진 상태의 삼각형 회전 */
-.nav-item.active > a::after {
-transform: rotate(180deg);
-}
 
 
 .nav-item > a i {
@@ -140,11 +128,12 @@ margin-bottom: 10px;
 
 /* 메인 컨텐츠 영역 */
 .main-content {
+position: relative;
 flex: 1;
 padding: 20px;
-background-color: #f0f0f0;
-min-height: 100vh;
 margin-left: 0;
+background-color: #f4f4f4;
+min-height: 100vh;
 }
 
 /* 헤더 영역 */
@@ -344,6 +333,14 @@ transition: transform 0.2s ease;
 transform: rotate(180deg);
 }
 
+ul {
+list-style: none;
+}
+
+ul::marker {
+display: none; /* ::marker 가상 요소를 표시하지 않음 */
+}
+
 /* 로그아웃 버튼 */
 .logout-btn {
 position: absolute;
@@ -359,6 +356,7 @@ align-items: center;
 cursor: pointer;
 border-radius: 6px;
 transition: background-color 0.3s;
+justify-content: center;
 }
 
 .logout-btn:hover {
@@ -368,6 +366,9 @@ background-color: #3D3D3D;
 .logout-btn i {
 margin-right: 10px;
 }
+
+
+
 
 /* 차트 컨테이너 스타일 */
 .chart-container {
@@ -394,4 +395,169 @@ color: #333;
 .chart-period {
 color: #666;
 font-size: 14px;
+}
+
+
+
+
+
+/* 리뷰 관리를 위해 추가된 새로운 스타일 */
+/* 리뷰 그리드 레이아웃 */
+.review-grid {
+display: flex;
+gap: 20px;
+margin-bottom: 20px;
+}
+
+/* 리뷰 관리 스타일 */
+.review-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 20px;
+background: #fff;
+margin-bottom: 20px;
+}
+
+/* 리뷰 정보 (작성자, 날짜) */
+.review-info {
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+min-width: 150px;
+}
+
+.review-column {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+
+/* 리뷰 리스트 컨테이너 */
+.review-list {
+background: #fff;
+padding: 20px;
+padding-bottom: 60px; /* pagination을 위한 여백 */
+}
+
+/* 개별 리뷰 아이템 */
+.review-item {
+display: flex;
+align-items: center;
+padding: 15px;
+border-bottom: 1px solid #eee;
+}
+
+.review-item:hover {
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* 체크박스 */
+.review-select {
+margin-right: 15px;
+}
+
+/* 리뷰 이미지 */
+.review-img {
+width: 60px;
+height: 60px;
+object-fit: cover;
+margin-right: 15px;
+}
+
+.no-image {
+width: 60px;
+height: 60px;
+background: #f0f0f0;
+display: flex;
+align-items: center;
+justify-content: center;
+margin: 0 10px;
+border-radius: 4px;
+color: #999;
+font-size: 12px;
+}
+
+/* 리뷰 내용 스타일 */
+.review-content {
+flex: 1;
+overflow: hidden;
+}
+
+/* 리뷰 텍스트 */
+.review-text {
+flex: 1;
+margin-right: 15px;
+}
+
+.review-writer {
+font-weight: bold;
+margin-bottom: 5px;
+}
+
+.review-date {
+color: #666;
+font-size: 0.9em;
+}
+
+
+/* pagination 스타일 수정 */
+.pagination {
+display: flex;
+justify-content: center;
+gap: 10px;
+position: absolute;  /* 절대 위치 지정 */
+bottom: 20px;       /* 하단에서 20px 위 */
+left: 50%;         /* 왼쪽에서 50% */
+transform: translateX(-50%);  /* 중앙 정렬을 위해 왼쪽으로 자신의 50% 만큼 이동 */
+width: fit-content;  /* 내용물 크기만큼만 너비 설정 */
+padding: 10px 0;
+align-items: flex-end;
+}
+
+.pagination button {
+padding: 5px 15px;
+border: 1px solid #ddd;
+background: #fff;
+cursor: pointer;
+}
+
+.pagination button.active {
+background: #007bff;
+color: white;
+border-color: #007bff;
+}
+
+.pagination button:hover {
+background: #f5f5f5;
+}
+
+.pagination button:hover:not(:disabled) {
+background: #f0f0f0;
+}
+
+.pagination button:disabled {
+background: #f0f0f0;
+cursor: not-allowed;
+opacity: 0.6;
+}
+
+/* 버튼 스타일 */
+.btn-primary {
+background: #dc3545;
+color: white;
+border: none;
+padding: 8px 16px;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.btn-secondary {
+background: #6c757d;
+color: white;
+border: none;
+padding: 8px 16px;
+border-radius: 4px;
+cursor: pointer;
 }
