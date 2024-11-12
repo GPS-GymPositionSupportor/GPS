@@ -9,16 +9,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @Controller
-@Slf4j
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class OAuth2Controller {
@@ -60,7 +63,6 @@ public class OAuth2Controller {
                 return "redirect:/api/register";  // 경로 수정
             }
         } catch (Exception e) {
-            log.error("Kakao login error", e);
             return "redirect:/?error=kakao_login_failed";
         }
     }
@@ -73,7 +75,6 @@ public class OAuth2Controller {
         session.setAttribute("name", member.getName());
         session.setAttribute("authority", member.getAuthority());
         session.setMaxInactiveInterval(1800);
-        log.info("Session set for user: {}", member.getMId());  // 세션 저장 후 로그 추가
     }
 
     /**
@@ -82,14 +83,27 @@ public class OAuth2Controller {
      * @return JWT 토큰을 포함한 응답
      */
     @GetMapping("/google")
-    public String googleCallback(@RequestParam String code, HttpSession session, RedirectAttributes attributes) {
+    public String googleCallback(@RequestParam(required = false) String code, HttpSession session, RedirectAttributes attributes) {
         try {
             Map<String, String> result = oAuth2Service.googleLogin(code);
+            logger.info("Received code: {}", code);
+
+
+
+
+            String providerId = result.get("providerId");
+            String nickname = result.get("name");
+            String email = result.get("email");
+            String profileImage = result.get("picture");
 
             Optional<Member> existingMember = memberRepository.findByProviderTypeAndProviderId(
-                    ProviderType.GOOGLE,
-                    result.get("providerId")
-            );
+                    ProviderType.GOOGLE, providerId);
+
+            if (existingMember.isPresent()) {
+                logger.info("Existing member found: {}", existingMember.get());
+            } else {
+                logger.info("No existing member found for providerId: {}", providerId);
+            }
 
             if (existingMember.isPresent()) {
                 Member member = existingMember.get();
@@ -98,15 +112,14 @@ public class OAuth2Controller {
             } else {
                 // RedirectAttributes를 사용하여 파라미터 전달
                 attributes.addAttribute("provider", "GOOGLE");
-                attributes.addAttribute("googleId", result.get("providerId"));
-                attributes.addAttribute("name", result.get("name"));
-                attributes.addAttribute("email", result.get("email"));
-                attributes.addAttribute("profileImage", result.get("profileImage"));
+                attributes.addAttribute("providerId", providerId);
+                attributes.addAttribute("nickname", nickname); // Google의 name을 nickname으로 사용
+                attributes.addAttribute("email", email);
+                attributes.addAttribute("profileImage", profileImage); // Google의 picture를 profileImage로 사용
 
                 return "redirect:/api/register";
             }
         } catch (Exception e) {
-            log.error("Google login error", e);
             return "redirect:/?error=google_login_failed";
         }
     }

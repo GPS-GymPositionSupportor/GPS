@@ -1,6 +1,7 @@
 package gps.base.config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,8 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.accept.ContentNegotiationStrategy;
-import org.springframework.web.accept.HeaderContentNegotiationStrategy;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -19,6 +19,15 @@ import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
+
+
+    @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+            // 회원 가입 여부 확인 후 리다이렉션 설정
+            response.sendRedirect("/"); // 메인 페이지로 리다이렉션 (필요 시 조건부로 수정 가능)
+        };
+    }
 
 
     @Bean
@@ -52,7 +61,7 @@ public class SecurityConfig {
                         .authorizationEndpoint(authorization -> authorization
                                 .baseUri("/oauth2/authorization"))
                         .redirectionEndpoint(redirection -> redirection
-                                .baseUri("/login/oauth2/code/*"))
+                                .baseUri("/login/oauth2/code/**"))
                         .defaultSuccessUrl("/", true)
                 )
                 .cors(cors -> cors

@@ -68,10 +68,10 @@ public class MainController {
             // 카카오 파라미터
             @RequestParam(required = false) String kakaoId,
             @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) String email,
             @RequestParam(required = false) String profileImage,
             // 구글 파라미터 추가
             @RequestParam(required = false) String googleId,
+            @RequestParam(required = false) String email,
             @RequestParam(required = false) String name,
             Model model
     ) {
@@ -111,6 +111,7 @@ public class MainController {
             @RequestParam(value = "privacy", required = true) boolean privacy,
             @RequestParam(value = "provider", defaultValue = "LOCAL") String provider, // 기본 값은 LOCAL
             @RequestParam(value = "kakaoId") String kakaoId,
+            @RequestParam(value = "googleId", required = false) String googleId,
             Model model
     ) {
         logger.info("회원 등록 요청을 받았습니다. ID: {}", username);
@@ -138,16 +139,25 @@ public class MainController {
                 member.setBirth(birth);
             }
 
-            // ProviderType 설정
+            // 제공자 타입에 따른 providerId 설정
             switch (provider.toUpperCase()) {
                 case "KAKAO":
+                    if (kakaoId == null || kakaoId.isEmpty()) {
+                        throw new RuntimeException("Kakao ID is missing");
+                    }
                     member.setProviderType(ProviderType.KAKAO);
+                    member.setProviderId(kakaoId);
                     break;
                 case "GOOGLE":
+                    if (googleId == null || googleId.isEmpty()) {
+                        throw new RuntimeException("Google ID is missing");
+                    }
                     member.setProviderType(ProviderType.GOOGLE);
+                    member.setProviderId(googleId);
                     break;
                 default:
                     member.setProviderType(ProviderType.LOCAL);
+                    break;
             }
 
             member.setAuthority(Authority.USER);
