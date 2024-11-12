@@ -164,31 +164,57 @@
         }
 
         function googleLogin() {
-            window.location.href = '/oauth2/authorization/google';
+            console.log('Initiating Google login');
+
+            fetch('/auth/google/url')
+                .then(response => {
+                    console.log('URL response:', response);
+                    return response.text();
+                })
+                .then(url => {
+                    console.log('Redirecting to:', url);
+                    window.location.href = url;
+                })
+                .catch(error => {
+                    console.error('Error getting Google auth URL:', error);
+                    alert('구글 로그인 초기화 중 오류가 발생했습니다.');
+                });
         }
 
         // 페이지 로드시 초기화 및 소셜 로그인 콜백 처리
         document.addEventListener('DOMContentLoaded', function() {
+
+            console.log("DOM Content Loaded");
+
             const currentPath = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
+            console.log('Current Path:', currentPath); // 현재 경로 확인
+            console.log('Code:', code);               // code 파라미터 확인
+
+
             // 카카오 로그인 콜백 처리
             if (currentPath === '/auth/kakao' && code) {
+                console.log('Processing Kakao callback');
                 handleKakaoCallback(code);
             }
             // 구글 로그인 콜백 처리
             else if (currentPath === '/auth/google' && code) {
+                console.log('Processing Google callback');
                 handleGoogleCallback(code);
             }
             // 회원가입 페이지에서 소셜 로그인 정보 처리
             else if (currentPath === '/register') {
+                console.log('Processing registration page');
                 handleSocialRegistration();
             }
         });
 
         // 카카오 로그인 콜백 처리
         function handleKakaoCallback(code) {
+            console.log('Handling Kakao callback with code:', code);
+
             fetch(`/auth/kakao?code=${code}`)
                 .then(response => response.json())
                 .then(data => {
@@ -215,6 +241,8 @@
 
         // 구글 로그인 콜백 처리
         function handleGoogleCallback(code) {
+            console.log('Handling Google callback with code:', code);
+
             fetch(`/auth/google?code=${code}`)
                 .then(response => response.json())
                 .then(data => {
@@ -224,13 +252,13 @@
                         window.location.href = data.redirectUrl;
                     } else if (data.status === 'registration_required') {
                         const params = new URLSearchParams({
-                            googleId: data.googleId,
+                            googleId: data.providerId,
                             name: data.name,
                             email: data.email,
                             profileImage: data.profileImage,
                             provider: 'GOOGLE'
                         });
-                        window.location.href = `/register?${params.toString()}`;
+                        window.location.href = `/api/register?${params.toString()}`;
                     }
                 })
                 .catch(error => {

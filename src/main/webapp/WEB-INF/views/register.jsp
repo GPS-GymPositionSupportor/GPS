@@ -26,18 +26,14 @@
 			<input type="hidden" name="provider" value="${provider != null ? provider : 'LOCAL'}">
 			<input type="hidden" name="profileImage" value="${profileImage}">
 
-			<!-- 제공자별 hidden 필드 -->
-			<c:if test="${provider == 'KAKAO'}">
-				<input type="hidden" name="kakaoId" value="${kakaoId}">
-			</c:if>
-			<c:if test="${provider == 'GOOGLE'}">
-				<input type="hidden" name="googleId" value="${googleId}">
-			</c:if>
+			<input type="hidden" name="kakaoId" value="${kakaoId}">
+			<input type="hidden" name="googleId" value="${googleId}">
 
-
+			<script>
+				console.log("googleId = {}", ${googleId});
+			</script>
 
 			<!-- ID/PW 필드 (소셜 로그인시 숨김) -->
-			<c:if test="${provider == 'LOCAL'}">
 				<div class="form-group">
 					<label for="username">1. 아이디를 입력해주세요</label>
 					<input type="text" id="username" name="username" placeholder="예) wowns3082" required>
@@ -48,7 +44,6 @@
 					<input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 혼합 8~16자리" required>
 					<input type="password" id="confirm-password" name="confirm-password" placeholder="비밀번호 재입력" required>
 				</div>
-			</c:if>
 
 	            <div class="form-group">
 	                <label for="name">3. 성명을 입력해주세요</label>

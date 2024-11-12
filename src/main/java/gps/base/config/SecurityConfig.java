@@ -50,7 +50,8 @@ public class SecurityConfig {
                         // OAuth2 관련 엔드포인트
                         .requestMatchers(
                                 "/oauth2/**",
-                                "/login/oauth2/code/**"
+                                "/login/oauth2/code/**",
+                                "/auth/google"
                         ).permitAll()
                         // 나머지 모든 요청 허용 (SPA이므로 프론트엔드에서 처리)
                         .anyRequest().permitAll()

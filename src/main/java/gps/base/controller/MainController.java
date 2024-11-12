@@ -41,13 +41,6 @@ public class MainController {
     @Autowired
     private GymService gymService;
 
-    @Autowired
-    private ReviewService reviewService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
@@ -100,18 +93,19 @@ public class MainController {
     // 회원가입 데이터 POST
     @PostMapping("/register")
     public String registerMember(
-            @RequestParam("username") String username,
-            @RequestParam("password") String password,
+            @RequestParam(value = "username", required = false) String username,
+            @RequestParam(value = "password", required = false) String password,
             @RequestParam("name") String name,
             @RequestParam("email") String email,
             @RequestParam("nickname") String nickname,
             @RequestParam("birthdate") String birthdate,
             @RequestParam("gender") String gender,
-            @RequestParam("profileImage") String profileImage,
-            @RequestParam(value = "privacy", required = true) boolean privacy,
+            @RequestParam(value = "profileImage", required = false) String profileImage,
+            @RequestParam(value = "privacy", required = false) boolean privacy,
             @RequestParam(value = "provider", defaultValue = "LOCAL") String provider, // 기본 값은 LOCAL
-            @RequestParam(value = "kakaoId") String kakaoId,
+            @RequestParam(value = "kakaoId", required = false) String kakaoId,
             @RequestParam(value = "googleId", required = false) String googleId,
+            @RequestParam(value = "providerId", required = false) String providerId,
             Model model
     ) {
         logger.info("회원 등록 요청을 받았습니다. ID: {}", username);
@@ -129,7 +123,16 @@ public class MainController {
             member.setNickname(nickname);
             member.setGender(gender);
             member.setProfileImg(profileImage);
-            member.setProviderId(kakaoId);
+
+            logger.info("=== Register Request Parameters ===");
+            logger.info("Provider: {}", provider);
+            logger.info("Username: {}", username);
+            logger.info("Profile Image: {}", profileImage);
+            logger.info("KakaoId: {}", kakaoId);
+            logger.info("GoogleId: {}", googleId);
+            logger.info("Name: {}", name);
+            logger.info("Email: {}", email);
+            logger.info("Nickname: {}", nickname);
 
             // 생년월일 변환
             if (birthdate != null && !birthdate.isEmpty()) {
@@ -142,18 +145,13 @@ public class MainController {
             // 제공자 타입에 따른 providerId 설정
             switch (provider.toUpperCase()) {
                 case "KAKAO":
-                    if (kakaoId == null || kakaoId.isEmpty()) {
-                        throw new RuntimeException("Kakao ID is missing");
-                    }
                     member.setProviderType(ProviderType.KAKAO);
                     member.setProviderId(kakaoId);
                     break;
                 case "GOOGLE":
-                    if (googleId == null || googleId.isEmpty()) {
-                        throw new RuntimeException("Google ID is missing");
-                    }
                     member.setProviderType(ProviderType.GOOGLE);
                     member.setProviderId(googleId);
+                    logger.info("member.setProviderId(googleId) : {}", providerId);
                     break;
                 default:
                     member.setProviderType(ProviderType.LOCAL);

@@ -17,10 +17,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // mId로 Member를 찾는 Method
     Optional<Member> findBymId(String mId);
 
-    Optional<Member> findByEmail(String email);
-
-    Optional<Member> findByProviderIdAndProviderType(ProviderType providerType, String providerId);
-
     // exists 관련 메소드 추가
     @Query("SELECT CASE WHEN COUNT(m) > 0 THEN true ELSE false END FROM Member m WHERE LOWER(m.mId) = LOWER(:username)")
     boolean existsBymId(@Param("username") String username);
@@ -28,5 +24,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByName(String name);
     boolean existsByNickname(String nickname);
 
-    Optional<Member> findByProviderTypeAndProviderId(ProviderType kakao, String providerId);
+    Optional<Member> findByProviderTypeAndProviderId(ProviderType providerType, String providerId);
 }
