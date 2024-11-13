@@ -4,13 +4,22 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtTokenProvider {
+
+    private String tokenSecret;
 
     @Value("${JWT_SECRET}")
     private String jwtSecret;
@@ -18,6 +27,12 @@ public class JwtTokenProvider {
     // 토큰 유효 시간 설정
     @Value("${JWT_TOKEN_VALIDATION_INSECONDS}")
     private long tokenValidityInSeconds;
+
+
+    public JwtTokenProvider(String tokenSecret) {
+        this.tokenSecret = tokenSecret;
+    }
+
 
     /**
      * JWT 토큰 생성 메서드
@@ -66,6 +81,20 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public Authentication getAuthentication(String token) {
+        Claims claims = Jwts.parser()
+                .setSigningKey(tokenSecret)
+                .parseClaimsJws(token)
+                .getBody();
+
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get("auth", String[].class))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        return new UsernamePasswordAuthenticationToken(claims.getSubject(), null, authorities);
     }
 
 
