@@ -155,36 +155,23 @@
             }
 
             const userData = await userResponse.json();
-            const userId = userData.userId;
 
-            // 2. 프로필 정보 가져오기
-            const profileResponse = await fetch(`/api/member/${userId}/myProfile`, {
-                credentials: 'include'
+            // 프로필 정보 업데이트
+            updateAdminProfile({
+                name: userData.name,
+                userId: userData.userID
             });
 
-            if (!profileResponse.ok) {
-                throw new Error('프로필 정보를 불러올 수 없습니다.');
-            }
-
-            const profileData = await profileResponse.json();
-            updateAdminProfile(profileData);
-
         } catch (error) {
-            console.error('Error:', error);
+            console.error('프로필 로드 실패 : ', error);
         }
     });
 
     function updateAdminProfile(data) {
-        // 프로필 이미지 업데이트
-        const profileImage = document.getElementById('adminProfileImage');
-        if (data.profileImage) {
-            profileImage.src = data.profileImage;
-        }
-
         // 닉네임 업데이트
         const profileName = document.getElementById('adminNickname');
-        if (data.nickname) {
-            profileName.textContent = data.nickname;
+        if (profileName && data.name) {
+            profileName.textContent = data.name;
         }
     }
 
@@ -211,61 +198,74 @@
         }
     }
 
+    let allReviews = [];  // 전체 리뷰 데이터 저장
+    let currentPage = 0;  // 현재 페이지
+    const itemsPerPage = 24;  // 페이지당 아이템 수
+
+    // 리뷰 관리 링크 클릭 시 호출되는 함수
     async function loadReviews() {
         const mainContent = document.querySelector('.main-content');
-        // 메인 컨텐트 내용 변경
+        if (!mainContent) {
+            console.error('main-content element not found');
+            return;
+        }
+
         mainContent.innerHTML = `
-        <div class="review-header">
+        <div class="header">
             <h2>리뷰 관리</h2>
             <div class="buttons">
-                <button class="btn btn-primary">변경 저장</button>
+                <button class="btn btn-primary">선택 삭제</button>
                 <button class="btn btn-secondary">나가기</button>
             </div>
         </div>
         <div class="review-list"></div>
-        <div class="pagination">
-            <button>1</button>
-            <button>2</button>
-            <button>3</button>
-            <button>4</button>
-            <button>5</button>
-        </div>
+        <div class="pagination"></div>
     `;
 
         try {
             const response = await fetch('/api/reviews/all');
             const reviews = await response.json();
+            console.log("API Response:", reviews);  // API 응답 확인
             displayReviews(reviews);
         } catch (error) {
             console.error('리뷰 로드 실패:', error);
         }
     }
 
+
     function displayReviews(reviews) {
+        console.log("All reviews:", reviews);  // 전체 데이터 확인
+
         const reviewList = document.querySelector('.review-list');
+        if (!reviewList) {
+            console.error('review-list element not found');
+            return;
+        }
+
         reviewList.innerHTML = '';
 
-        // 왼쪽 열 div 생성
         const leftColumn = document.createElement('div');
         leftColumn.className = 'review-column left';
-        // 오른쪽 열 div 생성
         const rightColumn = document.createElement('div');
         rightColumn.className = 'review-column right';
 
-        reviews.forEach((review, index) => {
+        const startIndex = currentPage * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentReviews = reviews.slice(startIndex, endIndex);
+
+        currentReviews.forEach((review, index) => {
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
             reviewElement.innerHTML = `
-           <input type="checkbox" class="review-select">
-           <img src="${review.image || '../image/logo.png'}" class="review-img">
-           <div class="review-text">${review.r_comment}</div>
-           <div class="review-info">
-               <span class="review-writer">${review.writer}</span>
-               <span class="review-date">${review.formattedDate}</span>
-           </div>
-       `;
+            <input type="checkbox" class="review-select">
+            <img src="/image/logo.png" class="review-img">
+            <div class="review-text">${review.comment ? review.comment.substring(0, 30) + (review.comment.length > 30 ? '...' : '') : ''}</div>
+            <div class="review-info">
+                <span class="review-writer">${review.userName || ''}</span>
+                <span class="review-date">${review.addedAt ? review.addedAt.split('T')[0] : ''}</span>
+            </div>
+        `;
 
-            // 12개씩 나누어 왼쪽/오른쪽 열에 추가
             if (index < 12) {
                 leftColumn.appendChild(reviewElement);
             } else {
@@ -273,9 +273,57 @@
             }
         });
 
-        // 생성된 열들을 reviewList에 추가
         reviewList.appendChild(leftColumn);
         reviewList.appendChild(rightColumn);
+
+        updatePagination(reviews.length);
+    }
+
+    function updatePagination(totalItems) {
+        const pagination = document.querySelector('.pagination');
+        if (!pagination) {
+            console.error('pagination element not found');
+            return;
+        }
+
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        pagination.innerHTML = '';
+
+        // 이전 버튼
+        const prevButton = document.createElement('button');
+        prevButton.innerHTML = '<';
+        prevButton.disabled = currentPage === 0;
+        prevButton.onclick = () => {
+            if (currentPage > 0) {
+                currentPage--;
+                displayReviews(allReviews);
+            }
+        };
+        pagination.appendChild(prevButton);
+
+        // 페이지 번호
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i + 1;
+            pageButton.className = i === currentPage ? 'active' : '';
+            pageButton.onclick = () => {
+                currentPage = i;
+                displayReviews(allReviews);
+            };
+            pagination.appendChild(pageButton);
+        }
+
+        // 다음 버튼
+        const nextButton = document.createElement('button');
+        nextButton.innerHTML = '>';
+        nextButton.disabled = currentPage === totalPages - 1;
+        nextButton.onclick = () => {
+            if (currentPage < totalPages - 1) {
+                currentPage++;
+                displayReviews(allReviews);
+            }
+        };
+        pagination.appendChild(nextButton);
     }
 
 

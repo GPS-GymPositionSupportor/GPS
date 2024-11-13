@@ -414,9 +414,9 @@ margin-bottom: 20px;
 /* 리뷰 정보 (작성자, 날짜) */
 .review-info {
 display: flex;
-flex-direction: column;
-align-items: flex-end;
-min-width: 150px;
+gap: 15px;
+color: #666;
+font-size: 13px;
 }
 
 .review-column {
@@ -451,9 +451,9 @@ grid-column: 2;  /* 두 번째 열 */
 .review-item {
 display: flex;
 align-items: center;
-padding: 10px;
+padding: 15px;
 border-bottom: 1px solid #eee;
-background: #fff;
+gap: 15px;
 }
 
 .review-item:hover {
@@ -470,7 +470,7 @@ margin-right: 15px;
 width: 60px;
 height: 60px;
 object-fit: cover;
-margin: 0 10px;
+border-radius: 4px;
 }
 
 .no-image {
@@ -492,20 +492,18 @@ flex: 1;
 overflow: hidden;
 }
 
-/* 리뷰 텍스트 */
 .review-text {
-flex: 1;
-margin-right: 15px;
+margin-bottom: 5px;
+font-size: 14px;
 }
 
 .review-writer {
-font-weight: bold;
+font-weight: 500;
 margin-bottom: 5px;
 }
 
 .review-date {
-color: #666;
-font-size: 0.9em;
+color: #888;
 }
 
 

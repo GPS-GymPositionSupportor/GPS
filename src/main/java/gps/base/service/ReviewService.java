@@ -220,6 +220,11 @@ public class ReviewService {
         List<ReviewDTO> reviews = reviewRepository.findAllReviewsWithUserName();
 
         for(ReviewDTO review : reviews) {
+            // Member 정보 가져오기
+            Member member = memberRepository.findById(review.getUserId())
+                    .orElseThrow(() -> new RuntimeException("Member not found"));
+            review.setUserName(member.getName());  // Member의 name을 DTO에 설정
+
             List<Image> images = imageRepository.findByReviewId(review.getRId());
             if(!images.isEmpty()) {
                 // 단일 이미지 설정 (하위 호환성)
