@@ -245,20 +245,37 @@
         const reviewList = document.querySelector('.review-list');
         reviewList.innerHTML = '';
 
-        reviews.forEach(review => {
+        // 왼쪽 열 div 생성
+        const leftColumn = document.createElement('div');
+        leftColumn.className = 'review-column left';
+        // 오른쪽 열 div 생성
+        const rightColumn = document.createElement('div');
+        rightColumn.className = 'review-column right';
+
+        reviews.forEach((review, index) => {
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
             reviewElement.innerHTML = `
-            <input type="checkbox" class="review-select">
-            <img src="${review.image || '../image/logo.png'}" class="review-img">
-            <div class="review-text">${review.r_comment}</div>
-            <div class="review-info">
-                <span class="review-writer">${review.writer}</span>
-                <span class="review-date">${review.addedAt}</span>
-            </div>
-        `;
-            reviewList.appendChild(reviewElement);
+           <input type="checkbox" class="review-select">
+           <img src="${review.image || '../image/logo.png'}" class="review-img">
+           <div class="review-text">${review.r_comment}</div>
+           <div class="review-info">
+               <span class="review-writer">${review.writer}</span>
+               <span class="review-date">${review.formattedDate}</span>
+           </div>
+       `;
+
+            // 12개씩 나누어 왼쪽/오른쪽 열에 추가
+            if (index < 12) {
+                leftColumn.appendChild(reviewElement);
+            } else {
+                rightColumn.appendChild(reviewElement);
+            }
         });
+
+        // 생성된 열들을 reviewList에 추가
+        reviewList.appendChild(leftColumn);
+        reviewList.appendChild(rightColumn);
     }
 
 

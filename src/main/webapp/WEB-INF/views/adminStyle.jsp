@@ -209,14 +209,6 @@ padding-bottom: 10px;
 border-bottom: 1px solid #eee;
 }
 
-.pagination {
-position: absolute;
-top: 20px;
-right: 20px;
-font-size: 12px;
-color: #888;
-}
-
 /* 반응형 디자인 */
 @media (max-width: 1024px) {
 .content-grid {
@@ -436,17 +428,32 @@ gap: 10px;
 
 /* 리뷰 리스트 컨테이너 */
 .review-list {
+display: flex;
+justify-content: space-between;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
 background: #fff;
 padding: 20px;
 padding-bottom: 60px; /* pagination을 위한 여백 */
+}
+
+/* 첫 번째 column (왼쪽 12개) */
+.review-left {
+grid-column: 1;  /* 첫 번째 열 */
+}
+
+/* 두 번째 column (오른쪽 12개) */
+.review-right {
+grid-column: 2;  /* 두 번째 열 */
 }
 
 /* 개별 리뷰 아이템 */
 .review-item {
 display: flex;
 align-items: center;
-padding: 15px;
+padding: 10px;
 border-bottom: 1px solid #eee;
+background: #fff;
 }
 
 .review-item:hover {
@@ -463,7 +470,7 @@ margin-right: 15px;
 width: 60px;
 height: 60px;
 object-fit: cover;
-margin-right: 15px;
+margin: 0 10px;
 }
 
 .no-image {
