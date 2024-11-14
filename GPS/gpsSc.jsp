@@ -58,7 +58,7 @@
 		        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 		        passwordInput.setAttribute('type', type);
 		        
-		        eyeIcon.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg'; // Ã«Â¹ÂÃ«Â°ÂÃ«Â²ÂÃ­ÂÂ¸ÃªÂ°Â Ã«Â³Â´Ã¬ÂÂ¼ Ã«ÂÂ Ã¬ÂÂÃ¬ÂÂ´Ã¬Â½Â Ã«Â³ÂÃªÂ²Â½
+		        eyeIcon.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
 		    });
 		    
 		    <%-- 햄버거 버튼 --%>
@@ -130,25 +130,26 @@
 		    fetch('findIdPw.jsp')
 		        .then(response => response.text())
 		        .then(data => {
-		            document.querySelector('.login-form').innerHTML = data; // Ã¬ÂÂ¤Ã«Â²ÂÃ«Â ÂÃ¬ÂÂ´ Ã«ÂÂ´Ã¬ÂÂ©Ã¬ÂÂ Ã«Â³ÂÃªÂ²Â½
+		        	// 가져온 데이터를 login-form 요소에 삽입
+		            document.querySelector('.login-form').innerHTML = data;
 		            
-		            // id ì°¾ê¸° í¼
+		            // id 찾기 폼 가져옴
 		            var findIdForm = document.getElementById('findIdForm2');
 		    	    if (findIdForm) {
 		    	        findIdForm.addEventListener('submit', function(event) {
 		    	            if (!validFindIdForm()) {
-		    	                event.preventDefault(); // ì í¨ì± ê²ì¬ ì¤í¨ ì ì ì¶ ë°©ì§
+		    	                event.preventDefault(); // 유효성 검사 실패 시 폼 제출 방지
 		    	                console.log("ID validation failed, form submission prevented.");
 		    	            }
 		    	        });
 		    	    }
 		    	
-		    	    // ë¹ë°ë²í¸ ì°¾ê¸° í¼
+		    	    // pw 찾기 폼 가져옴
 		    	    var findPwForm = document.getElementById('findPwForm2');
 		    	    if (findPwForm) {
 		    	        findPwForm.addEventListener('submit', function(event) {
 		    	            if (!validFindPwForm()) {
-		    	                event.preventDefault(); // ì í¨ì± ê²ì¬ ì¤í¨ ì ì ì¶ ë°©ì§
+		    	                event.preventDefault(); // 유효성 검사 실패 시 폼 제출 방지
 		    	                console.log("Password validation failed, form submission prevented.");
 		    	            }
 		    	        });
