@@ -105,21 +105,6 @@ public class MemberService {
         return null;
     }
 
-    public Map<String, Object> getMemberProfile(Long userId) {
-        Member member = memberRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
-        Map<String, Object> profileData = new HashMap<>();
-        profileData.put("userId", member.getUserId());
-        profileData.put("name", member.getName());
-        profileData.put("nickname", member.getNickname());
-        profileData.put("email", member.getEmail());
-        profileData.put("age", member.calculateAge());  // 계산된 나이
-        profileData.put("gender", member.getGender());
-        profileData.put("profileImg", member.getProfileImg());
-
-        return profileData;
-    }
 
     // 프로필 정보 업데이트 (birth는 수정 불가로 가정)
     public void updateProfileInfo(Long userId, MemberDTO profileData) {

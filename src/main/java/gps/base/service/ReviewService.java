@@ -38,6 +38,9 @@ public class ReviewService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+
+    private Authority authority;
+
     @Autowired
     private CommentRepository commentRepository;
 
@@ -256,8 +259,8 @@ public class ReviewService {
     
     // 리뷰 수정
     @Transactional
-    public Review updateReview(Long rId , Long gymId, Long userId, ReviewDTO reviewDTO) {
-        Review review = validateReviewAndImage(rId, gymId, userId, null);  // 검증 재사용
+    public Review updateReview(Long rId , Long gymId, Long userId, ReviewDTO reviewDTO, Authority authority) {
+        Review review = validateReviewAndImage(rId, gymId, userId, null, authority);  // 검증 재사용
         review.setComment(reviewDTO.getComment());
         // 추후 다른 필드들도 업데이트가 필요하면 코드추가
 
@@ -269,8 +272,8 @@ public class ReviewService {
 
     // 리뷰 삭제
     @Transactional
-    public void deleteReview(Long rId, Long gymId, Long userId) {
-        Review review = validateReviewAndImage(rId, gymId, userId, null);   // 검증 재사용
+    public void deleteReview(Long rId, Long gymId, Long userId, Authority authority) {
+        Review review = validateReviewAndImage(rId, gymId, userId, null, authority);   // 검증 재사용
         
         // 연관된 이미지 삭제
         imageRepository.deleteByReviewId(rId);
@@ -315,7 +318,7 @@ public class ReviewService {
     }
 
     // 리뷰 & 이미지 검증
-    public Review validateReviewAndImage(Long reviewId, Long gymId, Long userId, MultipartFile file) {
+    public Review validateReviewAndImage(Long reviewId, Long gymId, Long userId, MultipartFile file, Authority authority) {
         // 체육관 존재 여부 확인
         if (!gymRepository.existsById(gymId)) {
             throw new CustomException(ErrorCode.GYM_NOT_FOUND);
@@ -325,9 +328,11 @@ public class ReviewService {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
 
-        if (!review.getUserId().equals(userId)) {
+        // 관리자인 경우, 작성자와 관계 없이 삭제 가능
+        if (authority != Authority.ADMIN && !review.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
         }
+
 
         // 파일이 있는 경우 이미지 검증
         if (file != null && !file.isEmpty()) {

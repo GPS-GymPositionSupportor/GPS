@@ -3,6 +3,7 @@ package gps.base.DTO;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import gps.base.model.Authority;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,9 +29,10 @@ public class ReviewDTO {
     private String comment;
 
 
+
     /*
-    이미지 관련
-     */
+        이미지 관련
+         */
     private String reviewImage; // 리뷰 이미지
     private MultipartFile file; // 파일
     private String caption; // 이미지 이름

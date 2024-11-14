@@ -18,7 +18,7 @@
 <!-- 사이드바 -->
 <div class="sidebar">
     <div class="logo">
-        <a href="redirect:/">
+        <a href="/api/admin">
             <img src="../image/gpsLogo.svg" alt="GPS Logo">
         </a>
     </div>
@@ -44,27 +44,27 @@
 
     <ul class="nav-menu">
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/api/admin" class="nav-link">
                 <i class="fas fa-chart-line"></i>통계
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/" class="nav-link">
                 <i class="fas fa-store"></i>시설 관리
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/" class="nav-link">
                 <i class="fas fa-users"></i>회원 관리
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link", onclick="loadReviews()">
+            <a href="#"  class="nav-link", onclick="loadReviews()">
                 <i class="fas fa-edit"></i>리뷰 관리
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="/" class="nav-link">
                 <i class="fas fa-comment"></i>댓글 관리
             </a>
         </li>
@@ -80,7 +80,6 @@
         <h2>신규 업데이트</h2>
         <div class="buttons">
             <button class="btn btn-primary">변경 저장</button>
-            <button class="btn btn-secondary">나가기</button>
         </div>
     </div>
 
@@ -214,8 +213,7 @@
         <div class="header">
             <h2>리뷰 관리</h2>
             <div class="buttons">
-                <button class="btn btn-primary">선택 삭제</button>
-                <button class="btn btn-secondary">나가기</button>
+                <button class="btn btn-primary" onclick="deleteSelectedReviews()">선택 삭제</button>
             </div>
         </div>
         <div class="review-list"></div>
@@ -224,9 +222,9 @@
 
         try {
             const response = await fetch('/api/reviews/all');
-            const reviews = await response.json();
-            console.log("API Response:", reviews);  // API 응답 확인
-            displayReviews(reviews);
+            allReviews = await response.json();
+            console.log("API Response : ", allReviews);
+            displayReviews(allReviews);
         } catch (error) {
             console.error('리뷰 로드 실패:', error);
         }
@@ -234,14 +232,7 @@
 
 
     function displayReviews(reviews) {
-        console.log("All reviews:", reviews);  // 전체 데이터 확인
-
         const reviewList = document.querySelector('.review-list');
-        if (!reviewList) {
-            console.error('review-list element not found');
-            return;
-        }
-
         reviewList.innerHTML = '';
 
         const leftColumn = document.createElement('div');
@@ -253,18 +244,42 @@
         const endIndex = startIndex + itemsPerPage;
         const currentReviews = reviews.slice(startIndex, endIndex);
 
-        currentReviews.forEach((review, index) => {
+        currentReviews.forEach((reviewData, index) => {
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
-            reviewElement.innerHTML = `
-            <input type="checkbox" class="review-select">
-            <img src="/image/logo.png" class="review-img">
-            <div class="review-text">${review.comment ? review.comment.substring(0, 30) + (review.comment.length > 30 ? '...' : '') : ''}</div>
-            <div class="review-info">
-                <span class="review-writer">${review.userName || ''}</span>
-                <span class="review-date">${review.addedAt ? review.addedAt.split('T')[0] : ''}</span>
-            </div>
-        `;
+            reviewElement.setAttribute('data-review-id', reviewData.rid);
+            reviewElement.setAttribute('data-gym-id', reviewData.gymId);
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'review-select';
+
+            const img = document.createElement('img');
+            img.src = '/image/logo.png';
+            img.className = 'review-img';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'review-text';
+            textDiv.textContent = reviewData.comment;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'review-info';
+
+            const writerSpan = document.createElement('span');
+            writerSpan.className = 'review-writer';
+            writerSpan.textContent = reviewData.userName;
+
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'review-date';
+            dateSpan.textContent = reviewData.addedAt.split('T')[0];
+
+            infoDiv.appendChild(writerSpan);
+            infoDiv.appendChild(dateSpan);
+
+            reviewElement.appendChild(checkbox);
+            reviewElement.appendChild(img);
+            reviewElement.appendChild(textDiv);
+            reviewElement.appendChild(infoDiv);
 
             if (index < 12) {
                 leftColumn.appendChild(reviewElement);
@@ -275,18 +290,12 @@
 
         reviewList.appendChild(leftColumn);
         reviewList.appendChild(rightColumn);
-
         updatePagination(reviews.length);
     }
 
     function updatePagination(totalItems) {
-        const pagination = document.querySelector('.pagination');
-        if (!pagination) {
-            console.error('pagination element not found');
-            return;
-        }
-
         const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const pagination = document.querySelector('.pagination');
         pagination.innerHTML = '';
 
         // 이전 버튼
@@ -296,19 +305,19 @@
         prevButton.onclick = () => {
             if (currentPage > 0) {
                 currentPage--;
-                displayReviews(allReviews);
+                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
             }
         };
         pagination.appendChild(prevButton);
 
-        // 페이지 번호
+        // 페이지 번호 버튼
         for (let i = 0; i < totalPages; i++) {
             const pageButton = document.createElement('button');
             pageButton.textContent = i + 1;
             pageButton.className = i === currentPage ? 'active' : '';
             pageButton.onclick = () => {
                 currentPage = i;
-                displayReviews(allReviews);
+                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
             };
             pagination.appendChild(pageButton);
         }
@@ -316,15 +325,59 @@
         // 다음 버튼
         const nextButton = document.createElement('button');
         nextButton.innerHTML = '>';
-        nextButton.disabled = currentPage === totalPages - 1;
+        nextButton.disabled = currentPage >= totalPages - 1;
         nextButton.onclick = () => {
             if (currentPage < totalPages - 1) {
                 currentPage++;
-                displayReviews(allReviews);
+                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
             }
         };
         pagination.appendChild(nextButton);
     }
+
+
+    async function deleteSelectedReviews() {
+        const selectedCheckboxes = document.querySelectorAll('.review-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('삭제할 리뷰를 선택해주세요.');
+            return;
+        }
+
+        if (confirm('선택한 리뷰를 삭제하시겠습니까?')) {
+            for (const checkbox of selectedCheckboxes) {
+                const reviewElement = checkbox.closest('.review-item');
+                const reviewId = parseInt(reviewElement.getAttribute('data-review-id'));
+                const gymId = parseInt(reviewElement.getAttribute('data-gym-id'));
+
+
+                console.log('Deleting review:', { reviewId, gymId }); // 삭제 시도 로그
+
+                try {
+                    const response = await fetch("/api/reviews/" + reviewId + "/" + gymId, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`삭제 실패 (Status: ${response.status})`);
+                    }
+                } catch (error) {
+                    console.error('리뷰 삭제 중 오류:', error);
+                    alert('리뷰 삭제 중 오류가 발생했습니다.');
+                    return;
+                }
+            }
+
+            await loadReviews(); // 비동기 처리
+            alert('선택한 리뷰가 삭제되었습니다.');
+        }
+    }
+
+    // reviewElement 생성 시 gymId도 추가
+    const reviewElement = document.createElement('div');
+    reviewElement.className = 'review-item';
+    reviewElement.dataset.reviewId = review.rid;
+    reviewElement.dataset.gymId = review.gymId;
 
 
 

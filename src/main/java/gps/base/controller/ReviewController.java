@@ -4,6 +4,7 @@ import gps.base.DTO.CommentDTO;
 import gps.base.DTO.ReviewDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
+import gps.base.model.Authority;
 import gps.base.model.Comment;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
@@ -95,27 +96,29 @@ public class ReviewController {
     @PutMapping("/{rId}")
     public ResponseEntity<Review> updateReview(@PathVariable Long rId, @RequestBody ReviewDTO reviewDTO, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
+        Authority authority = (Authority) session.getAttribute("authority");
 
         if(userId == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        reviewService.validateReviewAndImage(rId, reviewDTO.getGymId(), userId, null);  // 이미지 없이 검증
-        Review updatedReview = reviewService.updateReview(rId, reviewDTO.getGymId(), userId, reviewDTO);
+        reviewService.validateReviewAndImage(rId, reviewDTO.getGymId(), userId, null, authority);  // 이미지 없이 검증
+        Review updatedReview = reviewService.updateReview(rId, reviewDTO.getGymId(), userId, reviewDTO, authority);
         return ResponseEntity.ok(updatedReview);
 
     }
 
     // 리뷰 삭제
-    @DeleteMapping("/{rId}")
-    public ResponseEntity<Void> deleteReview(@PathVariable Long rId, @RequestParam Long gymId , HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+    @DeleteMapping("/{rId}/{gymId}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long rId, @PathVariable Long gymId , HttpSession session) {
+        Long userId = (Long) session.getAttribute("userID");
+        Authority authority = (Authority) session.getAttribute("authority");
         if(userId == null) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
+            throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
         }
 
-        reviewService.validateReviewAndImage(rId, gymId, userId, null);  // 이미지 없이 검증
-        reviewService.deleteReview(rId, gymId, userId);
+        reviewService.validateReviewAndImage(rId, gymId, userId, null, authority);  // 이미지 없이 검증
+        reviewService.deleteReview(rId, gymId, userId, authority);
         return ResponseEntity.ok().build();
     }
 
@@ -123,7 +126,7 @@ public class ReviewController {
     @GetMapping("/all")
     public ResponseEntity<List<ReviewDTO>> getAllReviews() {
         List<ReviewDTO> reviews = reviewService.getAllReviewsWithUserName();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");  // HH:mm 제거
         reviews.forEach(review ->
                 review.setFormattedDate(
                         review.getAddedAt() != null ? review.getAddedAt().format(formatter) : ""
