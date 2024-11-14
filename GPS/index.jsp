@@ -29,12 +29,6 @@
 </head>
 
 <body>
-    <%@ include file="DBC.jsp" %>
-    <%
-    request.setCharacterEncoding("UTF-8");
-    response.setCharacterEncoding("UTF-8");
-    %>
-    
 	<% if(session.getAttribute("userID") != null) { %>
 	    <div class="navbar">
 	        
@@ -56,7 +50,7 @@
                     <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
                 <% } %>
             </form>
-            <form action="logout.jsp" method="post">
+            <form action="/api/logout" method="post">
                 <% if(session.getAttribute("userID") != null) { %>
                     <button type="submit" id="logoutButton">로그아웃</button>
                 <% } %>

@@ -323,7 +323,7 @@ body::-webkit-scrollbar {
 	color: #616161;
 }
 
-#plzEmail.error, #plzEmailPw.error {
+#plzEmailId.error, #plzEmailPw.error {
 	color: #FF3B30 !important;
 }
 
