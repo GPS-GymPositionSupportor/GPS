@@ -10,13 +10,25 @@ from geopy.geocoders import Nominatim
 from time import sleep
 import re
 import json
+import os
+from dotenv import load_dotenv
+
+
+# 환경 변수 가져오기
+load_dotenv()
+
+# .env
+host = os.getenv('DB_host')
+user = os.getenv('DB_user')
+password = os.getenv('DB_password')
+database = os.getenv('DB_name')
 
 # MySQL DB 연결 설정
 db = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='2741',
-    database='gpsdb',
+    host=host,
+    user=user,
+    password=password,
+    database=database,
     charset='utf8mb4'
 )
 
@@ -43,9 +55,17 @@ def is_duplicate(address1,title):
     count = cursor.fetchone()[0]
     return count > 0
 
-# 크롬 드라이버 설정
+# 크롬 드라이버 경로 설정
 service = Service('C:/chromedriver-win64/chromedriver.exe')
-driver = webdriver.Chrome(service=service)
+
+# 크롤링 옵션 생성
+options = webdriver.ChromeOptions()
+
+# 백그라운드 실행 옵션 추가
+options.add_argument("headless")
+
+# 크롬 드라이버 실행
+driver = webdriver.Chrome(service=service,options=options)
 
 # 카카오맵 열기
 URL = "https://map.kakao.com/"
@@ -56,15 +76,8 @@ ico_coach = driver.find_element(By.XPATH, '//div[@class="view_coach"]/span[@clas
 ico_coach.click()
 sleep(1)
 
-# 카테고리 지정
-category_list = {
-    "water" : ["수영장"],
-#    "ball" : ["농구장", "축구장", "족구장", "탁구장", "테니스장", "배드민턴장", "풋살장", "배구장"], 완료
-    "physics" : ["헬스장", "요가", "크로스핏", "클라이밍"],
-    "battle" : ["태권도장", "특공무술", "합기도", "유도", "주짓수","복싱장","검도"]
-}
-
-region_list = ["경기", "강원","인천", "충남", "충북", "경북", "경남", "전북", "전남", "대전", "세종", "대구", "울산", "부산", "제주"]
+# 순회할 지역 리스트
+region_list = ["서울","경기", "인천", "강원", "충남", "충북", "전남", "전북", "경남", "경북", "대구", "대전", "부산", "세종", "울산", "광주", "제주"]
 
 # 서울특별시 구 리스트
 seoul_list = ['서울 마포구','서울 서대문구','서울 은평구','서울 종로구','서울 중구','서울 용산구','서울 성동구','서울 광진구',
@@ -132,10 +145,11 @@ busan_list = ["부산 중구", "부산 서구", "부산 동구", "부산 영도�
 #CrawlAndSave(region_list)
 
 def CrawlAndSave(list):
-    sport = "복싱장"
-    cate = "battle"
+    sport = "헬스장"
+    cate = "physics"
     for region in list:
         # 검색창 찾기
+        sleep(1)
         search = driver.find_element(By.XPATH, '//*[@id="search.keyword.query"]')
         search.clear()
         word = f"{region} {sport}"
@@ -144,12 +158,17 @@ def CrawlAndSave(list):
         sleep(1)
 
          # 카카오맵에서 카테고리 하나로 분류돼 있는 종목의 카테고리 클릭하기
-        if(sport == "수영장" or sport == "태권도장"):
-            category_xpath = f'//*[@id="info.search.place.list"]/li[1]/div[3]/span'
-            category = driver.find_element(By.XPATH, category_xpath)
-            category.click()
+        try:
+            if(sport == "수영장" or sport == "태권도장"):
+                category_xpath = f'//*[@id="info.search.place.list"]/li[1]/div[3]/span'
+                category = driver.find_element(By.XPATH, category_xpath)
+                if(category.text == sport):
+                    category.click()
+        except NoSuchElementException:
+            pass
 
         # 요소 최대 개수
+        sleep(1)
         try:
             count_all_text = driver.find_element(By.XPATH, '//*[@id="info.search.place.cnt"]').text
             count_all = int(count_all_text.replace(",", ""))
@@ -199,14 +218,15 @@ def CrawlAndSave(list):
                 CrawlAndSave(daegu_list)
             else:
                 count_all=500
-                pass
             
 
-        remain = count_all % 15
-        page_max = min((count_all // 15 + (1 if remain else 0)), 34)  # 최대 페이지 수를 34로 제한
 
-
+        # 페이지 수가 2개 이상일때
         if(count_all>15):
+
+            remain = count_all % 15
+            page_max = min((count_all // 15 + (1 if remain else 0)), 34)  # 최대 페이지 수를 34로 제한
+
             # 장소 더보기 클릭 로직 처리
             more = driver.find_element(By.XPATH, '//*[@id="info.search.place.more"]')
             more.click()
@@ -224,6 +244,11 @@ def CrawlAndSave(list):
                 sleep(2)
             except NoSuchElementException:
                 pass
+        # 페이지 수가 1개 일때
+        else:
+            page_max = 2
+            remain = 0
+            
         main_window = driver.current_window_handle
 
         # 개수 세기
@@ -252,13 +277,29 @@ def CrawlAndSave(list):
                     tmp_sport = sport
 
                     tmp_cate = cate
-                    
-                    sleep(1)
-                    # 헬스장 제목 가져오기
-                    title_xpath = f'//*[@id="info.search.place.list"]/li[{i}]/div[3]/strong/a[2]'
-                    title = driver.find_element(By.XPATH, title_xpath).text
 
-                    #battle 카테고리 데이터 정제
+                    sleep(1)
+
+                    # 카카오맵 카테고리 예외처리
+                    try:
+                        category_xpath = f'//*[@id="info.search.place.list"]/li[{i}]/div[3]/span'
+                        category = driver.find_element(By.XPATH, category_xpath)
+
+                        if(category == "주차장" or category == "펜션" or category == "협회" or category == "화장실" or category == "호텔"):
+                            print(f'{word}{cnt} 카테고리에서 예외처리')
+                            miss_cnt+=1
+                            continue
+                    except NoSuchElementException:
+                        pass
+
+                    # 시설 이름 가져오기
+                    try:
+                        title_xpath = f'//*[@id="info.search.place.list"]/li[{i}]/div[3]/strong/a[2]'
+                        title = driver.find_element(By.XPATH, title_xpath).text
+                    except NoSuchElementException:
+                        break
+
+                    #battle 데이터 정제
                     if("주짓수" in title):
                         tmp_sport = "주짓수"
                         tmp_cate = "battle"
@@ -275,8 +316,20 @@ def CrawlAndSave(list):
                         tmp_sport = "특공무술"
                         tmp_cate = "battle"
                     elif("태권" in title):
-                        tmp_sport = "태권도"
+                        tmp_sport = "태권도장"
                         tmp_cate = "battle"
+
+                    #physics 데이터 정제
+                    if("필라테스" in title):
+                        tmp_sport = "필라테스"
+                    elif("헬스장" in title):
+                        tmp_sport = "헬스장"
+                    elif("크로스핏" in title):
+                        tmp_sport = "크로스핏"
+                    elif("클라이밍" in title):
+                        tmp_sport = "클라이밍"
+                    elif("요가" in title):
+                        tmp_sport = "요가"
                         
 
                     # 도로명 주소 가져오기
@@ -395,13 +448,14 @@ def CrawlAndSave(list):
 
                     if(len(region)>2):
                         region = region[0:2]
-                        
+
+                    r = address1[0:2]
 
                     # DB에 image 데이터 저장
                     cursor.execute('''
                         INSERT INTO image (caption, added_at, ImageUrl, gym_id)
                         VALUES (%s, NOW(), %s, %s)
-                    ''', (f"{region} {tmp_sport} 이미지", image_url, gym_id))
+                    ''', (f"{r} {tmp_sport} 이미지", image_url, gym_id))
                     db.commit()
 
                     # 드라이버 닫고 원래 창으로 전환
@@ -421,7 +475,7 @@ def CrawlAndSave(list):
 
             # 페이지를 넘기는 로직
             try:
-                if(page_cnt >= page_max+1 and items_per_page == remain):
+                if(page_cnt >= page_max+1):
                     print(f'현재 {page_cnt} 페이지의 {items_per_page}까지 모두 추출 하였습니다')
                 elif page_cnt % 5 == 0:
                     next_button = WebDriverWait(driver, 2).until(
@@ -436,7 +490,6 @@ def CrawlAndSave(list):
                 sleep(2)  # 페이지 로딩 시간을 위해 대기
 
             except TimeoutException:
-                print(f"{page_cnt} 페이지로 이동하는 중 오류 발생: TimeoutException")
                 break
 
         print(f'{word} 전체 {count_all}개 중에 {insert_cnt}개 저장 {reinsert_cnt}개 중복, {miss_cnt}개 위도 경도 누락')
