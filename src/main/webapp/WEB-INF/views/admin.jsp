@@ -49,7 +49,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="/" class="nav-link">
+            <a href="#" class="nav-link", onclick="loadGyms()">
                 <i class="fas fa-store"></i>시설 관리
             </a>
         </li>
@@ -59,7 +59,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#"  class="nav-link", onclick="loadReviews()">
+            <a href="#"  class="nav-link", onclick="loadReviewList()">
                 <i class="fas fa-edit"></i>리뷰 관리
             </a>
         </li>
@@ -197,12 +197,128 @@
         }
     }
 
+    async function loadGyms() {
+        const mainContent = document.querySelector('.main-content');
+        mainContent.innerHTML = `
+       <div class="header">
+           <h2>시설 관리</h2>
+           <div class="search-bar">
+               <input type="text" placeholder="찾으시는 시설이 있나요?" class="search-input">
+               <button class="search-btn">검색</button>
+           </div>
+           <button class="btn btn-primary">시설 추가</button>
+       </div>
+       <div class="gym-table">
+           <table>
+               <thead>
+                   <tr>
+                       <th><input type="checkbox" id="selectAll"></th>
+                       <th>시설명</th>
+                       <th>주소</th>
+                       <th>운영시간</th>
+                       <th>홈페이지</th>
+                       <th>전화번호</th>
+                       <th>생성자</th>
+                       <th>생성일</th>
+                       <th>평점</th>
+                   </tr>
+               </thead>
+               <tbody id="gymList"></tbody>
+           </table>
+       </div>
+       <div class="pagination"></div>
+       `;
+
+        loadGymList();
+    }
+
+    async function loadGymList(page = 0, size = 12) {
+        try {
+            // currentPage는 gyms 탭의 페이지 상태로 업데이트
+            pageState.gyms = page;
+
+            // API 호출 시 currentPage와 size로 요청
+            const response = await fetch('/api/showgyms?page=' + page + '&size=' + size, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            displayGyms(data.content); // 데이터 로드
+            updatePagination(data.totalElements, 'gyms');
+        } catch (error) {
+            console.error('시설 로드 실패:', error);
+        }
+    }
+
+    function displayGyms(gyms) {
+        const gymList = document.getElementById('gymList');
+        const itemsPerPage = 12;
+        const startIndex = currentPage * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const currentGyms = gyms.slice(startIndex, endIndex);
+
+        gymList.innerHTML = '';
+
+        currentGyms.forEach(gym => {
+            const row = document.createElement('tr');
+            const date = gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-';
+            const rating = gym.rating ? (gym.rating < 1 ? '0.0' : gym.rating.toFixed(1)) : '0.0';
+
+            // 체크박스
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'gym-select';
+            checkbox.dataset.gymId = gym.gymId;
+            checkboxCell.appendChild(checkbox);
+
+            // 이미지
+            const imgCell = document.createElement('td');
+            const img = document.createElement('img');
+            img.src = '../image/logo.png';  // 기본 이미지로 설정
+            img.style.width = '50px';
+            img.style.height = '50px';
+            img.style.objectFit = 'cover';
+            imgCell.appendChild(img);
+
+            // 각 셀 생성
+            const cells = [
+                { content: gym.gname || '-' },
+                { content: gym.address || '-' },
+                { content: gym.openHour || '-' },
+                { content: gym.homepage || '-' },
+                { content: gym.phone || '-' },
+                { content: gym.gCreatedBy || '-' },
+                { content: date },
+                { content: rating }
+            ];
+
+            row.appendChild(checkboxCell);
+            row.appendChild(imgCell);
+
+            cells.forEach(cellData => {
+                const cell = document.createElement('td');
+                cell.textContent = cellData.content;
+                row.appendChild(cell);
+            });
+
+            gymList.appendChild(row);
+        });
+
+        updatePagination(gyms.length, 'gyms');
+    }
+
+    function formatDate(dateString) {
+        return new Date(dateString).toLocaleDateString('ko-KR');
+    }
+
+
+
+
+
     let allReviews = [];  // 전체 리뷰 데이터 저장
-    let currentPage = 0;  // 현재 페이지
-    const itemsPerPage = 24;  // 페이지당 아이템 수
 
     // 리뷰 관리 링크 클릭 시 호출되는 함수
-    async function loadReviews() {
+    async function loadReviewList() {
         const mainContent = document.querySelector('.main-content');
         if (!mainContent) {
             console.error('main-content element not found');
@@ -290,50 +406,99 @@
 
         reviewList.appendChild(leftColumn);
         reviewList.appendChild(rightColumn);
-        updatePagination(reviews.length);
+        updatePagination(reviews.length, 'reviews');
     }
 
-    function updatePagination(totalItems) {
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
+    // 탭별 currentPage 상태 저장
+    const pageState = {
+        gyms: 0,
+        reviews: 0
+    };
+    let currentPage = 0;
+    let currentPageGyms = 0;
+    const itemsPerPage = 12;  // 한 페이지에 표시할 항목 수
+    const pagesPerStep = 5;  // > 버튼 클릭 시 5페이지씩 넘기기
+
+
+    function updatePagination(totalItems, currentFunction) {
         const pagination = document.querySelector('.pagination');
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
         pagination.innerHTML = '';
 
-        // 이전 버튼
-        const prevButton = document.createElement('button');
-        prevButton.innerHTML = '<';
-        prevButton.disabled = currentPage === 0;
-        prevButton.onclick = () => {
-            if (currentPage > 0) {
-                currentPage--;
-                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
+        let currentPage = (currentFunction === 'gyms') ? currentPageGyms : currentPageReviews;
+
+        // 첫 페이지 버튼
+        const firstButton = document.createElement('button');
+        firstButton.className = currentPage === 0 ? 'active' : '';
+        firstButton.onclick = function () {
+            currentPage = 0;
+            if (currentFunction === 'gyms') {
+                currentPageGyms = currentPage;
+                loadGymList(currentPage);
+            } else if (currentFunction === 'reviews') {
+                currentPageReviews = currentPage;
+                loadReviewList(currentPage);
             }
         };
-        pagination.appendChild(prevButton);
+        pagination.appendChild(firstButton);
 
-        // 페이지 번호 버튼
-        for (let i = 0; i < totalPages; i++) {
+        // 중간 페이지들
+        for (let i = currentPage; i < Math.min(currentPage + pagesPerStep, totalPages); i++) {
             const pageButton = document.createElement('button');
-            pageButton.textContent = i + 1;
-            pageButton.className = i === currentPage ? 'active' : '';
-            pageButton.onclick = () => {
+            pageButton.textContent = (i + 1);
+            pageButton.className = (i === currentPage ? 'active' : '');
+            pageButton.onclick = function () {
                 currentPage = i;
-                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
+                if (currentFunction === 'gyms') {
+                    currentPageGyms = currentPage;
+                    loadGymList(currentPage);
+                } else if (currentFunction === 'reviews') {
+                    currentPageReviews = currentPage;
+                    loadReviewList(currentPage);
+                }
             };
             pagination.appendChild(pageButton);
         }
 
-        // 다음 버튼
+        // > 버튼 (페이지 5단위씩 증가)
         const nextButton = document.createElement('button');
         nextButton.innerHTML = '>';
-        nextButton.disabled = currentPage >= totalPages - 1;
-        nextButton.onclick = () => {
-            if (currentPage < totalPages - 1) {
-                currentPage++;
-                displayReviews(allReviews);  // 전체 데이터로부터 페이지 표시
+        nextButton.className = 'arrow';
+        nextButton.onclick = function () {
+            if (currentPage + pagesPerStep < totalPages) {
+                currentPage += pagesPerStep;
+                if (currentFunction === 'gyms') {
+                    currentPageGyms = currentPage;
+                    loadGymList(currentPage);
+                } else if (currentFunction === 'reviews') {
+                    currentPageReviews = currentPage;
+                    loadReviewList(currentPage);
+                }
             }
         };
         pagination.appendChild(nextButton);
+
+        // >> 버튼 (마지막 페이지로 이동)
+        const lastButton = document.createElement('button');
+        lastButton.innerHTML = '>>';
+        lastButton.className = 'double-arrow';
+        lastButton.onclick = function () {
+            currentPage = totalPages - 1;
+            if (currentFunction === 'gyms') {
+                currentPageGyms = currentPage;
+                loadGymList(currentPage);
+            } else if (currentFunction === 'reviews') {
+                currentPageReviews = currentPage;
+                loadReviewList(currentPage);
+            }
+        };
+        pagination.appendChild(lastButton);
     }
+
+
+
+
+
 
 
     async function deleteSelectedReviews() {
@@ -368,7 +533,7 @@
                 }
             }
 
-            await loadReviews(); // 비동기 처리
+            await loadReviewList(); // 비동기 처리
             alert('선택한 리뷰가 삭제되었습니다.');
         }
     }

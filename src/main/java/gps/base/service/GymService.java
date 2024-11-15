@@ -8,6 +8,8 @@ import gps.base.repository.GymRepository;
 import gps.base.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -167,6 +169,9 @@ public class GymService {
     public List<Gym> searchGymsByName(String name) {
         return gymRepository.findBygNameContaining(name);
     }
-    
-    
+
+
+    public Page<Gym> getGyms(PageRequest pageRequest) {
+        return gymRepository.findAll(pageRequest);
+    }
 }

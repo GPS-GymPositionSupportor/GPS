@@ -525,13 +525,12 @@ color: #B00C0C;
 display: flex;
 justify-content: center;
 gap: 10px;
-position: absolute;  /* 절대 위치 지정 */
-bottom: 20px;       /* 하단에서 20px 위 */
-left: 50%;         /* 왼쪽에서 50% */
-transform: translateX(-50%);  /* 중앙 정렬을 위해 왼쪽으로 자신의 50% 만큼 이동 */
-width: fit-content;  /* 내용물 크기만큼만 너비 설정 */
+position: absolute;
+bottom: 20px;
+left: 50%;
+transform: translateX(-50%);
+width: fit-content;
 padding: 10px 0;
-align-items: flex-end;
 }
 
 .pagination button {
@@ -539,12 +538,24 @@ padding: 5px 15px;
 border: 1px solid #ddd;
 background: #fff;
 cursor: pointer;
+min-width: 40px;
+text-align: center;
 }
 
 .pagination button.active {
-background: #007bff;
-color: white;
-border-color: #007bff;
+background: #f0f0f0;
+border-bottom: 2px solid #000;
+font-weight: bold;
+}
+
+.pagination button.arrow {
+font-weight: bold;
+font-size: 18px;
+}
+
+.pagination button.double-arrow {
+font-weight: bold;
+font-size: 16px;
 }
 
 .pagination button:hover {
@@ -576,6 +587,56 @@ background: #6c757d;
 color: white;
 border: none;
 padding: 8px 16px;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.gym-table {
+background: white;
+border-radius: 8px;
+padding: 20px;
+margin-top: 20px;
+overflow-x: auto;
+}
+
+table {
+width: 100%;
+border-collapse: collapse;
+}
+
+th, td {
+padding: 12px 15px;
+text-align: left;
+border-bottom: 1px solid #eee;
+}
+
+th {
+background-color: #f8f9fa;
+font-weight: 600;
+}
+
+tr:hover {
+background-color: #f8f9fa;
+}
+
+.search-bar {
+display: flex;
+gap: 10px;
+margin: 20px 0;
+}
+
+.search-input {
+flex: 1;
+padding: 8px 12px;
+border: 1px solid #ddd;
+border-radius: 4px;
+}
+
+.search-btn {
+padding: 8px 16px;
+background: #B05D5D;
+color: white;
+border: none;
 border-radius: 4px;
 cursor: pointer;
 }

@@ -1,18 +1,26 @@
 package gps.base.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gps.base.DTO.GymDTO;
+import gps.base.DTO.ImageDTO;
 import gps.base.DTO.MemberDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.*;
+import gps.base.repository.ImageRepository;
 import gps.base.service.GymService;
 import gps.base.service.MemberService;
 import gps.base.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,17 +34,19 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
+@Slf4j
 @RequestMapping("/api")
 public class MainController {
 
     @Autowired
     private MemberService memberService;
+
+    @Autowired
+    private ImageRepository imageRepository;
 
     @Autowired
     private GymService gymService;
@@ -368,16 +378,47 @@ public class MainController {
 
     // HTMl 호출
     @GetMapping("/showgyms")
-    public String showGymList(Model model, HttpSession session) {
+    @ResponseBody
+    public ResponseEntity<Page<GymDTO>> getGyms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            HttpSession session) {
+        try {
+            if (session.getAttribute("loggedInUser") == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
-        if(session.getAttribute("loggedInUser") == null) {
-            return "redirect:/api/login";
+            Page<Gym> gymPage = gymService.getGyms(PageRequest.of(page, size));
+            Page<GymDTO> gymDTOPage = gymPage.map(gym -> {
+                GymDTO dto = convertToDTO(gym);
+                Optional<Image> image = imageRepository.findFirstByGymId(gym.getGymId());
+                image.ifPresent(img -> dto.setGymImage(ImageDTO.fromEntity(img)));
+                return dto;
+            });
+
+            return ResponseEntity.ok(gymDTOPage);
+        } catch (CustomException e) {
+            log.error("Error retrieving gyms: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        List<Gym> gyms = gymService.getAllGyms();
-        model.addAttribute("gyms",  gyms);
-        return "gym";
     }
+
+
+
+    private GymDTO convertToDTO(Gym gym) {
+        GymDTO dto = new GymDTO();
+        dto.setGymId(gym.getGymId());
+        dto.setAddress(gym.getAddress());
+        dto.setGName(gym.getGName());
+        dto.setOpenHour(gym.getOpenHour());
+        dto.setHomepage(gym.getHomepage());
+        dto.setPhone(gym.getPhone());
+        dto.setGCreatedBy(gym.getGCreatedBy());
+        dto.setGCreatedAt(gym.getGCreatedAt());
+        dto.setRating(gym.getRating());
+        return dto;
+    }
+
 
     // API 엔드포인트 추가
     @GetMapping("/gyms")
