@@ -1,14 +1,14 @@
 package gps.base.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Getter
-@Setter
+@Data
 @Table(name = "gym")
 public class Gym {
 
@@ -17,14 +17,27 @@ public class Gym {
     @Column(name = "gym_id")
     private Long gymId;
 
-    @Column(name = "address1", nullable = false)
+    @Column(name = "address1", nullable = false, unique = true)
     private String address1;
 
-    @Column(name = "address2", nullable = false)
+    @Column(name = "address2", nullable = false, unique = true)
     private String address2;
 
     @Column(name = "g_name", nullable = false)
     private String gName;
+
+    @Column(name = "opening_hours", nullable = true)
+    private String openHour;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    private GymCategory category;
+
+    @Column(name = "homepage", nullable = true, length = 1000)
+    private String homepage;
+
+    @Column(name = "phone_number", nullable = true)
+    private String phone;
 
     @Column(name = "g_longitude", nullable = false)
     private double gLongitude;
@@ -32,47 +45,38 @@ public class Gym {
     @Column(name = "g_latitude", nullable = false)
     private double gLatitude;
 
-    @Column(name = "opening_hours")
-    private String openingHours;
+    @Column(name = "rating", nullable = false)
+    private double rating;
 
-    @Column(name = "homepage")
-    private String homepage;
-
-    @Column(name = "phone_number")
-    private String phoneNumber;
-
-    @Column(name = "hashtag")
-    private String hashtag;
-
-    @Column(name = "avg_rating", nullable = true) // nullable 설정
-    private Byte rating;
-
-    @Column(name = "g_created_by", nullable = true) // nullable 설정
+    @Column(name = "g_created_by", nullable = false)
     private String gCreatedBy;
 
-    @Column(name = "g_deleted_by", nullable = true) // nullable 설정
+    @Column(name = "g_deleted_by", nullable = false)
     private String gDeletedBy;
 
-    @Column(name = "g_created_at", nullable = true) // nullable 설정
+    @Column(name = "g_created_at", nullable = false)
     private LocalDateTime gCreatedAt;
 
-    @Column(name = "g_deleted_at", nullable = true) // nullable 설정
+    @Column(name = "g_deleted_at", nullable = false)
     private LocalDateTime gDeletedAt;
 
-    // 생성일 자동 설정
-    @PrePersist
-    protected void onCreate() {
-        gCreatedAt = LocalDateTime.now();
+
+    // Constructors
+
+
+    public Gym() {
     }
 
     public void setRating(Byte rating) {
-        if (rating < 1 || rating > 5) {
+        if(rating <= 1 || rating >= 5) {
             throw new IllegalArgumentException("점수는 1점과 5점 사이로만 입력 되어야 합니다.");
         }
         this.rating = rating;
     }
 
-    // 기본 생성자
-    public Gym() {
+    // gCreateAt 을 입력하기 전에 PrePersist로 세팅하기
+    @PrePersist
+    protected void onCreate() {
+        gCreatedAt = LocalDateTime.now();
     }
 }

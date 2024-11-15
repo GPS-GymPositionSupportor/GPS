@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 public class MemberService {
@@ -23,6 +24,18 @@ public class MemberService {
     @Autowired
     MemberRepository memberRepository;
 
+    public String generateTemporaryPassword() {
+        return UUID.randomUUID().toString().substring(0, 8);  // 8자리 임시 비밀번호 생성
+    }
+
+    @Transactional
+    public void updatePassword(String email, String newPassword) {
+        Member member = (Member) memberRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다."));
+        member.setMPassword(newPassword);  // 실제로는 암호화를 적용해야 함
+        memberRepository.save(member);
+    }
+
     @Transactional
     public Member saveMember(Member member) {
         if (member.getMPassword() == null || member.getMPassword().trim().isEmpty()) {
@@ -36,12 +49,6 @@ public class MemberService {
         } catch (Exception e) {
             throw new RuntimeException("회원 저장 중 오류 발생 : " + e.getMessage(), e);
         }
-    }
-
-
-    public Member getMemberById(Long userId) {
-        return memberRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("회원을 찾을 수 없습니다. ID : " + userId));
     }
 
     public Member getMemberBymId(String mId) {

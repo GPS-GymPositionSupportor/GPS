@@ -1,6 +1,7 @@
 package gps.base.controller;
 
 import gps.base.model.Authority;
+import gps.base.service.MailService;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
 import jakarta.servlet.http.HttpSession;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("/api")
@@ -23,7 +25,27 @@ public class MainController {
     @Autowired
     private MemberService memberService;
 
+    private MailService mailService;
+
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+
+    // 인증 코드 발송 메서드
+    @PostMapping("/register/email-validate")
+    public String mailConfirm(@RequestParam(value = "email", required = false) String email) throws Exception{
+        String code = mailService.sendSimpleMessage(email);
+        System.out.println("인증코드 : " + code);
+        return code;
+    }
+
+
+    // 인증 코드 확인 메서드
+    @PostMapping("/register/verifyCode")
+    public boolean verifyCode(@RequestParam("inputCode") String inputCode, @RequestParam("sessionCode") String sessionCode) {
+        if (!sessionCode.equals(inputCode)) {
+            throw new NoSuchElementException("인증 코드가 일치하지 않습니다.");
+        }
+        return true;
+    }
 
     // 회원가입 폼
     @GetMapping("/register")

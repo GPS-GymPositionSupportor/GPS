@@ -2,57 +2,642 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GPS MAIN</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; }
-        h1 { color: #333; }
-        .container { max-width: 800px; margin: auto; }
-        .menu { list-style-type: none; padding: 0; }
-        .menu li { margin-bottom: 10px; }
-        .menu a { text-decoration: none; color: #007bff; }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .mobile-container {
+            width: 375px;
+            height: 812px;
+            background-color: #FFF9F5;
+            position: relative;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            border-radius: 30px;
+        }
+
+        .content-container {
+            padding: 20px;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            width: 100%;
+            background-color: #FFF9F5;
+            position: sticky;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        @media screen and (max-width: 375px) {
+            body {
+                padding: 0;
+            }
+
+            .mobile-container {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
+        /* 로고 스타일 */
+        .logo {
+            color: #C4A484;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .profile-modal {
+            background-color: #FFF9F5;
+            margin: 0;
+            padding: 0;
+            width: 375px;
+            height: 812px;
+            position: relative;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+            }
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        /* 검색바 스타일 */
+        .search-container {
+            margin: 20px auto;
+            max-width: 90%;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #C4A484;
+            border-radius: 25px;
+            font-size: 16px;
+            background-color: white;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* 프로필 섹션 */
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 20px;
+        }
+        .profile-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .profile-status {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        /* 메인 그리드 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+
+        .profile-modal {
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            border-radius: 0;
+            overflow-y: auto;
+            background-color: #FFF9F5;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-header .close-button {
+            font-size: 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 40px;
+        }
+
+        .profile-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            margin: 0 auto 10px;
+        }
+
+        .profile-message {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .header-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-right: 40px;
+        }
+
+        .profile-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .profile-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background-color: #f0f0f0;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .profile-message {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+            padding: 0 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background-color: #fff;
+        }
+
+        .form-input:disabled {
+            background-color: #f5f5f5;
+            color: #666;
+        }
+
+        .submit-button {
+            width: calc(100% - 40px);
+            margin: 20px;
+            padding: 15px;
+            background-color: #4A2B2B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .delete-button {
+            width: calc(100% - 40px);
+            margin: 0 20px 20px;
+            padding: 15px;
+            background-color: transparent;
+            color: #ff4444;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @media screen and (max-width: 375px) {
+            .mobile-container, .profile-modal {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+            }
+        }
+
+        .profile-form {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-label {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .form-input {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #f8f8f8;
+            font-size: 16px;
+        }
+
+        .form-input:disabled {
+            background-color: #f0f0f0;
+            color: #666;
+        }
+
+        .submit-button {
+            background-color: #4A2B2B;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .delete-button {
+            background-color: transparent;
+            color: #ff4444;
+            border: none;
+            padding: 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .menu-card.review { background-color: #4A2B2B; color: white; }
+        .menu-card.matching { background-color: #F5E6D3; }
+        .menu-card.sports { background-color: #D4B392; }
+        .menu-card.screen { background-color: #C4A484; color: white; }
+
+        /* 더보기 버튼 수정 */
+        .more-button {
+            position: absolute;  /* fixed에서 absolute로 변경 */
+            bottom: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            z-index: 1000;
+        }
+
+        .menu {
+            display: none;
+            position: absolute;  /* fixed에서 absolute로 변경 */
+            right: 20px;
+            bottom: 60px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 10px 0;
+            list-style: none;
+            z-index: 999;
+        }
+
+        .menu.show {
+            display: block;
+        }
+
+        .menu li a {
+            color: #4A2B2B;
+            text-decoration: none;
+            padding: 10px 20px;
+            display: block;
+        }
+
+        .menu li:hover {
+            background-color: #F5E6D3;
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>환영합니다, <span id="name"></span>님!</h1>
-    <ul class="menu">
-        <li><a href="/api/member/profile">프로필 관리</a></li>
-        <li><a href="/api/gym/list">체육관 목록</a></li>
-        <li><a href="/api/reviews/my">내 리뷰</a></li>
-        <li><a href="/api/reviews/board">게시판</a></li>
-        <li><a href="/api/logout" id="logout">로그 아웃</a></li>
-    </ul>
+<div class="mobile-container">
+    <div class="status-bar">
+        <span class="time">9:41</span>
+    </div>
+    <div class="content-container">
+        <div class="container">
+            <h1>환영합니다, <span id="name"></span>님!</h1>
+        </div>
+
+        <div class="logo">GPS</div>
+
+        <div class="search-container">
+            <input type="text" class="search-bar" placeholder="찾으시는 운동시설을 검색해주세요.">
+        </div>
+
+        <div class="profile-section">
+            <div class="profile-image"></div>
+            <div class="profile-info">
+                <div class="profile-name" id="profileName"></div>
+                <div class="profile-status">🟢 Online</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="menu-card matching" onclick="location.href='/api/showgyms'">
+                <div class="menu-title">운동시설 찾기</div>
+            </div>
+            <div class="menu-card sports">
+                <div class="menu-title">추천피드</div>
+            </div>
+            <div class="menu-card review" onclick="location.href='/api/reviews/my'">
+                <div class="menu-title">내가 쓴 리뷰</div>
+            </div>
+            <div class="menu-card screen">
+                <div class="menu-title">스크랩한 장소</div>
+            </div>
+        </div>
+        <button class="more-button" onclick="toggleMenu()">→</button>
+
+        <ul class="menu">
+            <li><a href="#" class="profile-link" onclick="loadProfileAndOpenModal(); return false;">프로필 관리</a></li>
+            <li><a href="/api/showgyms">체육관 목록</a></li>
+            <li><a href="/api/reviews/my">내 리뷰</a></li>
+            <li><a href="/api/reviews/board">게시판</a></li>
+            <li><a href="/api/logout" id="logout">로그 아웃</a></li>
+        </ul>
+    </div>
+
+    <!-- 모달 -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content profile-modal">
+            <div class="profile-header">
+                <button class="close-button" onclick="closeProfileModal()">←</button>
+                <div class="header-title">프로필 정보</div>
+            </div>
+
+            <div class="profile-section">
+                <div class="profile-image">
+                    <!-- 프로필 이미지 -->
+                </div>
+                <div class="profile-message">프로필 사진을 수정할 수 없습니다.</div>
+            </div>
+
+            <form class="profile-form" id="profileForm">
+                <div class="form-group">
+                    <label class="form-label">아이디</label>
+                    <input type="text" class="form-input" id="userId" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">성명</label>
+                    <input type="text" class="form-input" id="userName" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">닉네임</label>
+                    <input type="text" class="form-input" id="userNickname">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">이메일</label>
+                    <input type="email" class="form-input" id="userEmail">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">나이</label>
+                    <input type="number" class="form-input" id="userAge">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">성별</label>
+                    <input type="text" class="form-input" id="userGender" disabled>
+                </div>
+
+                <button type="submit" class="submit-button">저장하기</button>
+                <button type="button" class="delete-button">회원탈퇴</button>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
-    // 페이지 로드 시 사용자 정보를 Get 하는 함수
-    function loadUserInfo() {
-        fetch('/api/user-info', {
-            method: 'GET',
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json; charset=UTF-8'
-            }
-        })
-            .then(response => {
-                if(!response.ok) {
-                    throw new Error('로그인 상태가 아닙니다.');
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const profileLink = document.querySelector('.profile-link');
+        profileLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            loadProfileAndOpenModal();
+        });
+    });
+
+    async function loadProfileAndOpenModal() {
+        try {
+            // 먼저 현재 로그인된 사용자 정보 가져오기
+            const userResponse = await fetch('/api/user-info', {
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
                 }
-                return response.json();
-            })
-            .then(data => {
-                console.log(data);
-                document.getElementById('name').textContent = data.name;
-            })
-            .catch(error => {
-                console.error('Error: ', error);
-                alert('사용자 정보를 불러오는데 실패했습니다. 다시 로그인해주세요.');
-                window.location.href = '/api/login';
             });
+
+            if (!userResponse.ok) {
+                throw new Error('로그인이 필요합니다.');
+            }
+
+            const userData = await userResponse.json();
+            const userId = userData.userId; // 실제 사용자 ID
+            console.log("유저 ID:", userId); // 확인용
+
+            const profileResponse = await fetch(`/api/member/${userId}/myProfile`, {
+                credentials: 'include'
+            });
+
+            if (!profileResponse.ok) {
+                throw new Error('프로필 정보를 불러올 수 없습니다.');
+            }
+
+            const profileData = await profileResponse.json();
+            const modal = document.getElementById('profileModal');
+            fillProfileData(profileData);
+            modal.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error:', error);
+            alert('프로필 정보를 불러오는데 실패했습니다.');
+        }
     }
 
-    // 로그아웃 기능
-    document.getElementById('logout').addEventListener('click', function (e) {
+    function fillProfileData(data) {
+        document.getElementById('userId').value = data.userId;
+        document.getElementById('userName').value = data.name;
+        document.getElementById('userNickname').value = data.nickname;
+        document.getElementById('userEmail').value = data.email;
+        document.getElementById('userAge').value = data.age + '세';
+        document.getElementById('userGender').value = data.gender;
+
+        const profileImage = document.querySelector('.profile-image');
+        if (data.profileImg) {
+            profileImage.style.backgroundImage = `url(${data.profileImg})`;
+        } else {
+            profileImage.style.backgroundImage = 'none';
+            profileImage.style.backgroundColor = '#f0f0f0';
+        }
+    }
+
+    // 프로필 모달 닫기
+    function closeProfileModal() {
+        const modal = document.getElementById('profileModal');
+        modal.style.display = 'none';
+    }
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('profileModal');
+        if (event.target === modal) {
+            closeProfileModal();
+        }
+    });
+
+    // 프로필 업데이트 함수도 수정
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData();
+
+        const profileData = {
+            nickname: document.getElementById('userNickname').value,
+            email: document.getElementById('userEmail').value
+        };
+
+        formData.append('profileData', new Blob([JSON.stringify(profileData)], {
+            type: 'application/json'
+        }));
+
+        // user-info에서 가져온 userId 사용
+        fetch('/api/user-info', {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(userData => {
+                const userId = userData.userId;  // Member 엔티티의 userId
+
+                return fetch(`/api/member/${userId}/myProfile`, {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('프로필이 업데이트되었습니다.');
+                    closeProfileModal();
+                } else {
+                    alert(data.message || '업데이트에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+    });
+
+    // 로그아웃 처리
+    document.getElementById('logout').addEventListener('click', function(e) {
         e.preventDefault();
         fetch('/api/logout', {
             method: 'GET',
@@ -68,13 +653,39 @@
                 }
             })
             .catch(error => {
+                console.error('Error:', error);
+                alert('로그아웃 처리 중 오류가 발생했습니다.');
+            });
+    });
+
+
+    function toggleMenu() {
+        const menu = document.querySelector('.menu');
+        menu.classList.toggle('show');
+    }
+
+    document.getElementById('logout').addEventListener('click', function(e) {
+        e.preventDefault();
+        fetch('/api/logout', {
+            method: 'GET',
+            credentials: 'include'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
                 console.error('Error : ', error);
                 alert('로그아웃 처리 중 오류가 발생했습니다.');
-            })
-    })
+            });
+    });
 
-    // 페이지 로드 시 사용자 정보 로드 함수 호출
-    window.onload = loadUserInfo();
+    window.onload = loadUserInfo;
 </script>
 </body>
 </html>

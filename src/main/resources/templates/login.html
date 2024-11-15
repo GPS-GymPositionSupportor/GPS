@@ -13,40 +13,47 @@
     </style>
 </head>
 <body>
-    <h1>로그인</h1>
-    <form id="loginForm" action="/api/login" method="post">
-        <input type="text" name="mId" placeholder="아이디" required>
-        <input type="password" name="mPassword" placeholder="비밀번호" required>
-        <button type="button" onClick="location.href='/oauth2/authorization/kakao'">카카오로 로그인하기</button>
-        <button type="button" onClick="location.href='/oauth2/authorization/google'">구글로 로그인하기</button>
-        <button type="submit">로그인</button>
-    </form>
-    <p>계정이 없으신가요? <a href="/api/register">회원가입</a> </p>
+<h1>로그인</h1>
+<form id="loginForm" action="/api/login" method="post">
+    <input type="text" name="mId" placeholder="아이디" required>
+    <input type="password" name="mPassword" placeholder="비밀번호" required>
+    <button type="button" onClick="location.href='/oauth2/authorization/kakao'">카카오로 로그인하기</button>
+    <button type="button" onClick="location.href='/oauth2/authorization/google'">구글로 로그인하기</button>
+    <button type="submit">로그인</button>
+</form>
 
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+<p>계정이 없으신가요? <a href="/api/register">회원가입</a></p>
 
-            const formData = new FormData(this);
+<!-- 아이디 찾기 및 비밀번호 찾기 버튼 추가 -->
+<p>
+    <button type="button" onClick="location.href='/api/find-id'">아이디 찾기</button>
+    <button type="button" onClick="location.href='/api/find-password'">비밀번호 찾기</button>
+</p>
 
-            fetch('/api/login', {
-                method: 'POST',
-                body: formData
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/api/login', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert(data.message);
-                        window.location.href = data.redirect;
-                    } else {
-                        alert(data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error: ', error);
-                    alert('로그인 처리 중 오류가 발생했습니다.');
-                });
-        });
-    </script>
+            .catch(error => {
+                console.error('Error: ', error);
+                alert('로그인 처리 중 오류가 발생했습니다.');
+            });
+    });
+</script>
 </body>
 </html>
