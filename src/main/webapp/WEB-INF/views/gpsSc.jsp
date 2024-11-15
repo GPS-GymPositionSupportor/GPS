@@ -1,52 +1,53 @@
-	<script>
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<script>
         <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 		
 		document.addEventListener('DOMContentLoaded', function() {
 			var loginForm = document.getElementById('loginForm');
 		    loginForm.addEventListener('submit', function(event) {
 		        if (!validForm()) {
-		            event.preventDefault(); // í¼ ì ì¶ ë°©ì§
+		            event.preventDefault();
 		        }
 		    });
 		    
 			var loginForm = document.getElementById('loginForm');
 		    var username = loginForm.querySelector('input[name="username"]');
 		    var password = loginForm.querySelector('input[name="password"]');
+
 		
 		    loginForm.addEventListener('submit', function(event) {
 		        if (!validForm()) {
-		            event.preventDefault(); // í¼ ì ì¶ ë°©ì§
+		            event.preventDefault();
 		        }
 		    });
 		
 		    function validForm() {
 		        var isValid = true;
-		
-		        // ì í¨ì± ê²ì¬
+
 		        if (username.value.trim() === "") {
-		            username.classList.add('error'); // ìë¬ í´ëì¤ ì¶ê°
+		            username.classList.add('error');
 		            isValid = false;
 		        } else {
-		            username.classList.remove('error'); // ìë¬ í´ëì¤ ì ê±°
+		            username.classList.remove('error');
 		        }
 		
 		        if (password.value.trim() === "") {
-		            password.classList.add('error'); // ìë¬ í´ëì¤ ì¶ê°
+		            password.classList.add('error');
 		            isValid = false;
 		        } else {
-		            password.classList.remove('error'); // ìë¬ í´ëì¤ ì ê±°
+		            password.classList.remove('error');
 		        }
 		
-		        return isValid; // ì í¨ì± ê²ì¬ ê²°ê³¼ ë°í
+		        return isValid;
 		    }
 		
-		    // í´ë¦­ ì´ë²¤í¸ ì¶ê°
+		    // id 유효성 검사 이후 id/pw 입력 폼 클릭 시 Error 제거
 		    username.addEventListener('focus', function() {
-		        username.classList.remove('error'); // ìë¬ í´ëì¤ ì ê±°
+		        username.classList.remove('error');
 		    });
 		
 		    password.addEventListener('focus', function() {
-		        password.classList.remove('error'); // ìë¬ í´ëì¤ ì ê±°
+		        password.classList.remove('error');
 		    });
 		    
 		    var togglePassword = document.getElementById('togglePassword');
@@ -57,10 +58,10 @@
 		        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 		        passwordInput.setAttribute('type', type);
 		        
-		        eyeIcon.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg'; // ë¹ë°ë²í¸ê° ë³´ì¼ ë ìì´ì½ ë³ê²½
+		        eyeIcon.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 		    });
 		    
-		    <%-- íë²ê±° ë²í¼--%>
+
 		    var burButton = document.querySelector('.burbutton');
 		    var navLinks = document.getElementById('nav-links');
 	
@@ -73,7 +74,7 @@
 	            var navLinks = document.getElementById('nav-links');
 
 	            if (window.innerWidth <= 767) {
-	                // ëª¨ë°ì¼ êµ¬ì¡°ë¡ ë³ê²½
+	                // 모바일 구조로 변경
 	                navLinks.innerHTML = `
 	                	<div class="myPage">
 		                    <div class="user-info">
@@ -83,38 +84,38 @@
 		                        <div class="greeting">
 		                            <a class="hello">안녕하세요</a>
 		                            <div class="mrUser">
-		                                <a class="mrUserName"><%= session.getAttribute("userID") %></a>
+		                                <a class="mrUserName"><%= session.getAttribute("nickname") %></a>
 		                                <a class="mr">님</a>
 		                            </div>
 		                        </div>
 		                    </div>
 		                </div>
-	                <div>
+	                 <div>
 	                	<form id="navForm" method="get">
 		                    <button type="submit" name="selectedNav" value="A">A</button>
-		                    <button type="submit" name="selectedNav" value="B">íë¡í</button>
-		                    <button type="submit" name="selectedNav" value="C">ì¶ì² í¼ë</button>
-		                    <button type="submit" name="selectedNav" value="D">ì¤í¬ë©í ì¥ì</button>
-		                    <button type="submit" name="selectedNav" value="E">ë´ê° ì´ ë¦¬ë·°</button>
+		                    <button type="submit" name="selectedNav" value="B">프로필</button>
+		                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
+		                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
+		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 		                </form>
 		                <div id="logoutContainer">
 		                    <form action="/api/logout" method="post" id="logoutForm">
-		                        <button type="submit" id="logoutButton">ë¡ê·¸ìì <img src="../image/Frame.png" alt="logout_icon" class="logout_icon"></button>
+		                        <button type="submit" id="logoutButton">로그아웃 <img src="../image/Frame.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    <div>
 	                `;
 	            } else {
-	                // ë°ì¤í¬í± êµ¬ì¡°ë¡ ë³ê²½
+	                // 데스크톱 구조로 변경
 	                navLinks.innerHTML = `
 	                    <form id="navForm" method="get">
 	                        <button type="submit" name="selectedNav" value="A">A</button>
-	                        <button type="submit" name="selectedNav" value="B">íë¡í</button>
-	                        <button type="submit" name="selectedNav" value="C">ì¶ì² í¼ë</button>
-	                        <button type="submit" name="selectedNav" value="D">ì¤í¬ë©í ì¥ì</button>
-	                        <button type="submit" name="selectedNav" value="E">ë´ê° ì´ ë¦¬ë·°</button>
+	                        <button type="submit" name="selectedNav" value="B">프로필</button>
+	                        <button type="submit" name="selectedNav" value="C">추천 피드</button>
+	                        <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
+	                        <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 	                    </form>
 	                    <form action="/api/logout" method="post">
-	                        <button type="submit" id="logoutButton">ë¡ê·¸ìì</button>
+	                        <button type="submit" id="logoutButton">로그아웃</button>
 	                    </form>
 	                `;
 	            }
@@ -129,12 +130,13 @@
 		    fetch('findIdPw.jsp')
 		        .then(response => response.text())
 		        .then(data => {
-		            document.querySelector('.login-form').innerHTML = data; // ì¤ë²ë ì´ ë´ì©ì ë³ê²½
+                    // 가져온 데이터를 login-form 요소에 삽입
+		            document.querySelector('.login-form').innerHTML = data;
 		        })
 		        .catch(error => console.error('Error loading findIdPw.jsp:', error));
 		});
 
-		//ê° ë²í¼ì í´ë¦­íì ë ê°ê°ì í¼ì ë³´ì¬ì£¼ë í¨ì
+        // id/pw 찾기 페이지에서 각 버튼을 클릭했을 때 각각의 폼을 보여주는 함수
 		function showForm(formType) {
 			var idPwBtn = document.getElementById('idPw-btn');
 		    var findIdForm = document.getElementById('findIdForm');
@@ -145,8 +147,8 @@
 		    findIdForm.style.display = 'none';
 		    findPwForm.style.display = 'none';
 		    cancelBtn.style.display = 'none';
-		
-		    // ì íë í¼ë§ ë³´ì´ê¸°
+
+            // 선택된 폼만 보이기
 		    if (formType === 'findBtn') {
 		    	idPwBtn.style.display = 'block';
 		    } else if (formType === 'findId') {
