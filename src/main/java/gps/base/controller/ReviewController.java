@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -124,14 +126,21 @@ public class ReviewController {
 
 
     @GetMapping("/all")
-    public ResponseEntity<List<ReviewDTO>> getAllReviews() {
-        List<ReviewDTO> reviews = reviewService.getAllReviewsWithUserName();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");  // HH:mm 제거
-        reviews.forEach(review ->
+    public ResponseEntity<Page<ReviewDTO>> getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "24") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Page<ReviewDTO> reviews = reviewService.getAllReviewsWithPaging(pageRequest);
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        reviews.getContent().forEach(review ->
                 review.setFormattedDate(
                         review.getAddedAt() != null ? review.getAddedAt().format(formatter) : ""
                 )
         );
+
         return ResponseEntity.ok(reviews);
     }
 

@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -360,6 +362,24 @@ public class ReviewService {
         if (file.getSize() > maxSize) {
             throw new CustomException(ErrorCode.FILE_SIZE_EXCEED);
         }
+    }
+
+    public Page<ReviewDTO> getAllReviewsWithPaging(Pageable pageable) {
+        Page<Review> reviewPage = reviewRepository.findAll(pageable);
+        return reviewPage.map(review -> {
+            ReviewDTO dto = convertToDTO(review); // 기존 변환 메서드 사용
+
+            List<Image> images = imageRepository.findByReviewId(review.getRId());
+            if(!images.isEmpty()) {
+                dto.setReviewImage(images.get(0).getImageUrl());
+                List<String> imageUrls = images.stream()
+                        .map(Image::getImageUrl)
+                        .collect(Collectors.toList());
+                dto.setReviewImages(imageUrls);
+            }
+
+            return dto;
+        });
     }
 
     
