@@ -1,7 +1,8 @@
 package gps.base.controller;
 
+import gps.base.DTO.EmailRequest;
 import gps.base.model.Authority;
-import gps.base.service.MailService;
+import gps.base.service.EmailService;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
 import jakarta.servlet.http.HttpSession;
@@ -10,13 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Controller
 @RequestMapping("/api")
@@ -25,26 +26,20 @@ public class MainController {
     @Autowired
     private MemberService memberService;
 
-    private MailService mailService;
+    @Autowired
+    private EmailService emailService;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    // 인증 코드 발송 메서드
-    @PostMapping("/register/email-validate")
-    public String mailConfirm(@RequestParam(value = "email", required = false) String email) throws Exception{
-        String code = mailService.sendSimpleMessage(email);
-        System.out.println("인증코드 : " + code);
-        return code;
-    }
-
-
-    // 인증 코드 확인 메서드
-    @PostMapping("/register/verifyCode")
-    public boolean verifyCode(@RequestParam("inputCode") String inputCode, @RequestParam("sessionCode") String sessionCode) {
-        if (!sessionCode.equals(inputCode)) {
-            throw new NoSuchElementException("인증 코드가 일치하지 않습니다.");
+    @PostMapping("/send-email")
+    public @ResponseBody String sendEmail(@RequestBody EmailRequest emailRequest) {
+        try {
+            emailService.sendSimpleMessage(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getText());
+            return "Email sent successfully!";
+        } catch (MailException e) {
+            e.printStackTrace();
+            return "Email could not be sent!";
         }
-        return true;
     }
 
     // 회원가입 폼
