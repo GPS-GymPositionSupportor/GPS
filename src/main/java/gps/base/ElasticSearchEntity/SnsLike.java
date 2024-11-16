@@ -4,11 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "favorite")
+@Table(name = "sns_like")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Favorite {
+public class SnsLike {
     @Id
     private Long id;
 
@@ -20,11 +21,12 @@ public class Favorite {
     @JoinColumn(name = "gym_id")
     private Gym gym;
 
-    @Column(name = "is_favorite")
-    private boolean isFavorite;
+    @Column(name = "is_like")
+    private boolean isLike;
+
+    @Column(name = "like_count")
+    private int likeCount;
 
     @Column(name = "added_at")
     private LocalDateTime addedAt;
 }
-
-

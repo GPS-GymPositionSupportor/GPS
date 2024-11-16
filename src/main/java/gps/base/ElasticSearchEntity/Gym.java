@@ -1,52 +1,35 @@
 package gps.base.ElasticSearchEntity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import lombok.*;
 
-// 체육관 정보 엔티티
+import java.time.LocalDateTime;
 @Entity
 @Table(name = "gym")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Gym {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "gym_id")
-    private Long gymId;
+    private Long id;
 
-    @Column(name = "g_name", nullable = false)
+    @Column(name = "g_name")
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private GymCategory category;
 
-    @Column(nullable = false)
     private String address1;
-
-    @Column(nullable = false)
     private String address2;
-
-    @Column(name = "opening_hours")
     private String openingHours;
-
     private String homepage;
-
-    @Column(name = "phone_number")
     private String phoneNumber;
-
     private Double rating;
 
-    @Column(name = "g_longitude", nullable = false)
+    @Column(name = "g_longitude")
     private Double longitude;
 
-    @Column(name = "g_latitude", nullable = false)
+    @Column(name = "g_latitude")
     private Double latitude;
 
     @Column(name = "g_created_by")
@@ -60,6 +43,4 @@ public class Gym {
 
     @Column(name = "g_deleted_at")
     private LocalDateTime deletedAt;
-
 }
-

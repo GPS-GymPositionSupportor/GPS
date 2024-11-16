@@ -4,27 +4,20 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "favorite")
+@Table(name = "real_time_location")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Favorite {
+public class RealTimeLocation {
     @Id
     private Long id;
+
+    private Double longitude;
+    private Double latitude;
+    private LocalDateTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gym_id")
-    private Gym gym;
-
-    @Column(name = "is_favorite")
-    private boolean isFavorite;
-
-    @Column(name = "added_at")
-    private LocalDateTime addedAt;
 }
-
-

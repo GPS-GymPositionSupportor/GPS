@@ -1,48 +1,33 @@
 package gps.base.ElasticSearchEntity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "member")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private Long id;
 
-    @Column(name = "m_id", nullable = false)
-    private String mId;
+    @Column(name = "m_id")
+    private String memberId;
 
-    @Column(name = "m_password", nullable = false)
-    private String mPassword;
+    @Column(name = "m_password")
+    private String password;
 
-    @Column(nullable = false)
     private String name;
-
-    @Column(nullable = false)
     private String nickname;
-
-    @Column(nullable = false)
     private String email;
-
-    @Column(nullable = false)
     private LocalDate birth;
-
-    @Column(nullable = false)
     private String gender;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Authority authority;
 
     @Column(name = "m_created_by")
