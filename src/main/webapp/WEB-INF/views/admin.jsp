@@ -666,6 +666,12 @@
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.innerHTML = '<div class="modal-content">' +
+            '<div class="current-gym-image">' +
+            '<img src="' + (gym.gymImage && gym.gymImage.imageUrl ? gym.gymImage.imageUrl : '../image/logo.png') + '" ' +
+            'alt="체육관 이미지" class="gym-edit-image">' +
+            '<input type="file" id="gymImageInput" accept="image/*" class="image-input">' +
+            '<label for="gymImageInput" class="image-upload-btn"><i class="fas fa-camera"></i> 이미지 변경</label>' +
+            '</div>' +
             '<div class="form-group">' +
             '<label><i class="fas fa-store"></i>시설명</label>' +
             '<input type="text" class="form-control" id="editGymName" value="' + (gym.gname || '') + '">' +

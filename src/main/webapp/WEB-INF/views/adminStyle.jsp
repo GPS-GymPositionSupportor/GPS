@@ -780,3 +780,34 @@ color: white;
 background-color: #6c757d;
 color: white;
 }
+
+.current-gym-image {
+text-align: center;
+margin-bottom: 20px;
+position: relative;
+}
+
+.gym-edit-image {
+width: 150px;
+height: 150px;
+object-fit: cover;
+border-radius: 8px;
+margin-bottom: 10px;
+}
+
+.image-input {
+display: none;
+}
+
+.image-upload-btn {
+padding: 8px 16px;
+background: #B05D5D;
+color: white;
+border-radius: 4px;
+cursor: pointer;
+display: inline-block;
+}
+
+.image-upload-btn i {
+margin-right: 8px;
+}
