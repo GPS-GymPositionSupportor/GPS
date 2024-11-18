@@ -54,7 +54,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="/" class="nav-link">
+            <a href="#" class="nav-link">
                 <i class="fas fa-users"></i>회원 관리
             </a>
         </li>
@@ -64,8 +64,8 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="/" class="nav-link">
-                <i class="fas fa-comment"></i>댓글 관리
+            <a href="#" class="nav-link">
+                <i class="fas fa-comment" onclick="loadCommentList()"></i>댓글 관리
             </a>
         </li>
     </ul>
@@ -773,6 +773,185 @@
                 reader.readAsDataURL(file);
             }
         }
+    });
+
+    // 댓글 관리 메뉴 클릭시 호출되는 함수
+    async function loadCommentList() {
+        const mainContent = document.querySelector('.main-content');
+        mainContent.innerHTML = ''
+            + '<div class="header">'
+            + '    <h2>댓글 관리</h2>'
+            + '    <div class="buttons">'
+            + '        <button class="btn btn-primary" onclick="deleteSelectedComments()">선택 삭제</button>'
+            + '    </div>'
+            + '</div>'
+            + '<div class="review-list"></div>'
+            + '<div class="pagination"></div>';
+
+        try {
+            const response = await fetch('/api/reviews/comments/all?page=0', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            const data = await response.json();
+            console.log('댓글 데이터:', data);
+
+            if (data && data.content) {
+                displayComments(data.content);
+                updateCommentPagination(data.totalElements, 0);
+            }
+        } catch (error) {
+            console.error('댓글 로드 실패:', error);
+        }
+    }
+
+    function displayComments(comments) {
+        const commentList = document.querySelector('.review-list');
+        if (!commentList) return;
+
+        commentList.innerHTML = '';
+        const leftColumn = document.createElement('div');
+        leftColumn.className = 'review-column left';
+        const rightColumn = document.createElement('div');
+        rightColumn.className = 'review-column right';
+
+        comments.forEach((comment, index) => {
+            const commentElement = document.createElement('div');
+            commentElement.className = 'review-item';
+            commentElement.setAttribute('data-comment-id', comment.id);
+
+            // 체크박스, 텍스트, 작성자 정보를 담을 컨테이너들
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'review-select';
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'review-text';
+            textDiv.textContent = comment.comment;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'review-info';
+
+            const writerSpan = document.createElement('span');
+            writerSpan.className = 'review-writer';
+            writerSpan.textContent = comment.userName;
+
+            const dateSpan = document.createElement('span');
+            dateSpan.className = 'review-date';
+            dateSpan.textContent = new Date(comment.addedAt).toLocaleDateString();
+
+            // 요소들 조립
+            infoDiv.appendChild(writerSpan);
+            infoDiv.appendChild(dateSpan);
+
+            commentElement.appendChild(checkbox);
+            commentElement.appendChild(textDiv);
+            commentElement.appendChild(infoDiv);
+
+            // 왼쪽/오른쪽 컬럼에 분배
+            if (index < 12) {
+                leftColumn.appendChild(commentElement);
+            } else {
+                rightColumn.appendChild(commentElement);
+            }
+        });
+
+        commentList.appendChild(leftColumn);
+        commentList.appendChild(rightColumn);
+    }
+
+    function updateCommentPagination(totalElements, currentPage) {
+        const pagination = document.querySelector('.pagination');
+        if (!pagination) return;
+
+        const totalPages = Math.ceil(totalElements / 24);
+        pagination.innerHTML = '';
+
+        // 첫 페이지
+        const firstButton = document.createElement('button');
+        firstButton.textContent = '<<';
+        firstButton.onclick = () => loadComments(0);
+        pagination.appendChild(firstButton);
+
+        // 이전 페이지
+        if (currentPage > 0) {
+            const prevButton = document.createElement('button');
+            prevButton.textContent = '<';
+            prevButton.onclick = () => loadComments(currentPage - 1);
+            pagination.appendChild(prevButton);
+        }
+
+        // 페이지 번호
+        for (let i = Math.max(0, currentPage - 2); i <= Math.min(currentPage + 2, totalPages - 1); i++) {
+            const button = document.createElement('button');
+            button.textContent = i + 1;
+            button.className = i === currentPage ? 'active' : '';
+            button.onclick = () => loadComments(i);
+            pagination.appendChild(button);
+        }
+
+        // 다음 페이지
+        if (currentPage < totalPages - 1) {
+            const nextButton = document.createElement('button');
+            nextButton.textContent = '>';
+            nextButton.onclick = () => loadComments(currentPage + 1);
+            pagination.appendChild(nextButton);
+        }
+
+        // 마지막 페이지
+        const lastButton = document.createElement('button');
+        lastButton.textContent = '>>';
+        lastButton.onclick = () => loadComments(totalPages - 1);
+        pagination.appendChild(lastButton);
+    }
+
+    async function loadComments(page = 0) {
+        try {
+            const response = await fetch('/api/reviews/comments/all?page=' + page);
+            const data = await response.json();
+            if (data && data.content) {
+                displayComments(data.content);
+                updateCommentPagination(data.totalElements, page);
+            }
+        } catch (error) {
+            console.error('댓글 로드 실패:', error);
+        }
+    }
+
+    async function deleteSelectedComments() {
+        const selectedComments = document.querySelectorAll('.review-select:checked');
+        const commentIds = Array.from(selectedComments).map(function(checkbox) {
+            return checkbox.closest('.review-item').getAttribute('data-comment-id');
+        });
+
+        if (!commentIds.length) {
+            alert('삭제할 댓글을 선택해주세요.');
+            return;
+        }
+
+        if (confirm('선택한 댓글을 삭제하시겠습니까?')) {
+            try {
+                const response = await fetch('/api/comments', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(commentIds)
+                });
+
+                if (response.ok) {
+                    alert('댓글이 삭제되었습니다.');
+                    loadComments(0);
+                }
+            } catch (error) {
+                console.error('댓글 삭제 실패:', error);
+                alert('댓글 삭제 중 오류가 발생했습니다.');
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadComments(0);
     });
 
 

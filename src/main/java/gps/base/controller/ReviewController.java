@@ -9,6 +9,7 @@ import gps.base.model.Comment;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
 import gps.base.repository.ImageRepository;
+import gps.base.service.CommentService;
 import gps.base.service.ReviewService;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +18,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -37,6 +40,9 @@ public class ReviewController {
 
     @Autowired
     private ReviewService reviewService;
+
+    @Autowired
+    private CommentService commentService;
 
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
@@ -152,6 +158,21 @@ public class ReviewController {
     /*
     댓글 관리
      */
+
+    // 댓글 가져오기
+    @GetMapping("/comments/all")
+    @ResponseBody
+    public Page<CommentDTO> getAllComments(@PageableDefault(size = 24) Pageable pageable) {
+        log.info("댓글 조회 요청 - page: {}, size: {}",
+                pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<CommentDTO> comments = commentService.getAllComments(pageable);
+        log.info("조회된 댓글 수: {}", comments.getContent().size());
+        log.info("전체 페이지: {}", comments.getTotalPages());
+        log.info("전체 댓글 수: {}", comments.getTotalElements());
+
+        return comments;  // ResponseEntity 제거
+    }
     
     
     // 댓글 추가
