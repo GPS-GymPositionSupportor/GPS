@@ -207,7 +207,7 @@
                <button class="search-btn">검색</button>
            </div>
            <div class="buttons">  <!-- 버튼들을 div로 묶어서 관리 -->
-                <button class="btn btn-primary">시설 추가</button>
+                <button class="btn btn-primary" onclick="showEditModal()">시설 수정</button>
                 <button class="btn btn-primary" onclick="deleteSelectedGyms()">시설 삭제</button>
            </div>
        </div>
@@ -235,6 +235,7 @@
 
         loadGymList();
     }
+    let currentGyms = [];
 
     async function loadGymList(page = 0, size = 12) {
         try {
@@ -242,8 +243,7 @@
                 credentials: 'include'
             });
             const data = await response.json();
-            console.log("받은 Gym DATA : {}", data);
-            console.log("TestImage : {}", data.content[0].gymImage.imageUrl);
+            currentGyms = data.content;
             displayGyms(data.content, page);  // 페이지 번호 전달
             updateGymPagination(data.totalElements);
         } catch (error) {
@@ -307,6 +307,7 @@
                 { content: date },
                 { content: rating }
             ];
+
 
             row.appendChild(checkboxCell);
             row.appendChild(imgCell);
@@ -639,6 +640,98 @@
 
             await loadGymList(); // 삭제 후 목록 갱신
             alert('선택한 시설이 삭제되었습니다.');
+        }
+    }
+
+
+    // 모달
+    async function showEditModal() {
+        const selectedCheckboxes = document.querySelectorAll('.gym-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('수정할 시설을 선택해주세요.');
+            return;
+        }
+
+        if (selectedCheckboxes.length > 1) {
+            alert('한 번에 하나의 시설만 수정할 수 있습니다.');
+            return;
+        }
+
+        const gymRow = selectedCheckboxes[0].closest('.gym-row');
+        const gymId = parseInt(gymRow.getAttribute('data-gym-id'));
+        const gym = currentGyms.find(g => g.gymId === gymId);
+
+        if (!gym) return;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = '<div class="modal-content">' +
+            '<div class="form-group">' +
+            '<label><i class="fas fa-store"></i>시설명</label>' +
+            '<input type="text" class="form-control" id="editGymName" value="' + (gym.gname || '') + '">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label><i class="fas fa-map-marker-alt"></i>주소</label>' +
+            '<input type="text" class="form-control" id="editAddress" value="' + (gym.address || '') + '">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label><i class="fas fa-phone"></i>전화번호</label>' +
+            '<input type="text" class="form-control" id="editPhone" value="' + (gym.phone || '') + '">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label><i class="fas fa-globe"></i>홈페이지 주소</label>' +
+            '<input type="text" class="form-control" id="editHomepage" value="' + (gym.homepage || '') + '">' +
+            '</div>' +
+            '<div class="form-group">' +
+            '<label><i class="fas fa-clock"></i>영업일</label>' +
+            '<input type="text" class="form-control" id="editOpenHour" value="' + (gym.openHour || '') + '">' +
+            '</div>' +
+            '<div class="edit-buttons">' +
+            '<button class="btn-edit btn-save" onclick="saveGymChanges(' + gymId + ')">변경 저장</button>' +
+            '<button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>' +
+            '</div>' +
+            '</div>';
+
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    function closeModal() {
+        const modal = document.querySelector('.modal');
+        if (modal) {
+            modal.remove();
+        }
+    }
+
+    async function saveGymChanges(gymId) {
+        const updatedGym = {
+            gname: document.getElementById('editGymName').value,
+            address: document.getElementById('editAddress').value,
+            phone: document.getElementById('editPhone').value,
+            homepage: document.getElementById('editHomepage').value,
+            openHour: document.getElementById('editOpenHour').value
+        };
+
+        try {
+            const response = await fetch(`/api/gyms/${gymId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedGym),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('시설 정보가 수정되었습니다.');
+                closeModal();
+                loadGymList();  // 목록 새로고침
+            } else {
+                throw new Error('수정 실패');
+            }
+        } catch (error) {
+            console.error('시설 수정 중 오류:', error);
+            alert('시설 수정 중 오류가 발생했습니다.');
         }
     }
 

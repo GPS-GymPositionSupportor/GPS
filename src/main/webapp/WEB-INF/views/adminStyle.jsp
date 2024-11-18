@@ -703,3 +703,80 @@ border: none;
 border-radius: 4px;
 cursor: pointer;
 }
+
+
+/* 모달 스타일 */
+.modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0, 0, 0, 0.5);
+z-index: 1000;
+}
+
+.modal-content {
+position: relative;
+background-color: #fff;
+width: 800px;
+margin: 50px auto;
+padding: 20px;
+border-radius: 8px;
+box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form-group {
+margin-bottom: 20px;
+position: relative;
+}
+
+.form-group label {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 8px;
+color: #666;
+}
+
+.form-group i {
+color: #888;
+}
+
+.form-control {
+width: 100%;
+padding: 10px;
+border: 1px solid #ddd;
+border-radius: 4px;
+font-size: 14px;
+}
+
+.form-control:focus {
+border-color: #B05D5D;
+outline: none;
+}
+
+.edit-buttons {
+display: flex;
+justify-content: flex-end;
+gap: 10px;
+margin-top: 20px;
+}
+
+.btn-edit {
+padding: 8px 16px;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.btn-save {
+background-color: #B05D5D;
+color: white;
+}
+
+.btn-cancel {
+background-color: #6c757d;
+color: white;
+}
