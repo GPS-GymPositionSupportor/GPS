@@ -2,16 +2,20 @@ package gps.base.service;
 
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
+import gps.base.model.Authority;
 import gps.base.model.Gym;
 import gps.base.model.Review;
 import gps.base.repository.GymRepository;
+import gps.base.repository.ImageRepository;
 import gps.base.repository.ReviewRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -27,11 +31,12 @@ public class GymService {
 
     @Autowired
     private ReviewService reviewService;
-
     @Autowired
-    private ReviewRepository reviewRepository;
+    private ImageRepository imageRepository;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
-    
+
     // 체육관 저장
     @Transactional
     public Gym saveGym(Gym gym) {
@@ -132,25 +137,64 @@ public class GymService {
     /**
      * 체육관 삭제 (소프트 삭제)
      * @param gymId 체육관 ID
-     * @param deletedBy 삭제 요청자
      */
     @Transactional
-    public void deleteGym(Long gymId, String deletedBy) {
-        if (deletedBy == null || deletedBy.trim().isEmpty()) {
-            throw new IllegalArgumentException("삭제 요청자 정보가 필요합니다.");
-        }
+    public void deleteGym(Long gymId, Long userId, Authority authority) {
+        Gym gym = validateGymAndImage(gymId, userId, null, authority);
 
+        // 연관된 이미지 삭제
+        imageRepository.deleteByGymId(gymId);
+
+        // 체육관 삭제
+        gymRepository.delete(gym);
+        messagingTemplate.convertAndSend("/topic/gym/" + gymId, "체육관이 삭제되었습니다.");
+    }
+
+    // 체욱관 & 이미지 검증
+    public Gym validateGymAndImage(Long gymId, Long userId, MultipartFile file, Authority authority) {
+        // 체육관 존재 여부
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new EntityNotFoundException("체육관을 찾을 수 없습니다. ID: " + gymId));
+                .orElseThrow(() -> new CustomException(ErrorCode.GYM_NOT_FOUND));
 
-        // 이미 삭제된 체육관인지 확인
-        if (gym.getGDeletedAt() != null) {
-            throw new IllegalStateException("이미 삭제된 체육관입니다.");
+        // 작성자 확인
+        if (authority != Authority.ADMIN) {
+            throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
         }
 
-        gym.setGDeletedAt(LocalDateTime.now());
-        gym.setGDeletedBy(deletedBy);
-        gymRepository.save(gym);
+        // 이미지가 있는 경우 이미지 검증
+        if (file != null && !file.isEmpty()) {
+            validateImageFile(file);
+        }
+        return gym;
+
+    }
+
+    // 이미지 파일 검증 메서드
+    private void validateImageFile(MultipartFile file) {
+        // 파일이 비어있는지 확인
+        if (file.isEmpty()) {
+            throw new CustomException(ErrorCode.NO_FILE_PROVIDED);
+        }
+
+        // 파일 형식 검증
+        String contentType = file.getContentType();
+        if (contentType == null || !isValidImageType(contentType)) {
+            throw new CustomException(ErrorCode.NOT_IMAGE_FILE);
+        }
+
+        // 파일 크기 검증 (예: 5MB)
+        long maxSize = 5 * 1024 * 1024; // 5MB
+        if (file.getSize() > maxSize) {
+            throw new CustomException(ErrorCode.FILE_SIZE_EXCEED);
+        }
+    }
+
+    // 이미지 타입 검증
+    private boolean isValidImageType(String contentType) {
+        return contentType.equals("image/jpeg") ||
+                contentType.equals("image/png") ||
+                contentType.equals("image/gif") ||
+                contentType.equals("image/webp");
     }
 
     /**

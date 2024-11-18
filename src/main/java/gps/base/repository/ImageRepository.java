@@ -13,4 +13,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     void deleteByReviewId(Long reviewId);
 
     Optional<Image> findFirstByGymId(Long gymId);
+
+    void deleteByGymId(Long gymId);
 }

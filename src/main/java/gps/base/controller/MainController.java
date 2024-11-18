@@ -379,27 +379,36 @@ public class MainController {
     // HTMl 호출
     @GetMapping("/showgyms")
     @ResponseBody
-    public ResponseEntity<Page<GymDTO>> getGyms(
+    public Map<String, Object> getGyms(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size,
             HttpSession session) {
         try {
             if (session.getAttribute("loggedInUser") == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                throw new  CustomException(ErrorCode.MEMBER_NOT_FOUND);
             }
+
+            Map<String, Object> response = new HashMap<>();
 
             Page<Gym> gymPage = gymService.getGyms(PageRequest.of(page, size));
             Page<GymDTO> gymDTOPage = gymPage.map(gym -> {
                 GymDTO dto = convertToDTO(gym);
                 Optional<Image> image = imageRepository.findFirstByGymId(gym.getGymId());
                 image.ifPresent(img -> dto.setGymImage(ImageDTO.fromEntity(img)));
+                response.put("imageUrl", image.get().getImageUrl());
                 return dto;
             });
 
-            return ResponseEntity.ok(gymDTOPage);
+
+            response.put("content", gymDTOPage.getContent());
+            response.put("totalElements", gymDTOPage.getTotalElements());
+            response.put("totalPages", gymDTOPage.getTotalPages());
+            response.put("currentPage", gymDTOPage.getNumber());
+
+            return response;
         } catch (CustomException e) {
             log.error("Error retrieving gyms: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -446,6 +455,23 @@ public class MainController {
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
+
+    // 체육관 삭제
+    @DeleteMapping("/{gymId}")
+    public ResponseEntity<?> deleteGym(@PathVariable Long gymId, Long userId , HttpSession session) {
+        Long sessionId = (Long) session.getAttribute("userID");
+        Authority authority = (Authority) session.getAttribute("authority");
+
+        if (sessionId == null) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        gymService.validateGymAndImage(gymId, userId, null, authority);
+        gymService.deleteGym(gymId, userId, authority);
+
+        return ResponseEntity.ok().build();
+    }
+
 
 
 }

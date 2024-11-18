@@ -208,7 +208,7 @@
            </div>
            <div class="buttons">  <!-- 버튼들을 div로 묶어서 관리 -->
                 <button class="btn btn-primary">시설 추가</button>
-                <button class="btn btn-primary">시설 삭제</button>
+                <button class="btn btn-primary" onclick="deleteSelectedGyms()">시설 삭제</button>
            </div>
        </div>
        <div class="gym-table">
@@ -242,6 +242,8 @@
                 credentials: 'include'
             });
             const data = await response.json();
+            console.log("받은 Gym DATA : {}", data);
+            console.log("TestImage : {}", data.content[0].gymImage.imageUrl);
             displayGyms(data.content, page);  // 페이지 번호 전달
             updateGymPagination(data.totalElements);
         } catch (error) {
@@ -260,6 +262,8 @@
 
         currentGyms.forEach(gym => {
             const row = document.createElement('tr');
+            row.className = 'gym-row';
+            row.setAttribute('data-gym-id', gym.gymId);
             const date = gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-';
             const rating = gym.rating ? (gym.rating < 1 ? '0.0' : gym.rating.toFixed(1)) : '0.0';
 
@@ -275,9 +279,18 @@
             // 이미지
             const imgCell = document.createElement('td');
             const img = document.createElement('img');
-            img.src = '../image/logo.png';  // 기본 이미지로 설정
-            img.style.width = '25px';
-            img.style.height = '25px';
+            if (gym.gymImage && gym.gymImage.imageUrl) {
+                // Google 드라이브 링크 체크
+                if (gym.gymImage.imageUrl.includes('google.com')) {
+                    img.src = '../image/logo.png';
+                } else {
+                    img.src = gym.gymImage.imageUrl;
+                }
+            } else {
+                img.src = '../image/logo.png';
+            }
+            img.style.width = '50px';
+            img.style.height = '50px';
             img.style.objectFit = 'cover';
             imgCell.appendChild(img);
 
@@ -415,77 +428,7 @@
 
 
 
-    function displayGyms(gyms, currentPage) {
-        const gymList = document.getElementById('gymList');
-        const itemsPerPage = 12;
-        const startIndex = currentPage * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const currentGyms = gyms;
 
-        gymList.innerHTML = '';
-
-        currentGyms.forEach(gym => {
-            const row = document.createElement('tr');
-            const date = gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-';
-            const rating = gym.rating ? (gym.rating < 1 ? '0.0' : gym.rating.toFixed(1)) : '0.0';
-
-            // 체크박스 셀
-            const checkboxCell = document.createElement('td');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'gym-select';
-            checkbox.dataset.gymId = gym.gymId;
-            checkboxCell.appendChild(checkbox);
-
-            // 이미지 셀
-            const imgCell = document.createElement('td');
-            const img = document.createElement('img');
-            img.src = '../image/logo.png';
-            img.className = 'gym-thumbnail';  // 클래스 추가
-            imgCell.appendChild(img);
-
-            // 나머지 셀들 생성
-            const nameCell = document.createElement('td');
-            nameCell.textContent = gym.gname || '-';
-
-            const addressCell = document.createElement('td');
-            addressCell.textContent = gym.address || '-';
-
-            const hourCell = document.createElement('td');
-            hourCell.textContent = gym.openHour || '-';
-
-            const homepageCell = document.createElement('td');
-            homepageCell.textContent = gym.homepage || '-';
-
-            const phoneCell = document.createElement('td');
-            phoneCell.textContent = gym.phone || '-';
-
-            const creatorCell = document.createElement('td');
-            creatorCell.textContent = gym.gCreatedBy || '-';
-
-            const dateCell = document.createElement('td');
-            dateCell.textContent = date;
-
-            const ratingCell = document.createElement('td');
-            ratingCell.textContent = rating;
-
-            // 순서대로 append
-            row.appendChild(checkboxCell);
-            row.appendChild(imgCell);
-            row.appendChild(nameCell);
-            row.appendChild(addressCell);
-            row.appendChild(hourCell);
-            row.appendChild(homepageCell);
-            row.appendChild(phoneCell);
-            row.appendChild(creatorCell);
-            row.appendChild(dateCell);
-            row.appendChild(ratingCell);
-
-            gymList.appendChild(row);
-        });
-
-        updateGymPagination(gyms.totalElements);
-    }
 
     // 탭별 currentPage 상태 저장
     let pageState = {
@@ -661,6 +604,41 @@
 
             await loadReviewList(); // 비동기 처리
             alert('선택한 리뷰가 삭제되었습니다.');
+        }
+    }
+
+    async function deleteSelectedGyms() {
+        const selectedCheckboxes = document.querySelectorAll('.gym-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('삭제할 시설을 선택해주세요.');
+            return;
+        }
+
+        if (confirm('선택한 시설을 삭제하시겠습니까?')) {
+            for (const checkbox of selectedCheckboxes) {
+                const gymElement = checkbox.closest('.gym-row');
+                const gymId = parseInt(gymElement.getAttribute('data-gym-id'));
+
+                console.log('Deleting gym:', { gymId }); // 삭제 시도 로그
+
+                try {
+                    const response = await fetch(`/api/` + gymId, {
+                        method: 'DELETE',
+                        credentials: 'include',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`삭제 실패 (Status: ` + response.status + ` )`);
+                    }
+                } catch (error) {
+                    console.error('시설 삭제 중 오류:', error);
+                    alert('시설 삭제 중 오류가 발생했습니다.');
+                    return;
+                }
+            }
+
+            await loadGymList(); // 삭제 후 목록 갱신
+            alert('선택한 시설이 삭제되었습니다.');
         }
     }
 

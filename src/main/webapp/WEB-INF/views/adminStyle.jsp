@@ -605,9 +605,66 @@ margin-top: 20px;
 overflow-x: auto;
 }
 
+.gym-table th {
+padding: 15px;
+font-weight: 600;
+background-color: #f8f9fa;
+border-bottom: 2px solid #dee2e6;
+}
+
+.gym-row {
+transition: background-color 0.2s;
+}
+
+.gym-row:hover {
+background-color: #f8f9fa;
+}
+
+.gym-row td {
+padding: 12px 15px;
+vertical-align: middle;
+}
+
+.gym-row img {
+width: 50px;
+height: 50px;
+object-fit: cover;
+border-radius: 4px;
+}
+
+.gym-table th {
+padding: 15px;
+font-weight: 600;
+background-color: #f8f9fa;
+border-bottom: 2px solid #dee2e6;
+}
+
 table {
 width: 100%;
 border-collapse: collapse;
+}
+
+.gym-item {
+display: flex;
+align-items: center;
+padding: 20px;
+background: white;
+border-radius: 8px;
+box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.gym-item:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* 체크박스 */
+.gym-select {
+width: 18px;
+height: 18px;
+margin: 0;
+cursor: pointer;
 }
 
 th, td {
