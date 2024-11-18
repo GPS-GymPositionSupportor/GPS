@@ -1,24 +1,53 @@
 package gps.base.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender javaMailSender;
+    private static final String senderEmail = "whalsrnr2741@naver.com";
+    public static int number;
 
-    private static final String FROM_EMAIL = "whalsrnr2741@naver.com"; // 보내는 사람 이메일 주소
+    public EmailService(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
-    public void sendSimpleMessage(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(FROM_EMAIL);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text);
-        mailSender.send(message);
+    // 랜덤으로 숫자 생성
+    public static void createNumber() {
+        number = (int) (Math.random() * (90000)) + 100000;
+    }
+
+    public MimeMessage createMail(String mail) {
+        createNumber();
+        MimeMessage message = javaMailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(senderEmail);
+            helper.setTo(mail);
+            helper.setSubject("인증코드");
+
+            String body = "";
+            body += "<h3>요청하신 인증 번호입니다.</h3>";
+            body += "<h1>" + number + "</h1>";
+            body += "<h3>감사합니다.</h3>";
+
+            helper.setText(body, true);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+
+        return message;
+    }
+
+    public int sendMail(String mail) {
+        MimeMessage message = createMail(mail);
+        javaMailSender.send(message);
+        return number;
     }
 }

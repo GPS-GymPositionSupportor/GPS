@@ -2,6 +2,7 @@ package gps.base.controller;
 
 import gps.base.DTO.EmailRequest;
 import gps.base.model.Authority;
+import gps.base.repository.MemberRepository;
 import gps.base.service.EmailService;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,14 +33,34 @@ public class MainController {
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    @PostMapping("/send-email")
-    public @ResponseBody String sendEmail(@RequestBody EmailRequest emailRequest) {
+    @GetMapping("/find-userId")
+    public String showFindUserIdForm() {
+        return "find-userId";
+    }
+
+    @GetMapping("/send-email-form")
+    public String showSendEmailForm(Model model) {
+        model.addAttribute("emailRequest", new EmailRequest());
+        return "send-email";
+    }
+
+    @PostMapping("/send-verification-code")
+    public @ResponseBody ResponseEntity<?> sendVerificationCode(@RequestParam String email) {
         try {
-            emailService.sendSimpleMessage(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getText());
-            return "Email sent successfully!";
+            int number = emailService.sendMail(email);
+            return ResponseEntity.ok().body(Collections.singletonMap("message", "메일 전송 완료, 인증번호: " + number));
         } catch (MailException e) {
             e.printStackTrace();
-            return "Email could not be sent!";
+            return ResponseEntity.status(500).body(Collections.singletonMap("message", "메일 전송 실패"));
+        }
+    }
+
+    @PostMapping("/verify-code")
+    public @ResponseBody ResponseEntity<?> verifyCode(@RequestParam int code) {
+        if (code == EmailService.number) { // 인증 번호 비교
+            return ResponseEntity.ok().body(Collections.singletonMap("message", "인증 성공"));
+        } else {
+            return ResponseEntity.status(400).body(Collections.singletonMap("message", "인증 실패"));
         }
     }
 
@@ -47,7 +69,6 @@ public class MainController {
     public String showRegisterForm() {
         return "registerForm";
     }
-
 
     // 회원가입 데이터 POST
     @PostMapping("/register")
