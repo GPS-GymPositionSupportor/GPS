@@ -718,26 +718,30 @@ z-index: 1000;
 }
 
 .modal-content {
-position: relative;
+display: flex;
+flex-direction: column;
 background-color: #fff;
-width: 800px;
-margin: 50px auto;
 padding: 20px;
+max-width: 800px;
+margin: 50px auto;
 border-radius: 8px;
-box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+gap: 20px;
 }
 
 .form-group {
-margin-bottom: 20px;
-position: relative;
+display: flex;
+flex-direction: row;
+align-items: center;
+gap: 10px;
+margin-bottom: 15px;
 }
 
 .form-group label {
+min-width: 100px;
+color: #666;
 display: flex;
 align-items: center;
-gap: 10px;
-margin-bottom: 8px;
-color: #666;
+gap: 8px;
 }
 
 .form-group i {
@@ -745,8 +749,8 @@ color: #888;
 }
 
 .form-control {
-width: 100%;
-padding: 10px;
+flex: 1;
+padding: 8px 12px;
 border: 1px solid #ddd;
 border-radius: 4px;
 font-size: 14px;
@@ -757,6 +761,7 @@ border-color: #B05D5D;
 outline: none;
 }
 
+/* 하단 버튼 */
 .edit-buttons {
 display: flex;
 justify-content: flex-end;
@@ -769,6 +774,7 @@ padding: 8px 16px;
 border: none;
 border-radius: 4px;
 cursor: pointer;
+font-size: 14px;
 }
 
 .btn-save {
@@ -781,10 +787,13 @@ background-color: #6c757d;
 color: white;
 }
 
+
 .current-gym-image {
-text-align: center;
-margin-bottom: 20px;
-position: relative;
+width: 150px;
+height: 150px;
+overflow: hidden;
+border-radius: 8px;
+margin-right: 20px;
 }
 
 .gym-edit-image {
@@ -800,14 +809,63 @@ display: none;
 }
 
 .image-upload-btn {
+display: inline-block;
+align-items: center;
+justify-content: center;
+gap: 8px;
 padding: 8px 16px;
-background: #B05D5D;
+background-color: #B05D5D;
 color: white;
+border: none;
 border-radius: 4px;
 cursor: pointer;
-display: inline-block;
+font-size: 14px;
+width: auto;
 }
 
 .image-upload-btn i {
 margin-right: 8px;
+font-size: 14px;
+display: inline-block;
+aria-hidden: false;
 }
+
+.image-upload-btn span {
+display: inline-block;
+vertical-align: middle;
+}
+
+
+/* 중앙 컬럼 - 기본 정보 */
+.basic-info {
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+/* 오른쪽 컬럼 - 운영 정보 및 고정값 */
+.operation-info {
+display: flex;
+flex-direction: column;
+gap: 15px;
+}
+
+.operation-hours {
+height: 150px;
+resize: none;
+}
+
+.fixed-info {
+margin-top: 20px;
+padding: 15px;
+background: #f8f9fa;
+border-radius: 4px;
+}
+
+.fixed-info-item {
+display: flex;
+justify-content: space-between;
+margin-bottom: 10px;
+color: #666;
+}
+

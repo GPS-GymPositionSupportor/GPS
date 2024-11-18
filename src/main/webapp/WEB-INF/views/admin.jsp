@@ -665,38 +665,58 @@
 
         const modal = document.createElement('div');
         modal.className = 'modal';
-        modal.innerHTML = '<div class="modal-content">' +
-            '<div class="current-gym-image">' +
-            '<img src="' + (gym.gymImage && gym.gymImage.imageUrl ? gym.gymImage.imageUrl : '../image/logo.png') + '" ' +
-            'alt="체육관 이미지" class="gym-edit-image">' +
-            '<input type="file" id="gymImageInput" accept="image/*" class="image-input">' +
-            '<label for="gymImageInput" class="image-upload-btn"><i class="fas fa-camera"></i> 이미지 변경</label>' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label><i class="fas fa-store"></i>시설명</label>' +
-            '<input type="text" class="form-control" id="editGymName" value="' + (gym.gname || '') + '">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label><i class="fas fa-map-marker-alt"></i>주소</label>' +
-            '<input type="text" class="form-control" id="editAddress" value="' + (gym.address || '') + '">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label><i class="fas fa-phone"></i>전화번호</label>' +
-            '<input type="text" class="form-control" id="editPhone" value="' + (gym.phone || '') + '">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label><i class="fas fa-globe"></i>홈페이지 주소</label>' +
-            '<input type="text" class="form-control" id="editHomepage" value="' + (gym.homepage || '') + '">' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label><i class="fas fa-clock"></i>영업일</label>' +
-            '<input type="text" class="form-control" id="editOpenHour" value="' + (gym.openHour || '') + '">' +
-            '</div>' +
-            '<div class="edit-buttons">' +
-            '<button class="btn-edit btn-save" onclick="saveGymChanges(' + gymId + ')">변경 저장</button>' +
-            '<button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>' +
-            '</div>' +
-            '</div>';
+        modal.innerHTML = ''
+            + '<div class="modal-content">\n'
+            + '    <div class="current-gym-image">\n'
+            + '        <img src="' + (gym.gymImage?.imageUrl || '../image/logo.png') + '" alt="체육관 이미지" class="gym-edit-image">\n'
+            + '        <input type="file" id="gymImageInput" accept="image/*" class="image-input">\n'
+            + '        <label for="gymImageInput" class="image-upload-btn">\n'
+            + '            <i class="fas fa-camera"></i> 이미지 변경\n'
+            + '        </label>\n'
+            + '    </div>\n'
+            + '    <div class="basic-info">\n'
+            + '        <div class="form-group">\n'
+            + '            <label><i class="fas fa-store"></i> 시설명</label>\n'
+            + '            <input type="text" class="form-control" id="editGymName" value="' + (gym.gname || '') + '">\n'
+            + '        </div>\n'
+            + '        <div class="form-group">\n'
+            + '            <label><i class="fas fa-map-marker-alt"></i> 주소</label>\n'
+            + '            <input type="text" class="form-control" id="editAddress" value="' + (gym.address || '') + '">\n'
+            + '        </div>\n'
+            + '        <div class="form-group">\n'
+            + '            <label><i class="fas fa-phone"></i> 전화번호</label>\n'
+            + '            <input type="text" class="form-control" id="editPhone" value="' + (gym.phone || '') + '">\n'
+            + '        </div>\n'
+            + '        <div class="form-group">\n'
+            + '            <label><i class="fas fa-globe"></i> 홈페이지</label>\n'
+            + '            <input type="text" class="form-control" id="editHomepage" value="' + (gym.homepage || '') + '">\n'
+            + '        </div>\n'
+            + '    </div>\n'
+            + '    <div class="operation-info">\n'
+            + '        <div class="form-group">\n'
+            + '            <label><i class="fas fa-clock"></i> 영업시간</label>\n'
+            + '            <textarea class="form-control operation-hours" id="editOpenHour">' + (gym.openHour || '') + '</textarea>\n'
+            + '        </div>\n'
+            + '        <div class="fixed-info">\n'
+            + '            <div class="fixed-info-item">\n'
+            + '                <span>생성자</span>\n'
+            + '                <span>' + (gym.gCreatedBy || '-') + '</span>\n'
+            + '            </div>\n'
+            + '            <div class="fixed-info-item">\n'
+            + '                <span>생성일</span>\n'
+            + '                <span>' + (gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-') + '</span>\n'
+            + '            </div>\n'
+            + '            <div class="fixed-info-item">\n'
+            + '                <span>평점</span>\n'
+            + '                <span>' + (gym.rating ? gym.rating.toFixed(1) : '0.0') + '</span>\n'
+            + '            </div>\n'
+            + '        </div>\n'
+            + '    </div>\n'
+            + '    <div class="edit-buttons">\n'
+            + '        <button class="btn-edit btn-save" onclick="saveGymChanges(' + gym.gymId + ')">변경 저장</button>\n'
+            + '        <button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>\n'
+            + '    </div>\n'
+            + '</div>';
 
         document.body.appendChild(modal);
         modal.style.display = 'block';
@@ -719,7 +739,7 @@
         };
 
         try {
-            const response = await fetch(`/api/gyms/${gymId}`, {
+            const response = await fetch(`/api/gyms/` + gymId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -731,7 +751,7 @@
             if (response.ok) {
                 alert('시설 정보가 수정되었습니다.');
                 closeModal();
-                loadGymList();  // 목록 새로고침
+                loadGymList();
             } else {
                 throw new Error('수정 실패');
             }
@@ -740,6 +760,20 @@
             alert('시설 수정 중 오류가 발생했습니다.');
         }
     }
+
+    // 이미지 미리보기 기능
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.id === 'gymImageInput') {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('.gym-edit-image').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    });
 
 
 

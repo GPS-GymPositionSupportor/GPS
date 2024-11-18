@@ -1,5 +1,6 @@
 package gps.base.service;
 
+import gps.base.DTO.GymDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.Authority;
@@ -84,53 +85,32 @@ public class GymService {
     /**
      * 체육관 정보 수정
      * @param gymId 체육관 ID
-     * @param gymDetails 수정할 체육관 정보
-     * @return 수정된 체육관 정보를 Map 형태로 반환
      */
     @Transactional
-    public Map<String, Object> updateGym(Long gymId, Gym gymDetails) {
+    public GymDTO updateGym(Long gymId, GymDTO gymData) {
         Gym gym = gymRepository.findById(gymId)
-                .orElseThrow(() -> new EntityNotFoundException("체육관을 찾을 수 없습니다. ID: " + gymId));
+                .orElseThrow(() -> new CustomException(ErrorCode.GYM_NOT_FOUND));
 
-        // Null 체크 및 유효성 검사
-        if (gymDetails.getGName() != null && !gymDetails.getGName().trim().isEmpty()) {
-            gym.setGName(gymDetails.getGName());
-        }
+        // 기본 정보 업데이트
+        gym.setGName(gymData.getGName());
+        gym.setAddress(gymData.getAddress());
+        gym.setPhone(gymData.getPhone());
+        gym.setHomepage(gymData.getHomepage());
+        gym.setOpenHour(gymData.getOpenHour());
 
-        if (gymDetails.getAddress() != null && !gymDetails.getAddress().trim().isEmpty()) {
-            gym.setAddress(gymDetails.getAddress());
-        }
+        gym = gymRepository.save(gym);
+        return convertToDTO(gym);
+    }
 
-        // 위도/경도는 0이 아닌 경우에만 업데이트
-        if (gymDetails.getGLongitude() != 0) {
-            validateCoordinate(gymDetails.getGLongitude(), "경도");
-            gym.setGLongitude(gymDetails.getGLongitude());
-        }
-
-        if (gymDetails.getGLatitude() != 0) {
-            validateCoordinate(gymDetails.getGLatitude(), "위도");
-            gym.setGLatitude(gymDetails.getGLatitude());
-        }
-
-        // 선택적 필드들 업데이트
-        if (gymDetails.getOpenHour() != null) {
-            gym.setOpenHour(gymDetails.getOpenHour());
-        }
-
-        if (gymDetails.getHomepage() != null) {
-            gym.setHomepage(gymDetails.getHomepage());
-        }
-
-        if (gymDetails.getPhone() != null) {
-            gym.setPhone(gymDetails.getPhone());
-        }
-
-        if (gymDetails.getCategory() != null) {
-            gym.setCategory(gymDetails.getCategory());
-        }
-
-        Gym updatedGym = gymRepository.save(gym);
-        return convertGymToMap(updatedGym);  // 위에서 만든 convertGymToMap 메서드 재사용
+    private GymDTO convertToDTO(Gym gym) {
+        GymDTO dto = new GymDTO();
+        dto.setGymId(gym.getGymId());
+        dto.setGName(gym.getGName());
+        dto.setAddress(gym.getAddress());
+        dto.setPhone(gym.getPhone());
+        dto.setHomepage(gym.getHomepage());
+        dto.setOpenHour(gym.getOpenHour());
+        return dto;
     }
 
 

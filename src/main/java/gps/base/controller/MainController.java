@@ -472,6 +472,22 @@ public class MainController {
         return ResponseEntity.ok().build();
     }
 
+    // 체육관 수정
+    @PutMapping("/gyms/{gymId}")
+    @ResponseBody
+    public ResponseEntity<GymDTO> updateGym(
+            @PathVariable Long gymId,
+            @RequestBody GymDTO gymData,
+            @RequestParam(value = "image", required = false) MultipartFile image
+    ) {
+        try {
+            GymDTO updatedGym = gymService.updateGym(gymId, gymData);
+            return ResponseEntity.ok(updatedGym);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
 
 }
