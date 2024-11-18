@@ -206,7 +206,10 @@
                <input type="text" placeholder="찾으시는 시설이 있나요?" class="search-input">
                <button class="search-btn">검색</button>
            </div>
-           <button class="btn btn-primary">시설 추가</button>
+           <div class="buttons">  <!-- 버튼들을 div로 묶어서 관리 -->
+                <button class="btn btn-primary">시설 추가</button>
+                <button class="btn btn-primary">시설 삭제</button>
+           </div>
        </div>
        <div class="gym-table">
            <table>
@@ -259,6 +262,7 @@
             const row = document.createElement('tr');
             const date = gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-';
             const rating = gym.rating ? (gym.rating < 1 ? '0.0' : gym.rating.toFixed(1)) : '0.0';
+
 
             // 체크박스
             const checkboxCell = document.createElement('td');
@@ -572,7 +576,7 @@
 
     function updateReviewPagination(totalItems) {
         const pagination = document.querySelector('.pagination');
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const totalPages = Math.floor(totalItems / itemsPerPage);
         pagination.innerHTML = '';
 
         // 1번 버튼
@@ -659,12 +663,6 @@
             alert('선택한 리뷰가 삭제되었습니다.');
         }
     }
-
-    // reviewElement 생성 시 gymId도 추가
-    const reviewElement = document.createElement('div');
-    reviewElement.className = 'review-item';
-    reviewElement.dataset.reviewId = review.rid;
-    reviewElement.dataset.gymId = review.gymId;
 
 
 

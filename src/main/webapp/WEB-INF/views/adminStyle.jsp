@@ -148,6 +148,12 @@ margin-bottom: 20px;
 border: 1px solid #ddd;
 }
 
+.header .buttons {
+display: flex;
+gap: 10px;
+padding-right: 20px;  /* 오른쪽 여백 추가 */
+}
+
 .header h2 {
 font-size: 18px;
 color: #333;
