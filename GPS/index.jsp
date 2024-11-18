@@ -26,6 +26,8 @@
     
     <!-- Kakao API script -->
     <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -56,7 +58,7 @@
                 <% } %>
             </form>
         </div>
-    </div>
+    </div> 
 
     <div class="test"></div>
 

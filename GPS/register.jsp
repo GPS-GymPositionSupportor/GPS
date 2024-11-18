@@ -37,39 +37,81 @@
 				<div class="form-group">
 					<label for="username">1. 아이디를 입력해주세요</label>
 					<input type="text" id="username" name="username" placeholder="예) wowns3082" required>
-					<button type="button" class="check-button" onclick="checkUsername()">중복확인</button>
+					<%
+			    	String idError = (String) session.getAttribute("idError");
+				    %>
+				    <!-- 고정된 오류 메시지 공간 -->
+				    <div id="error-message">
+				        <%
+				        if (idError != null) {
+				            out.print(idError.replace("<br>", "<br/>"));
+				            session.removeAttribute("idError");
+				        }
+				        %>
+				    </div>
+					<button type="button" id="duplicationCheck" onclick="checkUsername()">중복확인</button>
 				</div>
 				<div class="form-group">
 					<label for="password">2. 비밀번호를 입력해주세요</label>
 					<input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 혼합 8~16자리" required>
 					<input type="password" id="confirm-password" name="confirm-password" placeholder="비밀번호 재입력" required>
+					<%
+			    	String pwError = (String) session.getAttribute("pwError");
+				    %>
+				    <!-- 고정된 오류 메시지 공간 -->
+				    <div id="error-message">
+				        <%
+				        if (pwError != null) {
+				            out.print(pwError.replace("<br>", "<br/>"));
+				            session.removeAttribute("pwError");
+				        }
+				        %>
+				    </div>
 				</div>
 
 	            <div class="form-group">
 	                <label for="name">3. 성명을 입력해주세요</label>
 	                <input type="text" id="name" name="name" placeholder="예) 홍길동" required>
 	            </div>
-			<div class="form-group">
-				<label for="email">4. 이메일 주소를 입력해주세요</label>
-				<c:choose>
-					<c:when test="${provider == 'GOOGLE'}">
-						<input type="email" id="email" name="email" value="${email}" readonly>
-					</c:when>
-					<c:otherwise>
-						<input type="email" id="email" name="email" placeholder="예) example123@example.net" required>
-					</c:otherwise>
-				</c:choose>
-			</div>
 	            <div class="form-group">
-	                <label for="nickname">5. 닉네임을 입력해주세요</label>
+	                <label for="nickname">4. 닉네임을 입력해주세요</label>
 	                <input type="text" id="nickname" name="nickname" placeholder="예) 레갈리엔" required>
+	                <%
+			    	String nicknameError = (String) session.getAttribute("nicknameError");
+				    %>
+				    <!-- 고정된 오류 메시지 공간 -->
+				    <div id="error-message">
+				        <%
+				        if (nicknameError != null) {
+				            out.print(nicknameError.replace("<br>", "<br/>"));
+				            session.removeAttribute("nicknameError");
+				        }
+				        %>
+				    </div>
 	                <button type="button" class="check-button" onclick="checkNickname()">중복확인</button>
 	            </div>
+				<div class="form-group">
+					<label for="email">5. 이메일 주소를 입력해주세요</label>
+					<c:choose>
+						<c:when test="${provider == 'GOOGLE'}">
+							<input type="email" id="email" name="email" value="${email}" readonly>
+						</c:when>
+						<c:otherwise>
+							<input type="email" id="email" name="email" placeholder="예) example123@example.net" required>
+						</c:otherwise>
+					</c:choose>
+					<div id="regist-email">
+			            <input type="text" id="registerEmail" name="emailId">
+			            <span>@</span>
+			            <input type="text" id="registerEmailDomain" name="emailDomain">
+			        </div>
+			        <button type="button" class="check-button" onclick="checkEmail()">인증하기</button>
+				</div>
 	            <div class="form-group">
 	                <label for="birthdate">6. 생년월일을 입력해주세요</label>
 	                <input type="text" id="birthdate" name="birthdate" placeholder="예) 950714" required>
 	            </div>
-	            <div class="form-group">
+	            <div id="gender">
 	                <label>7. 성별을 입력해주세요.</label>
 	                <input type="radio" id="male" name="gender" value="male" required>
 	                <label for="male">남성</label>
@@ -78,7 +120,7 @@
 	                <input type="radio" id="etc-gender" name="gender" value="etc-gender" required>
 	                <label for="etc-gender">그 외</label>
 	            </div>
-	            <div class="form-group">
+	            <div id="checkbox">
 	                <input type="checkbox" id="privacy" name="privacy" required>
 	                <label for="privacy">개인정보 및 위치 정보 수집에 동의합니다.(필수)</label>
 	            </div>

@@ -5,6 +5,11 @@ body {
     background-color: #F5F5F5;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    max-width: 1000px;
+    width: 100%;
+    margin: 0 auto !important;
+    overflow-x: hidden;
+    max-height: 90%
 }
 
 body::-webkit-scrollbar {
@@ -163,7 +168,6 @@ body::-webkit-scrollbar {
 	0px 1px 1px 0px #0000000D,
 	0px 2px 1px 0px #00000003,
 	0px 3px 1px 0px #00000000;
-	
 }
 
 .login-form input::placeholder {
@@ -211,6 +215,16 @@ body::-webkit-scrollbar {
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.findIdPw-btn:hover, .register-btn:hover {
+	color: #A02400 !important;
+}
+
+.findIdPw-btn:active, .register-btn:active {
+	color: #3A1C16 !important;
 }
 
 #toLogin {
@@ -229,6 +243,8 @@ body::-webkit-scrollbar {
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 .kakao-btn {
@@ -252,7 +268,11 @@ body::-webkit-scrollbar {
 }
 
 .login-form button:hover {
-	background-color: #0056b3;
+	background-color: #B35F00;
+}
+
+.login-form button:active {
+	background-color: #C79126;
 }
 
 .social-buttons {
@@ -312,7 +332,6 @@ body::-webkit-scrollbar {
 
 #findIdForm2, #findPwForm2 {
 	display: contents;
-	
 }
 
 #findIdF, #findPwF{
@@ -325,6 +344,24 @@ body::-webkit-scrollbar {
 
 #plzEmailId.error, #plzEmailPw.error {
 	color: #FF3B30 !important;
+}
+
+#regist-email {
+	display: flex;
+    align-items: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+#findIdEmailDomain {
+	border: none;
+    outline: none;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    background-color: inherit;
+    border-bottom: 1px solid #616161;
 }
 
 .email-input {
@@ -349,21 +386,174 @@ body::-webkit-scrollbar {
     font-size: 14px;
 }
 
-#findCId {
+#findCId, #findCPw {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+}
+
+#findIdP, #findPwP {
+	font-size: 24px;
+	margin: 4.5rem 2rem 5rem 2rem;
+	font-weight: 400;
+	line-height: 17px;
+	text-align: left;
 }
 
 #sendMail {
 	text-align: center;
 	color: #616161;
 	font-size: 16px;
-	
+	margin: 2rem;
+}
+
+#certificationCodeId, #certificationCodePw {
+	display: grid;
+    width: 100%;
+    justify-content: center;
+}
+
+#certificationCodeIdForm, #certificationCodePwForm {
+	display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-end;
+}
+
+#certificationCodeIdForm input, #certificationCodePwForm input {
+	display: block;
+	margin: 10px 0px 10px 0px;
+	padding: 10px 15px 10px 15px;
+	width: 100%;
+	background-color: #f2f2f2;
+	border: 0px solid;
+	border-radius: 12px 12px 0 0;
+	font-size: 16px;
+	box-shadow: 0 1px 0px #999999;
+	box-sizing: border-box;
+	height: 3.5rem;
+}
+
+#certificationCodeIdForm button, #certificationCodePwForm button {
+	width: 32%;
+	padding: 10px;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	margin: 10px 0px 10px 0px;
+	box-shadow: 0px 1px 1px 0px #00000017,
+	0px 1px 1px 0px #0000000D,
+	0px 2px 1px 0px #00000003,
+	0px 3px 1px 0px #00000000;
+}
+
+#toLoginFindId, #toLoginFindPw {
+	color: #555 !important;
+    font-size: 12px !important;
+    background-color: #ffffff00;
+    position: absolute;
+    bottom: 2rem;
+    border-color: initial;
+    border: none;
+    text-decoration: underline;
+}
+
+#cCodeError {
+	color: #FF3B30;
+    text-align: center;
+    font-size: 12px;
+}
+
+#certificationCodeIdForm input.error, #certificationCodePwForm input.error {
+    color: #FF3B30 !important;
+    box-shadow: 0px 1px 1px 0px #FF3B30 !important;
+}
+
+#certificationCodeIdForm input.error::placeholder,
+#certificationCodePwForm input.error::placeholder {
+	color: #FF3B30 !important;
+}
+
+#certificationCodeIdForm input::placeholder,
+#certificationCodePwForm input::placeholder {
+    color: #ccc !important;
+}
+
+#findId-btn {
+	background-color: #B35F00 !important;
+}
+
+#findId-btn:hover {
+	background-color: #D7AF66 !important;
+}
+
+#findId-btn:active {
+	background-color: #9F7E70 !important;
+}
+
+#inputCCode:hover {
+	background-color: #B35F00;
+}
+
+#inputCCode:active {
+	background-color: #C79126;
+}
+
+#toFindPw {
+	width: 80%;
+	height: 3.5rem;
+	padding: 10px;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	margin: 10px 0px 10px 0px;
+	box-shadow: 0px 1px 1px 0px #00000017,
+	0px 1px 1px 0px #0000000D,
+	0px 2px 1px 0px #00000003,
+	0px 3px 1px 0px #00000000;
+	bottom: 5rem;
+    position: absolute;
+}
+
+#toFindPw:hover {
+	background-color: #B35F00; 
+}
+
+#toFindPw:active {
+	background-color: #C79126;
+}
+
+#findIdComplete, #findPwComplete {
+	display: grid;
+    justify-items: center;
+    text-align: center;
+    margin: 10rem 0rem 0rem 0rem;
+}
+
+#duplicationCheck {
+
+}
+
+#gender {
+
+}
+
+#checkbox {
+
 }
 
 @media only screen and (max-width: 767px) {
-
+	body {
+		max-height: 100%;
+		height: 100%;
+	}
+	
     .burbutton {
         display:block;
         z-index: 10;

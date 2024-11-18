@@ -12,7 +12,7 @@
 		    %>
 		
 		    <!-- 고정된 오류 메시지 공간 -->
-		    <div id="error-message"">
+		    <div id="error-message">
 		        <%
 		        if (loginError != null) {
 		            out.print(loginError.replace("<br>", "<br/>")); // HTML 태그 출력

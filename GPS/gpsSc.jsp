@@ -1,13 +1,8 @@
+<%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 	<script>
         <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 		
 		document.addEventListener('DOMContentLoaded', function() {
-			var loginForm = document.getElementById('loginForm');
-		    loginForm.addEventListener('submit', function(event) {
-		        if (!validForm()) {
-		            event.preventDefault();
-		        }
-		    });
 		    
 			var loginForm = document.getElementById('loginForm');
 		    var username = loginForm.querySelector('input[name="username"]');
@@ -70,6 +65,7 @@
 		        navLinks.classList.toggle('active');
 		    });
 	
+		    <%-- 사용자 화면당 화면 구조 변경 --%>
 		    function adjustNavLinks() {
 	            var navLinks = document.getElementById('nav-links');
 
@@ -79,7 +75,38 @@
 	                	<div class="myPage">
 		                    <div class="user-info">
 		                        <img
-            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.png" %>"
+            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.png" %>"
+            alt="myPage_image" title="myPage_image" class="picture">
+		                        <div class="greeting">
+		                            <a class="hello">안녕하세요</a>
+		                            <div class="mrUser">
+		                                <a class="mrUserName"><%= session.getAttribute("userID") %></a>
+		                                <a class="mr">님</a>
+		                            </div>
+		                        </div>
+		                    </div>
+		                </div>
+	                <div>
+	                	<form id="navForm" method="get">
+		                    <button type="submit" name="selectedNav" value="A">A</button>
+		                    <button type="submit" name="selectedNav" value="B">프로필</button>
+		                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
+		                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
+		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
+		                </form>
+		                <div id="logoutContainer">
+		                    <form action="logout.jsp" method="post" id="logoutForm">
+		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
+		                    </form>
+	                    </div>
+	                `;
+	            } else {
+	                // 데스크톱 구조로 변경
+	            	navLinks.innerHTML = `
+	                	<div class="myPage">
+		                    <div class="user-info">
+		                        <img
+            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.png" %>"
             alt="myPage_image" title="myPage_image" class="picture">
 		                        <div class="greeting">
 		                            <a class="hello">안녕하세요</a>
@@ -100,23 +127,9 @@
 		                </form>
 		                <div id="logoutContainer">
 		                    <form action="/api/logout" method="post" id="logoutForm">
-		                        <button type="submit" id="logoutButton">로그아웃 <img src="../image/Frame.png" alt="logout_icon" class="logout_icon"></button>
+		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
-	                    <div>
-	                `;
-	            } else {
-	                // 데스크톱 구조로 변경
-	            	navLinks.innerHTML = `
-	                    <form id="navForm" method="get">
-	                        <button type="submit" name="selectedNav" value="A">A</button>
-	                        <button type="submit" name="selectedNav" value="B">프로필</button>
-	                        <button type="submit" name="selectedNav" value="C">추천 피드</button>
-	                        <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
-	                        <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
-	                    </form>
-	                    <form action="/api/logout" method="post">
-	                        <button type="submit" id="logoutButton">로그아웃</button>
-	                    </form>
+	                    </div>
 	                `;
 	            }
 	        }
@@ -241,7 +254,75 @@
 		        cancelBtn.style.display = 'block';
 		    }
 		}
+		
+		// findIdComplete.jsp의 비밀번호 찾기 버튼 클릭 시 비밀번호 찾기 폼을 띄워주는 ajax 함수
+		document.addEventListener('DOMContentLoaded', function() {
+		    var urlParams = new URLSearchParams(window.location.search);
+		    var show = urlParams.get('show');
 
+		    if (show === 'findPw') {
+		        // 로그인 오버레이를 보여줍니다.
+		        var loginOverlay = document.getElementById('loginOverlay');
+		        loginOverlay.style.display = 'flex';
+
+		        // findIdPw.jsp를 AJAX로 요청하여 오버레이에 내용을 로드합니다.
+		        fetch('findIdPw.jsp')
+		            .then(response => response.text())
+		            .then(data => {
+		                document.querySelector('.login-form').innerHTML = data;
+
+		                showForm('findPw');
+		                
+		                window.history.replaceState({}, document.title, window.location.pathname);
+		            })
+		            .catch(error => console.error('Error loading findIdPw.jsp:', error));
+		    }
+		});
+		
+		//findIdCertification.jsp에서 뒤로가기 버튼 클릭 시 아이디 찾기 폼을 띄워주는 ajax 함수
+		document.addEventListener('DOMContentLoaded', function() {
+		    var urlParams = new URLSearchParams(window.location.search);
+		    var idCertification = urlParams.get('idCertification');
+
+		    if (idCertification === 'findId') {
+		        var loginOverlay = document.getElementById('loginOverlay');
+		        loginOverlay.style.display = 'flex';
+
+		        fetch('findIdPw.jsp')
+		            .then(response => response.text())
+		            .then(data => {
+		                document.querySelector('.login-form').innerHTML = data;
+
+		                showForm('findId');
+		                
+		                window.history.replaceState({}, document.title, window.location.pathname);
+		            })
+		            .catch(error => console.error('Error loading findIdPw.jsp:', error));
+		    }
+		});
+		
+		//findPwCertification.jsp에서 뒤로가기 버튼 클릭 시 비밀번호 찾기 폼을 띄워주는 ajax 함수
+		document.addEventListener('DOMContentLoaded', function() {
+		    var urlParams = new URLSearchParams(window.location.search);
+		    var pwCertification = urlParams.get('pwCertification');
+
+		    if (pwCertification === 'findPw') {
+		        var loginOverlay = document.getElementById('loginOverlay');
+		        loginOverlay.style.display = 'flex';
+
+		        fetch('findIdPw.jsp')
+		            .then(response => response.text())
+		            .then(data => {
+		                document.querySelector('.login-form').innerHTML = data;
+
+		                showForm('findPw');
+		                
+		                window.history.replaceState({}, document.title, window.location.pathname);
+		            })
+		            .catch(error => console.error('Error loading findIdPw.jsp:', error));
+		    }
+		});
+		
         // ìì ë¡ê·¸ì¸ ë²í¼ í´ë¦­ í¸ë¤ë¬
         function kakaoLogin() {
             window.location.href = '/oauth2/authorization/kakao';
