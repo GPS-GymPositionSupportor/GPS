@@ -1,7 +1,7 @@
 package gps.base.ElasticSearchController;
 
 import gps.base.ElasticSearchService.GymSearchService;
-import gps.base.config.Elastic.Document.GymDocument;
+import gps.base.ElasticSearchEntity.Gym;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +18,13 @@ public class GymSearchController {
     private final GymSearchService gymSearchService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<GymDocument>> searchNearbyGyms(
+    public ResponseEntity<List<Gym>> searchNearbyGyms(
             @RequestParam(name = "lat") double lat,
             @RequestParam(name = "lon") double lon,
             @RequestParam(name = "distance", defaultValue = "5.0") double distance
     ) {
         try {
-            List<GymDocument> results = gymSearchService.searchNearbyGyms(lat, lon, distance);
+            List<Gym> results = gymSearchService.searchNearbyGyms(lat, lon, distance);
             log.info("Found {} gyms near lat: {}, lon: {}", results.size(), lat, lon);
             return ResponseEntity.ok(results);
         } catch (Exception e) {
@@ -33,9 +33,8 @@ public class GymSearchController {
         }
     }
 
-
     @GetMapping("/recommend/similar")
-    public ResponseEntity<List<GymDocument>> recommendSimilarGyms(
+    public ResponseEntity<List<Gym>> recommendSimilarGyms(
             @RequestParam(name = "gymId") String gymId,
             @RequestParam(name = "lat") double lat,
             @RequestParam(name = "lon") double lon

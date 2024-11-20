@@ -17,8 +17,11 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
     connection-timeout: 5s
-    socket-timeout: 30s
+    socket-timeout: 60s
 
+    index:
+      number-of-shards: 1
+      number-of-replicas: 0
 
   jackson:
     serialization:
@@ -28,11 +31,16 @@ spring:
 
 logging:
   level:
+    root : INFO
     org.hibernate.SQL: debug
     org.hibernate.type: trace
-    org.springframework.data.elasticsearch.client: debug
+    org.springframework.data.elasticsearch.client: error
+
+    org.elasticsearch: error
+    gps.base.ElasticSearchService.GymSyncService: error
+
     gps.base: debug
-    root : debug
+
 
 server:
   port: 8080

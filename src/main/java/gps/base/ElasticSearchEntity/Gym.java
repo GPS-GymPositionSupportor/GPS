@@ -20,7 +20,6 @@ public class Gym {
     private GymCategory category;
 
     private String address1;
-    private String address2;
     private String openingHours;
     private String homepage;
     private String phoneNumber;

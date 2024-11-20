@@ -1,15 +1,17 @@
 package gps.base.config.Elastic;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
 @Component
+@Slf4j
 public class ElasticsearchIndexInitializer {
     private final ElasticsearchClient elasticsearchClient;
+    private static final String INDEX_NAME = "gyms";
 
     public ElasticsearchIndexInitializer(ElasticsearchClient elasticsearchClient) {
         this.elasticsearchClient = elasticsearchClient;
@@ -18,42 +20,31 @@ public class ElasticsearchIndexInitializer {
     @PostConstruct
     public void init() {
         try {
-            createGymIndex();
+            boolean indexExists = elasticsearchClient.indices().exists(e -> e.index(INDEX_NAME)).value();
+
+            if (!indexExists) {
+                elasticsearchClient.indices().create(c -> c
+                        .index(INDEX_NAME)
+                        .mappings(m -> m
+                                .properties("id", p -> p.keyword(k -> k))
+                                .properties("name", p -> p.text(t -> t))
+                                .properties("category", p -> p.keyword(k -> k))
+                                .properties("address", p -> p.text(t -> t))
+                                .properties("location", p -> p.geoPoint(g -> g))
+                                .properties("rating", p -> p.double_(d -> d))
+                                .properties("openingHours", p -> p.text(t -> t))
+                                .properties("phoneNumber", p -> p.keyword(k -> k))
+                                .properties("userInteractions", p -> p.nested(n -> n
+                                        .properties("userId", np -> np.keyword(k -> k))
+                                        .properties("rating", np -> np.double_(d -> d))
+                                ))
+                        )
+                );
+                log.info("Index created successfully");
+            }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create elasticsearch index", e);
-        }
-    }
-
-    private void createGymIndex() throws IOException {
-        boolean indexExists = elasticsearchClient.indices()
-                .exists(e -> e.index("gyms"))
-                .value();
-
-        if (!indexExists) {
-            // 인덱스 생성 설정
-            CreateIndexRequest request = CreateIndexRequest.of(b -> b
-                    .index("gyms")
-                    .mappings(mappings -> mappings
-                            .properties("id", property -> property.keyword(k -> k))
-                            .properties("name", property -> property.text(t -> t))
-                            .properties("category", property -> property.keyword(k -> k))
-                            .properties("address", property -> property.text(t -> t))
-                            .properties("location", property -> property.geoPoint(g -> g))
-                            .properties("rating", property -> property.double_(d -> d))
-                            .properties("openingHours", property -> property.text(t -> t))
-                            .properties("phoneNumber", property -> property.keyword(k -> k))
-                            .properties("userInteractions", property -> property
-                                    .nested(n -> n
-                                            .properties("userId", p -> p.keyword(k -> k))
-                                            .properties("type", p -> p.keyword(k -> k))
-                                            .properties("rating", p -> p.double_(d -> d))
-                                            .properties("timestamp", p -> p.date(d -> d))
-                                    )
-                            )
-                    )
-            );
-
-            elasticsearchClient.indices().create(request);
+            log.error("Index initialization error: ", e);
+            throw new RuntimeException("Failed to initialize elasticsearch index", e);
         }
     }
 }
