@@ -869,3 +869,25 @@ margin-bottom: 10px;
 color: #666;
 }
 
+.authority-cell {
+cursor: pointer;
+padding: 5px 15px;
+border-radius: 20px;
+text-align: center;
+transition: all 0.3s ease;
+}
+
+.authority-cell.user {
+background-color: #e0e0e0;
+color: #666;
+}
+
+.authority-cell.admin {
+background-color: #2196F3;
+color: white;
+}
+
+.authority-cell:hover {
+opacity: 0.8;
+}
+

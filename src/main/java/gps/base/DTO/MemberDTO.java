@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class MemberDTO {
+    private Long userId;
 
     private String nickname;
     private String email;
@@ -34,6 +35,7 @@ public class MemberDTO {
         dto.mCreatedAt = member.getMCreatedAt();
         dto.lastLogin = member.getLastLogin();
         dto.authority = member.getAuthority();
+        dto.userId = member.getUserId();
         return dto;
     }
 

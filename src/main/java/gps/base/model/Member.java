@@ -119,5 +119,18 @@ public class Member {
                 loginTime);
     }
 
+    public void updateAuthority(Authority authority) {
+        if (authority == null) {
+            throw new IllegalArgumentException("권한 값이 null일 수 없습니다.");
+        }
+
+        // ADMIN과 USER만 허용
+        if (authority != Authority.ADMIN && authority != Authority.USER) {
+            throw new IllegalArgumentException("유효하지 않은 권한입니다: " + authority);
+        }
+
+        this.authority = authority;
+    }
+
 
 }

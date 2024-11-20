@@ -14,10 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequiredArgsConstructor
@@ -57,5 +54,22 @@ public class MemberController {
 
         memberService.deleteMember(memberId);
         return ResponseEntity.noContent().build();
+    }
+
+    // 회원 권한 변경
+    @PatchMapping("/{userId}/authority")
+    public ResponseEntity<Void> updateUserAuthority(
+            @PathVariable Long userId,
+            @RequestParam Authority authority,  // RequestBody 대신 RequestParam 사용
+            HttpSession session) {
+
+        // 관리자 권한 체크
+        Authority currentAuthority = (Authority) session.getAttribute("authority");
+        if (currentAuthority != Authority.ADMIN) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        memberService.updateAuthority(userId, authority);
+        return ResponseEntity.ok().build();
     }
 }

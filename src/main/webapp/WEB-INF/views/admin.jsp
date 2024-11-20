@@ -1029,14 +1029,14 @@
         users.forEach(user => {
             const row = document.createElement('tr');
             row.className = 'user-row';
-            row.setAttribute('data-user-id', user.mid);
+            row.setAttribute('data-user-id', user.userId);
 
             // 체크박스
             const checkboxCell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'user-select';
-            checkbox.dataset.userId = user.mId;
+            checkbox.dataset.userId = user.userId;
             checkboxCell.appendChild(checkbox);
             row.appendChild(checkboxCell);
 
@@ -1059,6 +1059,23 @@
                 row.appendChild(cell);
             });
 
+            const authorityCell = document.createElement('td');
+            authorityCell.className = 'authority-cell' + (user.authority === 'ADMIN' ? ' admin' : ' user');
+            authorityCell.setAttribute('data-user-id', user.userId);  // user에서 userId를 가져와서 설정
+
+            authorityCell.onclick = function(event) {
+                const userId = event.currentTarget.getAttribute('data-user-id');
+                const isAdmin = event.currentTarget.classList.contains('user');
+                if(userId) {
+                    updateUserAuthority(userId, isAdmin);
+                    event.currentTarget.classList.toggle('user');
+                    event.currentTarget.classList.toggle('admin');
+                    event.currentTarget.textContent = isAdmin ? '관리자' : '일반';
+                }
+            };
+            authorityCell.textContent = user.authority === 'ADMIN' ? '관리자' : '일반';
+
+            row.appendChild(authorityCell);
             userList.appendChild(row);
         });
     }
@@ -1141,7 +1158,7 @@
                 for (const checkbox of selectedCheckboxes) {
                     const userId = checkbox.dataset.userId;
 
-                    const response = await fetch(`/api/users/${userId}`, {
+                    const response = await fetch(`/api/members/` + userId, {
                         method: 'DELETE',
                         credentials: 'include'
                     });
@@ -1156,6 +1173,39 @@
             } catch (error) {
                 console.error('회원 삭제 중 오류:', error);
                 alert('회원 삭제 중 오류가 발생했습니다.');
+            }
+        }
+    }
+
+    async function updateUserAuthority(userId, isAdmin) {
+        if (!userId) {
+            console.error('userId is missing');
+            return;
+        }
+
+        try {
+            const authority = isAdmin ? 'ADMIN' : 'USER';
+            console.log('Updating authority for user:', userId, 'to:', authority);  // 디버깅용
+
+            const response = await fetch('/api/members/' + userId + '/authority?authority=' + authority, {
+                method: 'PATCH',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error('권한 변경 실패');
+            }
+
+            alert('권한이 변경되었습니다.');
+        } catch (error) {
+            console.error('권한 변경 중 오류:', error);
+            alert('권한 변경 중 오류가 발생했습니다.');
+            // 토글 원상복구
+            const cell = document.querySelector('td[data-user-id="' + userId + '"]');
+            if (cell) {
+                cell.classList.toggle('user');
+                cell.classList.toggle('admin');
+                cell.textContent = isAdmin ? '일반' : '관리자';
             }
         }
     }

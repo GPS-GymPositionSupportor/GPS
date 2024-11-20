@@ -3,7 +3,10 @@ package gps.base.service;
 import gps.base.DTO.MemberDTO;
 import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
+import gps.base.model.Admin;
+import gps.base.model.Authority;
 import gps.base.model.Member;
+import gps.base.repository.AdminRepository;
 import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -31,8 +32,8 @@ public class MemberService {
     @Value("${UPLOAD_PATH}")
     private String uploadPath;
 
-    @Value("${RESOURCE_PATH}")
-    private String resourcePath;
+    @Autowired
+    AdminRepository adminRepository;
 
 
     @Autowired
@@ -164,6 +165,23 @@ public class MemberService {
     public Page<MemberDTO> getAllMembers(Pageable pageable) {
         Page<Member> members = memberRepository.findAll(pageable);
         return members.map(MemberDTO::from);
+    }
+
+    @Transactional
+    public void updateAuthority(Long memberId, Authority newAuthority) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // ADMIN으로 권한 변경 시 admin 테이블에도 데이터 추가
+        if(newAuthority == Authority.ADMIN) {
+            Admin admin = new Admin();
+            admin.setUserId(memberId);
+            admin.setAId(member.getEmail());      // member의 email을 admin의 a_id로 사용
+            admin.setAPassword(member.getMPassword());  // member의 password를 admin의 a_password로 사용
+            adminRepository.save(admin);
+        }
+
+        member.updateAuthority(newAuthority);
     }
 
 
