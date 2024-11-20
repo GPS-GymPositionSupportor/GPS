@@ -8,6 +8,8 @@ import gps.base.repository.MemberRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -143,18 +145,33 @@ public class MemberService {
 
     // 회원 삭제 기능 (수정 필요)
     @Transactional
-    public void deleteMember(Long userId) {
-        Member member = getMemberById(userId);
-        member.setMDeletedAt(LocalDateTime.now());
-        memberRepository.save(member);
+    public void deleteMember(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        memberRepository.delete(member);
     }
+
+    // 마지막 접속시간 업데이트
+    @Transactional
+    public void updateLastLogin(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        member.updateLastLogin(LocalDateTime.now());
+    }
+
+    public Page<MemberDTO> getAllMembers(Pageable pageable) {
+        Page<Member> members = memberRepository.findAll(pageable);
+        return members.map(MemberDTO::from);
+    }
+
+
+
+
 
     public boolean existsBymId(String mId) {
         return memberRepository.existsBymId(mId);
-    }
-
-    public boolean existsByName(String name) {
-        return memberRepository.existsByName(name);
     }
 
     public boolean existsByNickname(String nickname) {

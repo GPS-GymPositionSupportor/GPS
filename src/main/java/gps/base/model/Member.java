@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Entity
 @Data
+@Slf4j
 @Table(name = "member")
 public class Member {
 
@@ -99,25 +101,22 @@ public class Member {
         mDeletedAt = LocalDateTime.now();
     }
 
-    // 나이 계산을 위한 메서드 추가
-    public int calculateAge() {
-        if (this.birth == null) {
-            return 0;
+    public void updateLastLogin(LocalDateTime loginTime) {
+        if (loginTime == null) {
+            throw new IllegalArgumentException("로그인 시간이 null일 수 없습니다.");
         }
-        return Period.between(this.birth.toLocalDate(), LocalDate.now()).getYears();
-    }
 
+        // 이전 로그인 시간 저장 (필요한 경우)
+        LocalDateTime previousLogin = this.lastLogin;
 
-    // 소셜 로그인 사용자용 비밀번호 생성
-    public void generateRandomPassword() {
-        // UUID를 사용하여 랜덤 비밀번호 생성
-        this.mPassword = UUID.randomUUID().toString();
-    }
+        // 새로운 로그인 시간 설정
+        this.lastLogin = loginTime;
 
-    // 소셜 로그인 사용자용 mId 생성
-    public void generateSocialId() {
-        // 프로바이더 타입 + 프로바이더 ID를 조합하여 고유한 mId 생성
-        this.mId = this.providerType.toString().toLowerCase() + "_" + this.providerId;
+        // 로깅
+        log.info("Member {} updated last login time from {} to {}",
+                this.mId,
+                previousLogin,
+                loginTime);
     }
 
 

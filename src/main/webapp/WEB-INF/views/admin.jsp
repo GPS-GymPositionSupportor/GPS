@@ -54,7 +54,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="#" class="nav-link" onclick="loadUsers()">
                 <i class="fas fa-users"></i>회원 관리
             </a>
         </li>
@@ -820,7 +820,7 @@
         comments.forEach((comment, index) => {
             const commentElement = document.createElement('div');
             commentElement.className = 'review-item';
-            commentElement.setAttribute('data-comment-id', comment.id);
+            commentElement.setAttribute('data-comment-id', comment.cid);
             commentElement.setAttribute('data-review-id', comment.reviewId);
 
             // 체크박스, 텍스트, 작성자 정보를 담을 컨테이너들
@@ -962,6 +962,206 @@
     document.addEventListener('DOMContentLoaded', function() {
         loadComments(0);
     });
+
+
+    async function loadUsers() {
+        const mainContent = document.querySelector('.main-content');
+
+        mainContent.innerHTML = `
+       <div class="header">
+           <h2>회원 관리</h2>
+           <div class="search-bar">
+               <input type="text" placeholder="찾으시는 회원이 있나요?" class="search-input">
+               <button class="search-btn">검색</button>
+           </div>
+           <div class="buttons">
+                <button class="btn btn-primary" onclick="deleteSelectedUsers()">회원 삭제</button>
+           </div>
+       </div>
+       <div class="user-table">
+           <table>
+               <thead>
+                   <tr>
+                       <th><input type="checkbox" id="selectAll"></th>
+                       <th>ID</th>
+                       <th>성명</th>
+                       <th>닉네임</th>
+                       <th>이메일</th>
+                       <th>생년월일</th>
+                       <th>성별</th>
+                       <th>생성일</th>
+                       <th>최근 접속일</th>
+                       <th>권한</th>
+                   </tr>
+               </thead>
+               <tbody id="userList"></tbody>
+           </table>
+       </div>
+       <div class="pagination"></div>
+    `;
+
+        loadUserList();
+    }
+
+    let currentUsers = [];
+
+    async function loadUserList(page = 0, size = 12) {
+        try {
+            const response = await fetch('/api/members?page=' + page + '&size=' + size, {
+                credentials: 'include'
+            });
+            const data = await response.json();
+            console.log("받은 회원 데이터 : {}", data);
+            currentUsers = data.content;
+            displayUsers(data.content, page);
+            updateUserPagination(data.totalElements);
+        } catch (error) {
+            console.error('회원 목록 로드 실패:', error);
+        }
+    }
+
+    function displayUsers(users, currentPage) {
+        const userList = document.getElementById('userList');
+        if (!userList || !users) return;
+
+        userList.innerHTML = '';
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.className = 'user-row';
+            row.setAttribute('data-user-id', user.mid);
+
+            // 체크박스
+            const checkboxCell = document.createElement('td');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'user-select';
+            checkbox.dataset.userId = user.mId;
+            checkboxCell.appendChild(checkbox);
+            row.appendChild(checkboxCell);
+
+            // 회원 정보 셀들
+            const cells = [
+                { content: user.mid || '-' },
+                { content: user.name || '-' },
+                { content: user.nickname || '-' },
+                { content: user.email || '-' },
+                { content: user.birth || '-' },
+                { content: user.gender || '-' },
+                { content: user.mcreatedAt ? new Date(user.mcreatedAt).toLocaleDateString() : '-' },
+                { content: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-' },
+                { content: user.authority || '-' }
+            ];
+
+            cells.forEach(cellData => {
+                const cell = document.createElement('td');
+                cell.textContent = cellData.content;
+                row.appendChild(cell);
+            });
+
+            userList.appendChild(row);
+        });
+    }
+
+    function updateUserPagination(totalItems) {
+        const pagination = document.querySelector('.pagination');
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        pagination.innerHTML = '';
+
+        // 시작 페이지와 끝 페이지 계산
+        let startPage = Math.floor(currentPageUsers / 5) * 5;
+        let endPage = Math.min(startPage + 4, totalPages - 1);
+
+        // '<<' 버튼 (첫 페이지 그룹으로)
+        if(startPage > 0) {
+            const firstGroupButton = document.createElement('button');
+            firstGroupButton.innerHTML = '<<';
+            firstGroupButton.onclick = () => {
+                currentPageUsers = 0;
+                loadUserList(0);
+            };
+            pagination.appendChild(firstGroupButton);
+        }
+
+        // '<' 버튼 (이전 페이지 그룹으로)
+        if(startPage > 0) {
+            const prevGroupButton = document.createElement('button');
+            prevGroupButton.innerHTML = '<';
+            prevGroupButton.onclick = () => {
+                currentPageUsers = startPage - 5;
+                loadUserList(currentPageUsers);
+            };
+            pagination.appendChild(prevGroupButton);
+        }
+
+        // 페이지 번호 버튼들
+        for(let i = startPage; i <= endPage; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.textContent = i + 1;
+            pageButton.className = i === currentPageUsers ? 'active' : '';
+            pageButton.onclick = () => {
+                currentPageUsers = i;
+                loadUserList(i);
+            };
+            pagination.appendChild(pageButton);
+        }
+
+        // '>' 버튼 (다음 페이지 그룹으로)
+        if(endPage < totalPages - 1) {
+            const nextGroupButton = document.createElement('button');
+            nextGroupButton.innerHTML = '>';
+            nextGroupButton.onclick = () => {
+                currentPageUsers = startPage + 5;
+                loadUserList(currentPageUsers);
+            };
+            pagination.appendChild(nextGroupButton);
+        }
+
+        // '>>' 버튼 (마지막 페이지 그룹으로)
+        if(endPage < totalPages - 1) {
+            const lastGroupButton = document.createElement('button');
+            lastGroupButton.innerHTML = '>>';
+            lastGroupButton.onclick = () => {
+                currentPageUsers = Math.floor((totalPages - 1) / 5) * 5;
+                loadUserList(currentPageUsers);
+            };
+            pagination.appendChild(lastGroupButton);
+        }
+    }
+
+    async function deleteSelectedUsers() {
+        const selectedCheckboxes = document.querySelectorAll('.user-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('삭제할 회원을 선택해주세요.');
+            return;
+        }
+
+        if (confirm('선택한 회원을 삭제하시겠습니까?')) {
+            try {
+                for (const checkbox of selectedCheckboxes) {
+                    const userId = checkbox.dataset.userId;
+
+                    const response = await fetch(`/api/users/${userId}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`회원 삭제 실패 (Status: ${response.status})`);
+                    }
+                }
+
+                alert('선택한 회원이 삭제되었습니다.');
+                loadUserList(currentPageUsers);
+            } catch (error) {
+                console.error('회원 삭제 중 오류:', error);
+                alert('회원 삭제 중 오류가 발생했습니다.');
+            }
+        }
+    }
+
+    // 전역 변수 추가
+    let currentPageUsers = 0;
 
 
 
