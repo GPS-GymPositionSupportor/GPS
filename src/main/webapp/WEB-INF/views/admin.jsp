@@ -975,6 +975,7 @@
                <button class="search-btn">검색</button>
            </div>
            <div class="buttons">
+                <button class="btn btn-primary" onclick="showEditModalMember()">회원 수정</button>
                 <button class="btn btn-primary" onclick="deleteSelectedUsers()">회원 삭제</button>
            </div>
        </div>
@@ -1207,6 +1208,159 @@
                 cell.classList.toggle('admin');
                 cell.textContent = isAdmin ? '일반' : '관리자';
             }
+        }
+    }
+
+    function showEditModalMember() {
+        const selectedCheckboxes = document.querySelectorAll('.user-select:checked');
+        if (selectedCheckboxes.length === 0) {
+            alert('수정할 회원을 선택해주세요.');
+            return;
+        }
+
+        if (selectedCheckboxes.length > 1) {
+            alert('한 번에 하나의 회원만 수정할 수 있습니다.');
+            return;
+        }
+
+        const userRow = selectedCheckboxes[0].closest('.user-row');
+        const userId = parseInt(userRow.getAttribute('data-user-id'));
+        const user = currentUsers.find(u => u.userId === userId);
+
+        if (!user) return;
+        const birthDate = user.birth ? new Date(user.birth).toISOString().split('T')[0] : '';
+
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.innerHTML = ''
+            + '<div class="modal-content-member">'
+            + '    <div class="basic-info-member">'
+            + '        <div class="left-section-member">'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-user"></i> 아이디</label>'
+            + '                <input type="text" class="form-control" id="editUserId" value="' + (user.mid || '') + '" disabled>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-signature"></i> 성명</label>'
+            + '                <input type="text" class="form-control" id="editName" value="' + (user.name || '') + '" disabled>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-id-badge"></i> 닉네임</label>'
+            + '                <div class="nickname-group">'
+            + '                    <input type="text" class="form-control" id="editNickname" value="' + (user.nickname || '') + '">'
+            + '                    <button class="btn-check-duplicate" onclick="checkNickname()">체크</button>'
+            + '                </div>'
+            + '            </div>'
+            + '        </div>'
+            + '        <div class="right-section">'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-envelope"></i> 이메일</label>'
+            + '                <input type="email" class="form-control" id="editEmail" value="' + (user.email || '') + '">'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-calendar"></i> 생년월일</label>'
+            + '                <input type="date" class="form-control" id="editBirth" value="' + birthDate + '">'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-venus-mars"></i> 성별</label>'
+            + '                <div class="radio-group">'
+            + '                    <input type="radio" id="editGenderM" name="gender" value="MALE" ' + (user.gender === 'MALE' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderM">남성</label>'
+            + '                    <input type="radio" id="editGenderF" name="gender" value="FEMALE" ' + (user.gender === 'FEMALE' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderF">여성</label>'
+            + '                    <input type="radio" id="editGenderO" name="gender" value="OTHER" ' + (user.gender === 'OTHER' ? 'checked' : '') + '>'
+            + '                    <label for="editGenderO">기타</label>'
+            + '                </div>'
+            + '            </div>'
+            + '            <div class="form-group">'
+            + '                <label><i class="fas fa-user-shield"></i> 권한</label>'
+            + '                <div class="authority-toggle-member">'
+            + '                    <span class="auth-label-member">일반</span>'
+            + '                    <div class="toggle-switch-member" onclick="updateUserAuthority(\'' + user.userId + '\', ' + (user.authority !== 'ADMIN') + ')">'
+            + '                        <div class="toggle-slider-member' + (user.authority === 'ADMIN' ? ' active' : '') + '"></div>'
+            + '                    </div>'
+            + '                    <span class="auth-label-member">관리자</span>'
+            + '                </div>'
+            + '            </div>'
+            + '        </div>'
+            + '    </div>'
+            + '    <div class="edit-buttons">'
+            + '        <button class="btn-edit btn-save" onclick="saveUserChanges(' + user.userId + ')">변경 저장</button>'
+            + '        <button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>'
+            + '    </div>'
+            + '</div>';
+
+        document.body.appendChild(modal);
+        modal.style.display = 'block';
+    }
+
+    async function saveUserChanges(userId) {
+        const birthDate = document.getElementById('editBirth').value;
+
+        const updatedUser = {
+            name: document.getElementById('editName').value,
+            nickname: document.getElementById('editNickname').value,
+            email: document.getElementById('editEmail').value,
+            birth: birthDate + 'T00:00:00', // LocalDateTime 형식으로 변환
+            gender: document.querySelector('input[name="gender"]:checked').value,
+            authority: document.querySelector('.toggle-slider-member').classList.contains('active') ? 'ADMIN' : 'USER'
+        };
+
+        try {
+            const response = await fetch('/api/members/' + userId, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedUser),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                alert('회원 정보가 수정되었습니다.');
+                closeModal();
+                loadUserList(currentPageUsers);
+            } else {
+                throw new Error('수정 실패');
+            }
+        } catch (error) {
+            console.error('회원 정보 수정 중 오류:', error);
+            alert('회원 정보 수정 중 오류가 발생했습니다.');
+        }
+    }
+
+    // 중복 체크 닉네임
+    async function checkNickname() {
+        const nickname = document.getElementById('editNickname').value;
+
+        if (!nickname) {
+            alert("닉네임을 입력해주세요.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/check-nickname', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nickname: nickname }),
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.isDuplicate) {
+                    alert("이미 사용 중인 닉네임입니다.");
+                } else {
+                    alert("사용 가능한 닉네임입니다.");
+                }
+            } else {
+                throw new Error('중복 확인 실패');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert("중복 확인 중 오류가 발생했습니다.");
         }
     }
 

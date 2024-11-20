@@ -133,4 +133,24 @@ public class Member {
     }
 
 
+    public void updateInfo(String name, String nickname, String email, LocalDateTime birth, String gender, Authority authority) {
+        if (name != null) {
+            this.name = name;
+        }
+        if (nickname != null) {
+            this.nickname = nickname;
+        }
+        if (email != null) {
+            this.email = email;
+        }
+        if (birth != null) {
+            this.birth = birth;
+        }
+        if (gender != null) {
+            this.gender = gender;
+        }
+        if (authority != null) {
+            this.authority = authority;
+        }
+    }
 }

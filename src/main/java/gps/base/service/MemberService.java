@@ -195,4 +195,23 @@ public class MemberService {
     public boolean existsByNickname(String nickname) {
         return memberRepository.existsByNickname(nickname);
     }
+
+    public void updateMember(Long userId, MemberDTO memberDTO) {
+        Member member = memberRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!member.getNickname().equals(memberDTO.getNickname())
+                && memberRepository.existsByNickname(memberDTO.getNickname())) {
+            throw new CustomException(ErrorCode.DUPLICATE_MEMBER_NICKNAME);
+        }
+
+        member.updateInfo(
+                memberDTO.getName(),
+                memberDTO.getNickname(),
+                memberDTO.getEmail(),
+                memberDTO.getBirth(),
+                memberDTO.getGender(),
+                memberDTO.getAuthority()
+        );
+    }
 }

@@ -72,4 +72,20 @@ public class MemberController {
         memberService.updateAuthority(userId, authority);
         return ResponseEntity.ok().build();
     }
+    
+    // 회원 수정
+    @PutMapping("/{userId}")
+    public ResponseEntity<Void> updateMember(
+            @PathVariable Long userId,
+            @RequestBody MemberDTO memberDTO,
+            HttpSession session
+    ) {
+        Authority authority = (Authority) session.getAttribute("authority");
+        if (authority != Authority.ADMIN) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED);
+        }
+
+        memberService.updateMember(userId, memberDTO);
+        return ResponseEntity.ok().build();
+    }
 }

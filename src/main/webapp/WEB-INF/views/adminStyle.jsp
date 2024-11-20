@@ -707,7 +707,6 @@ cursor: pointer;
 
 /* 모달 스타일 */
 .modal {
-display: none;
 position: fixed;
 top: 0;
 left: 0;
@@ -715,6 +714,9 @@ width: 100%;
 height: 100%;
 background-color: rgba(0, 0, 0, 0.5);
 z-index: 1000;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .modal-content {
@@ -770,11 +772,11 @@ margin-top: 20px;
 }
 
 .btn-edit {
+margin-top: 20px;
 padding: 8px 16px;
-border: none;
 border-radius: 4px;
 cursor: pointer;
-font-size: 14px;
+border: none;
 }
 
 .btn-save {
@@ -889,5 +891,85 @@ color: white;
 
 .authority-cell:hover {
 opacity: 0.8;
+}
+
+
+.modal-content-member {
+max-width: 900px;
+background-color: #fff;  /* 배경색 추가 */
+padding: 20px;          /* 여백 추가 */
+border-radius: 8px;     /* 모서리 둥글게 */
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* 그림자 효과 */
+position: relative;
+margin: 50px auto;
+}
+
+.radio-group {
+display:flex;
+}
+
+.basic-info-member {
+display: flex;
+gap: 40px;
+}
+
+.left-section-member, .right-section-member {
+flex: 1;
+}
+
+.nickname-group-member {
+display: flex;
+gap: 10px;
+}
+
+.btn-check-duplicate-member {
+padding: 5px 10px;
+background: #6c757d;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+}
+
+.radio-group-member {
+display: flex;
+gap: 20px;
+align-items: center;
+}
+
+.authority-toggle-member {
+display: flex;
+align-items: center;
+gap: 10px;
+}
+
+.toggle-switch-member {
+width: 60px;
+height: 30px;
+background: #e0e0e0;
+border-radius: 15px;
+position: relative;
+cursor: pointer;
+}
+
+.toggle-slider-member {
+width: 26px;
+height: 26px;
+background: white;
+border-radius: 50%;
+position: absolute;
+top: 2px;
+left: 2px;
+transition: 0.3s;
+}
+
+.toggle-slider-member.active {
+left: 32px;
+background: #007bff;
+}
+
+.auth-label-member {
+font-size: 14px;
+color: #666;
 }
 
