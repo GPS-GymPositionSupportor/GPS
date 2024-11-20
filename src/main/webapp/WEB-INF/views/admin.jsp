@@ -64,8 +64,8 @@
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="fas fa-comment" onclick="loadCommentList()"></i>댓글 관리
+            <a href="#" class="nav-link", onclick="loadCommentList()">
+                <i class="fas fa-comment"></i>댓글 관리
             </a>
         </li>
     </ul>
@@ -821,6 +821,7 @@
             const commentElement = document.createElement('div');
             commentElement.className = 'review-item';
             commentElement.setAttribute('data-comment-id', comment.id);
+            commentElement.setAttribute('data-review-id', comment.reviewId);
 
             // 체크박스, 텍스트, 작성자 정보를 담을 컨테이너들
             const checkbox = document.createElement('input');
@@ -840,7 +841,7 @@
 
             const dateSpan = document.createElement('span');
             dateSpan.className = 'review-date';
-            dateSpan.textContent = new Date(comment.addedAt).toLocaleDateString();
+            dateSpan.textContent = new Date(comment.createdAt).toLocaleDateString();
 
             // 요소들 조립
             infoDiv.appendChild(writerSpan);
@@ -922,29 +923,37 @@
 
     async function deleteSelectedComments() {
         const selectedComments = document.querySelectorAll('.review-select:checked');
-        const commentIds = Array.from(selectedComments).map(function(checkbox) {
-            return checkbox.closest('.review-item').getAttribute('data-comment-id');
-        });
-
-        if (!commentIds.length) {
+        if (selectedComments.length === 0) {
             alert('삭제할 댓글을 선택해주세요.');
             return;
         }
 
         if (confirm('선택한 댓글을 삭제하시겠습니까?')) {
             try {
-                const response = await fetch('/api/comments', {
-                    method: 'DELETE',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(commentIds)
-                });
+                for (const checkbox of selectedComments) {
+                    const commentElement = checkbox.closest('.review-item');
+                    const reviewId = commentElement.getAttribute('data-review-id');
+                    const commentId = commentElement.getAttribute('data-comment-id');
 
-                if (response.ok) {
-                    alert('댓글이 삭제되었습니다.');
-                    loadComments(0);
+                    if (!reviewId || !commentId) {
+                        console.error('리뷰 ID 또는 댓글 ID를 찾을 수 없습니다.');
+                        continue;
+                    }
+
+                    const response = await fetch(`/api/reviews/` + reviewId + `/comments/` + commentId, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`댓글 삭제 실패 (Status: ${response.status})`);
+                    }
                 }
+
+                alert('선택한 댓글이 삭제되었습니다.');
+                loadComments(0); // 댓글 목록 새로고침
             } catch (error) {
-                console.error('댓글 삭제 실패:', error);
+                console.error('댓글 삭제 중 오류:', error);
                 alert('댓글 삭제 중 오류가 발생했습니다.');
             }
         }

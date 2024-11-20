@@ -191,7 +191,7 @@ public class ReviewController {
 
     // 댓글 수정
     @PutMapping("/{rId}/comments/{cId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long rId, @PathVariable Long cId, @RequestBody CommentDTO commentDTO, HttpSession session) {
+    public ResponseEntity<Comment> updateComment(@PathVariable Long rId, @PathVariable Long cId, @RequestBody CommentDTO commentDTO, Authority authority, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
 
         // 로그인 여부 확인
@@ -199,7 +199,7 @@ public class ReviewController {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        reviewService.validateReviewAndComment(rId, cId, userId);
+        reviewService.validateReviewAndComment(rId, cId, userId, authority);
         Comment updatedComment = reviewService.updateComment(rId, cId, userId, commentDTO);
         return ResponseEntity.ok(updatedComment);
     }
@@ -207,16 +207,17 @@ public class ReviewController {
     // 댓글 삭제
     @DeleteMapping("/{rId}/comments/{cId}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long rId, @PathVariable Long cId, HttpSession session) {
-        Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userID");
+        Authority authority = (Authority) session.getAttribute("authority");
         
         // 로그인 여부 확인
         if(userId == null) {
             throw new CustomException(ErrorCode.UNAUTHORIZED);
         }
 
-        reviewService.validateReviewAndComment(rId, cId, userId);
+        reviewService.validateReviewAndComment(rId, cId, userId,authority);
 
-        reviewService.deleteComment(rId, cId, userId);
+        reviewService.deleteComment(rId, cId, userId, authority);
         return ResponseEntity.noContent().build();
     }
 

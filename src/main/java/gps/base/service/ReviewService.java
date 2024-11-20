@@ -286,7 +286,7 @@ public class ReviewService {
     }
 
     // 리뷰와 댓글 검증
-    public void validateReviewAndComment(Long reviewId, Long commentId, Long userId) {
+    public void validateReviewAndComment(Long reviewId, Long commentId, Long userId, Authority authority) {
         // 리뷰 존재 여부 확인
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
@@ -294,14 +294,14 @@ public class ReviewService {
         // 댓글 존재 여부와 작성자 확인
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.REVIEW_NOT_FOUND));
-        
+
         // 댓글이 해당 리뷰의 댓글이 맞는지 확인
         if (!comment.getReview().getRId().equals(reviewId)) {
             throw new CustomException(ErrorCode.REVIEW_NOT_FOUND);
         }
-        
-        // 댓글 작성자 확인
-        if(!comment.getUserId().equals(userId)) {
+
+        // 관리자이거나 작성자일 경우 삭제 가능
+        if (authority != Authority.ADMIN && !comment.getUserId().equals(userId)) {
             throw new CustomException(ErrorCode.WRITER_DOES_NOT_MATCH);
         }
     }
@@ -435,13 +435,14 @@ public class ReviewService {
 
     // 댓글 삭제
     @Transactional
-    public void deleteComment(Long rId, Long commentId, Long userId) {
+    public void deleteComment(Long rId, Long commentId, Long userId, Authority authority) {
         Review review = reviewRepository.findById(rId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 리뷰가 존재하지 않습니다."));
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("해당하는 댓글이 존재하지 않습니다."));
 
-        if(!comment.getUserId().equals(userId) || !comment.getReview().equals(rId)) {
+        // 관리자이거나 댓글 작성자인 경우에만 삭제 가능
+        if (authority != Authority.ADMIN && (!comment.getUserId().equals(userId) || !comment.getReview().equals(rId))) {
             throw new IllegalArgumentException("댓글을 삭제할 권한이 없습니다.");
         }
 
