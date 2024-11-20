@@ -2,7 +2,6 @@ package gps.base.controller;
 
 import gps.base.DTO.EmailRequest;
 import gps.base.model.Authority;
-import gps.base.repository.MemberRepository;
 import gps.base.service.EmailService;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
@@ -17,9 +16,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 @RequestMapping("/api")
@@ -45,22 +44,33 @@ public class MainController {
     }
 
     @PostMapping("/send-verification-code")
-    public @ResponseBody ResponseEntity<?> sendVerificationCode(@RequestParam String email) {
+    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(@RequestParam String name, @RequestParam String email, HttpSession session) {
         try {
-            int number = emailService.sendMail(email);
-            return ResponseEntity.ok().body(Collections.singletonMap("message", "메일 전송 완료, 인증번호: " + number));
+            if (emailService.validateNameAndEmail(name, email)) {
+                return emailService.sendMailAsync(email)
+                        .thenApply(number -> {
+                            session.setAttribute("verificationCode", number); // 인증 코드를 세션에 저장
+                            session.setAttribute("email", email); // 이메일도 세션에 저장
+                            return ResponseEntity.ok("메일 전송 완료");
+                        });
+            } else {
+                return CompletableFuture.completedFuture(ResponseEntity.status(400).body("등록된 이름과 이메일이 일치하지 않습니다."));
+            }
         } catch (MailException e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(Collections.singletonMap("message", "메일 전송 실패"));
+            return CompletableFuture.completedFuture(ResponseEntity.status(500).body("메일 전송 실패"));
         }
     }
 
     @PostMapping("/verify-code")
-    public @ResponseBody ResponseEntity<?> verifyCode(@RequestParam int code) {
-        if (code == EmailService.number) { // 인증 번호 비교
-            return ResponseEntity.ok().body(Collections.singletonMap("message", "인증 성공"));
+    public @ResponseBody ResponseEntity<String> verifyCode(@RequestParam int code, HttpSession session) {
+        Integer sessionCode = (Integer) session.getAttribute("verificationCode"); // 세션에서 인증 코드 가져오기
+        String email = (String) session.getAttribute("email"); // 세션에서 이메일 가져오기
+        if (sessionCode != null && sessionCode == code) { // 인증 코드 비교
+            emailService.sendUserIdAsync(email); // 인증이 성공하면 유저 아이디 전송
+            return ResponseEntity.ok("인증 성공 및 아이디가 이메일로 전송되었습니다.");
         } else {
-            return ResponseEntity.status(400).body(Collections.singletonMap("message", "인증 실패"));
+            return ResponseEntity.status(400).body("인증 실패");
         }
     }
 
