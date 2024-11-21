@@ -4,6 +4,7 @@ import gps.base.ElasticSearchService.GymSearchService;
 import gps.base.ElasticSearchEntity.Gym;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,14 +34,14 @@ public class GymSearchController {
         }
     }
 
-    @GetMapping("/recommend/similar")
-    public ResponseEntity<List<Gym>> recommendSimilarGyms(
-            @RequestParam(name = "gymId") String gymId,
-            @RequestParam(name = "lat") double lat,
-            @RequestParam(name = "lon") double lon
-    ) throws IOException {
-        return ResponseEntity.ok(
-                gymSearchService.recommendSimilarGyms(gymId, lat, lon)
-        );
+    @GetMapping("/recommend/nearby")
+    public ResponseEntity<List<Gym>> getRecommendedNearbyGyms(
+            @RequestParam double lat,
+            @RequestParam double lon) {
+
+        List<Gym> recommendations = gymSearchService.recommendNearbyGyms(lat, lon);
+        return ResponseEntity.ok(recommendations);
     }
+
+
 }

@@ -1,18 +1,15 @@
 package gps.base.ElasticSearchService;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.GeoLocation;
-import co.elastic.clients.elasticsearch._types.query_dsl.*;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
-import gps.base.config.Elastic.Document.*;
 import gps.base.ElasticSearchEntity.Gym;
+import gps.base.ElasticSearchEntity.Review;
+import gps.base.config.Elastic.Document.GymDocument;
+import gps.base.config.Elastic.GymSearchRepository;
 import gps.base.repository.GymRepository;
+import gps.base.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,170 +17,156 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class GymSearchService {
-    private final ElasticsearchClient elasticsearchClient;
+    private final GymSearchRepository gymSearchRepository;
     private final GymRepository gymRepository;
-    private static final String INDEX_NAME = "gyms";
+    private final ReviewRepository reviewRepository;
+
+    private static final double NEARBY_DISTANCE_KM = 2.0;
+    private static final int RECOMMEND_LIMIT = 5;
+
 
     public List<Gym> searchNearbyGyms(double lat, double lon, double distanceKm) {
-        try {
-            GeoLocation geoLocation = GeoLocation.of(builder -> builder
-                    .latlon(latlon -> latlon
-                            .lat(lat)
-                            .lon(lon)));
+        List<GymDocument> nearbyGymDocs = gymSearchRepository.searchByLocation(distanceKm, lat, lon);
 
-            Query geoQuery = Query.of(q -> q
-                    .bool(b -> b
-                            .must(m -> m
-                                    .geoDistance(g -> g
-                                            .field("location")
-                                            .location(geoLocation)
-                                            .distance(distanceKm + "km")))));
+        // 거리 계산 및 정렬을 위한 Map 생성
+        Map<Long, Double> distanceMap = new HashMap<>();
 
-            SearchResponse<GymDocument> response = elasticsearchClient.search(s -> s
-                            .index(INDEX_NAME)
-                            .query(geoQuery)
-                            .size(100),
-                    GymDocument.class);
-
-            List<Long> gymIds = response.hits().hits().stream()
-                    .map(Hit::source)
-                    .filter(Objects::nonNull)
-                    .map(doc -> Long.parseLong(doc.getId()))
-                    .collect(Collectors.toList());
-
-            return gymRepository.findAllById(gymIds);
-
-        } catch (Exception e) {
-            log.error("Error in searchNearbyGyms: ", e);
-            return Collections.emptyList();
+        // 각 체육관의 거리 계산
+        for (GymDocument doc : nearbyGymDocs) {
+            double distance = calculateDistance(lat, lon, doc.getLatitude(), doc.getLongitude());
+            distanceMap.put(Long.parseLong(doc.getId()), distance);
         }
+
+        // 체육관 정보 조회 및 거리순 정렬
+        return nearbyGymDocs.stream()
+                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .sorted(Comparator.comparingDouble(gym ->
+                        distanceMap.getOrDefault(gym.getId(), Double.MAX_VALUE)))
+                .collect(Collectors.toList());
     }
 
-    public List<Gym> recommendSimilarGyms(String gymId, double lat, double lon) throws IOException {
-        // ElasticSearch로 유사도 계산
-        GymDocument targetGym = getGymById(gymId);
-        if (targetGym == null || targetGym.getUserInteractions() == null) {
+    // 두 지점 간의 거리 계산 (Haversine formula)
+    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // 지구 반지름 (km)
+        double latDistance = Math.toRadians(lat2 - lat1);
+        double lonDistance = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(latDistance / 2) * Math.sin(latDistance / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(lonDistance / 2) * Math.sin(lonDistance / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    public List<Gym> recommendNearbyGyms(double userLat, double userLon) {
+        // 1. 현재 위치 기준 2km 이내의 체육관들을 검색
+        List<GymDocument> nearbyGymDocs = gymSearchRepository.findByLocationNear(NEARBY_DISTANCE_KM, userLat, userLon);
+
+        if (nearbyGymDocs.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<GymDocument> allGyms = getAllGyms();
-        if (allGyms.isEmpty()) {
-            return Collections.emptyList();
+        // 2. 근처 체육관들의 상세 정보 조회
+        List<Gym> nearbyGyms = nearbyGymDocs.stream()
+                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+
+        // 3. 각 체육관 쌍 간의 유사도 계산
+        Map<Long, Map<Long, Double>> similarityMatrix = new HashMap<>();
+        for (Gym gym1 : nearbyGyms) {
+            similarityMatrix.put(gym1.getId(), new HashMap<>());
+            for (Gym gym2 : nearbyGyms) {
+                if (gym1.getId().equals(gym2.getId()) ||
+                        !gym1.getCategory().equals(gym2.getCategory())) {
+                    continue;
+                }
+
+                double similarity = calculateGymSimilarity(gym1, gym2);
+                similarityMatrix.get(gym1.getId()).put(gym2.getId(), similarity);
+            }
+        }
+
+        // 4. 각 체육관의 최종 점수 계산 (유사도 + 거리 + 평점)
+        List<GymScore> gymScores = nearbyGyms.stream()
+                .map(gym -> {
+                    double similarityScore = calculateAverageSimilarity(gym.getId(), similarityMatrix);
+                    double distance = calculateDistance(userLat, userLon, gym.getLatitude(), gym.getLongitude());
+                    double rating = gym.getRating() != null ? gym.getRating() : 0.0;
+
+                    return new GymScore(gym, similarityScore, distance, rating);
+                })
+                .collect(Collectors.toList());
+
+        // 5. 점수 기반으로 정렬하여 상위 5개 추천
+        return gymScores.stream()
+                .sorted(Comparator.comparing(GymScore::getCalculatedScore).reversed())
+                .limit(RECOMMEND_LIMIT)
+                .map(GymScore::getGym)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 두 체육관 간의 유사도 계산
+     */
+    private double calculateGymSimilarity(Gym gym1, Gym gym2) {
+        List<Review> reviews1 = reviewRepository.findByGymId(gym1.getId());
+        List<Review> reviews2 = reviewRepository.findByGymId(gym2.getId());
+
+        Map<Long, Double> ratings1 = reviews1.stream()
+                .collect(Collectors.toMap(
+                        Review::getUserId,
+                        Review::getRating,
+                        (r1, r2) -> r1
+                ));
+
+        Map<Long, Double> ratings2 = reviews2.stream()
+                .collect(Collectors.toMap(
+                        Review::getUserId,
+                        Review::getRating,
+                        (r1, r2) -> r1
+                ));
+
+        // 공통 사용자 찾기
+        Set<Long> commonUsers = new HashSet<>(ratings1.keySet());
+        commonUsers.retainAll(ratings2.keySet());
+
+        if (commonUsers.isEmpty()) {
+            return 0.0;
         }
 
         // 코사인 유사도 계산
-        Map<String, Double> similarityScores = calculateGymSimilarities(targetGym, allGyms);
-
-        List<String> similarGymIds = similarityScores.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(gymId))
-                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
-                .limit(10)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
-        if (similarGymIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // JPA로 실제 데이터 조회
-        List<Long> dbGymIds = similarGymIds.stream()
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
-
-        return gymRepository.findAllById(dbGymIds);
-    }
-
-    private Map<String, Double> calculateGymSimilarities(GymDocument targetGym, List<GymDocument> allGyms) {
-        Map<String, Double> similarities = new HashMap<>();
-        Map<String, Map<String, Double>> userRatings = new HashMap<>();
-
-        // 모든 체육관의 사용자 평점을 맵으로 변환
-        for (GymDocument gym : allGyms) {
-            Map<String, Double> ratings = new HashMap<>();
-            if (gym.getUserInteractions() != null) {
-                for (UserInteraction interaction : gym.getUserInteractions()) {
-                    ratings.put(interaction.getUserId(), interaction.getRating());
-                }
-            }
-            userRatings.put(gym.getId(), ratings);
-        }
-
-        // 타겟 체육관의 사용자 평점
-        Map<String, Double> targetRatings = userRatings.get(targetGym.getId());
-
-        // 각 체육관과의 유사도 계산
-        for (GymDocument otherGym : allGyms) {
-            if (otherGym.getId().equals(targetGym.getId())) continue;
-
-            Map<String, Double> otherRatings = userRatings.get(otherGym.getId());
-            double similarity = calculateCosineSimilarity(targetRatings, otherRatings);
-
-            if (targetGym.getCategory() == otherGym.getCategory()) {
-                similarity *= 1.2; // 같은 카테고리일 경우 가중치 부여
-            }
-
-            similarities.put(otherGym.getId(), similarity);
-        }
-
-        return similarities;
-    }
-
-    private double calculateCosineSimilarity(Map<String, Double> ratings1, Map<String, Double> ratings2) {
-        Set<String> commonUsers = new HashSet<>(ratings1.keySet());
-        commonUsers.retainAll(ratings2.keySet());
-
-        if (commonUsers.isEmpty()) return 0.0;
-
         double dotProduct = 0.0;
         double norm1 = 0.0;
         double norm2 = 0.0;
 
-        for (String userId : commonUsers) {
-            double r1 = ratings1.get(userId);
-            double r2 = ratings2.get(userId);
+        for (Long userId : commonUsers) {
+            double rating1 = ratings1.get(userId);
+            double rating2 = ratings2.get(userId);
 
-            dotProduct += r1 * r2;
-            norm1 += r1 * r1;
-            norm2 += r2 * r2;
+            dotProduct += rating1 * rating2;
+            norm1 += rating1 * rating1;
+            norm2 += rating2 * rating2;
         }
 
-        if (norm1 == 0.0 || norm2 == 0.0) return 0.0;
+        norm1 = Math.sqrt(norm1);
+        norm2 = Math.sqrt(norm2);
 
-        return dotProduct / (Math.sqrt(norm1) * Math.sqrt(norm2));
+        return norm1 == 0.0 || norm2 == 0.0 ? 0.0 : dotProduct / (norm1 * norm2);
     }
 
-    private GymDocument getGymById(String gymId) throws IOException {
-        Query idQuery = new Query.Builder()
-                .term(t -> t
-                        .field("_id")
-                        .value(gymId))
-                .build();
-
-        SearchResponse<GymDocument> response = elasticsearchClient.search(s -> s
-                        .index(INDEX_NAME)
-                        .query(idQuery),
-                GymDocument.class
-        );
-
-        List<GymDocument> hits = extractHits(response);
-        return hits.isEmpty() ? null : hits.get(0);
+    /**
+     * 한 체육관과 다른 체육관들 간의 평균 유사도 계산
+     */
+    private double calculateAverageSimilarity(Long gymId, Map<Long, Map<Long, Double>> similarityMatrix) {
+        Map<Long, Double> similarities = similarityMatrix.get(gymId);
+        if (similarities.isEmpty()) {
+            return 0.0;
+        }
+        return similarities.values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
-    private List<GymDocument> getAllGyms() throws IOException {
-        SearchResponse<GymDocument> response = elasticsearchClient.search(s -> s
-                        .index(INDEX_NAME)
-                        .query(q -> q
-                                .matchAll(m -> m)),
-                GymDocument.class
-        );
 
-        return extractHits(response);
-    }
-
-    private List<GymDocument> extractHits(SearchResponse<GymDocument> response) {
-        return response.hits().hits().stream()
-                .map(Hit::source)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
 }

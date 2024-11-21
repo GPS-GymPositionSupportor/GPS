@@ -3,9 +3,8 @@ package gps.base.config.Elastic.event;
 import gps.base.ElasticSearchEntity.Gym;
 import lombok.Getter;
 
-// 기본 이벤트 클래스
 @Getter
-public abstract class GymEvent {
+public class GymEvent {
     protected final Gym gym;
     protected final Long timestamp;
 

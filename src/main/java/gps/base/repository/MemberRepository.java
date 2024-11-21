@@ -1,14 +1,16 @@
 package gps.base.repository;
 
 import gps.base.ElasticSearchEntity.Member;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
 
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Optional<Member> findByEmail(String email);
-    Optional<Member> findByNickname(String nickname);
-    boolean existsByEmail(String email);
+    @Query("SELECT m FROM Member m WHERE m.email LIKE %:keyword% OR m.nickname LIKE %:keyword%")
+    Page<Member> searchByKeyword(String keyword, Pageable pageable);
+
+    Page<Member> findByEmailContainingOrNicknameContaining(String keyword, String keyword1, Pageable pageable);
 }

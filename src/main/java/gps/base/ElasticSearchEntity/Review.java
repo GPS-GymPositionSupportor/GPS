@@ -22,4 +22,7 @@ public class Review {
 
     @Column(name = "added_at")
     private LocalDateTime addedAt;
+
+    @Column(nullable = false)
+    private Double rating;
 }
