@@ -1300,14 +1300,17 @@
 
     async function saveUserChanges(userId) {
         const birthDate = document.getElementById('editBirth').value;
+        // authority 체크 방식 변경
+        const authorityToggle = document.querySelector('.authority-toggle-member');
+        const isAdmin = authorityToggle ? authorityToggle.classList.contains('active') : false;
 
         const updatedUser = {
             name: document.getElementById('editName').value,
             nickname: document.getElementById('editNickname').value,
             email: document.getElementById('editEmail').value,
-            birth: birthDate + 'T00:00:00', // LocalDateTime 형식으로 변환
+            birth: birthDate + 'T00:00:00',
             gender: document.querySelector('input[name="gender"]:checked').value,
-            authority: document.querySelector('.toggle-slider-member').classList.contains('active') ? 'ADMIN' : 'USER'
+            authority: isAdmin ? 'ADMIN' : 'USER'  // 수정된 부분
         };
 
         try {
