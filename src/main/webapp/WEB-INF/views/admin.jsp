@@ -83,35 +83,40 @@
         </div>
     </div>
 
-    <!-- 차트 컨테이너들 -->
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">접속자 평균</span>
-            <span class="chart-period">월별 통계</span>
+    <div class="charts-wrapper">
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">시설 분류 통계</span>
+                <span class="chart-period">카테고리별</span>
+            </div>
+            <canvas id="visitorChart"></canvas>
         </div>
-        <div class="chart" id="visitorChart"></div>
-    </div>
 
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">전체 조회수</span>
-            <span class="chart-period">일별 통계</span>
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">카테고리별 리뷰 수</span>
+                <span class="chart-period">전체 통계</span>
+            </div>
+            <canvas id="viewsChart"></canvas>
         </div>
-        <div class="chart" id="viewsChart"></div>
-    </div>
 
-    <div class="chart-container">
-        <div class="chart-header">
-            <span class="chart-title">전체 댓글수</span>
-            <span class="chart-period">일별 통계</span>
+        <div class="chart-container">
+            <div class="chart-header">
+                <span class="chart-title">회원가입 현황</span>
+                <span class="chart-period">로그인 타입별</span>
+            </div>
+            <canvas id="commentsChart"></canvas>
         </div>
-        <div class="chart" id="commentsChart"></div>
     </div>
 </div>
 
 
-<!-- Font Awesome -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <!-- Font Awesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+
 
 <script>
 
@@ -1051,7 +1056,6 @@
                 { content: user.gender || '-' },
                 { content: user.mcreatedAt ? new Date(user.mcreatedAt).toLocaleDateString() : '-' },
                 { content: user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : '-' },
-                { content: user.authority || '-' }
             ];
 
             cells.forEach(cellData => {
@@ -1363,6 +1367,167 @@
             alert("중복 확인 중 오류가 발생했습니다.");
         }
     }
+
+
+    // visitorChart를 카테고리별 시설 차트로 변경
+    async function loadCategoryStats() {
+        try {
+            const response = await fetch('/api/stats/category', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('visitorChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => item.category),
+                    datasets: [{
+                        label: '시설 수',
+                        data: data.map(item => item.count),
+                        backgroundColor: '#8884d8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('카테고리 통계 로드 실패:', error);
+        }
+    }
+
+
+    async function loadCategoryReviewStats() {
+        try {
+            const response = await fetch('/api/stats/category-reviews', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('viewsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(item => {
+                        switch(item.category) {
+                            case 'water': return '수상 스포츠';
+                            case 'ball': return '구기 스포츠';
+                            case 'physics': return '피지컬';
+                            case 'battle': return '격투기';
+                            default: return item.category;
+                        }
+                    }),
+                    datasets: [{
+                        label: '리뷰 수',
+                        data: data.map(item => item.reviewCount),
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',  // 수상 스포츠 - 파란색
+                            'rgba(255, 99, 132, 0.7)',  // 구기 스포츠 - 빨간색
+                            'rgba(75, 192, 192, 0.7)',  // 피지컬 - 초록색
+                            'rgba(255, 159, 64, 0.7)'   // 격투기 - 주황색
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 159, 64, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false  // 범례 숨기기
+                        },
+                        title: {
+                            display: true,
+                            text: '카테고리별 전체 리뷰 수',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `리뷰 수: ${context.raw}개`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('카테고리별 리뷰 통계 로드 실패:', error);
+        }
+    }
+
+
+    async function loadUserTypeStats() {
+        try {
+            const response = await fetch('/api/stats/user-types', {
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            const ctx = document.getElementById('commentsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',  // 도넛 차트로 변경
+                data: {
+                    labels: ['일반 로그인', '카카오 로그인', '구글 로그인'],
+                    datasets: [{
+                        data: [
+                            data.find(item => item.providerType === 'LOCAL')?.count || 0,
+                            data.find(item => item.providerType === 'KAKAO')?.count || 0,
+                            data.find(item => item.providerType === 'GOOGLE')?.count || 0
+                        ],
+                        backgroundColor: [
+                            '#FF6384',  // 일반 로그인
+                            '#FFE500',  // 카카오 색상
+                            '#4285F4'   // 구글 색상
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: '로그인 타입별 회원 분포'
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('회원 통계 로드 실패:', error);
+        }
+    }
+
+    // 페이지 로드 시 차트 로드
+    document.addEventListener('DOMContentLoaded', function() {
+        loadCategoryStats();
+        loadCategoryReviewStats();  // 수정된 부분
+        loadUserTypeStats();
+    });
 
     // 전역 변수 추가
     let currentPageUsers = 0;

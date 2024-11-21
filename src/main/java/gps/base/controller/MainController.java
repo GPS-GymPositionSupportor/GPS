@@ -293,6 +293,7 @@ public class MainController {
     public String logout(HttpSession session) {
         Member loggedInUser = (Member) session.getAttribute("loggedInUser");
 
+
         try {
             if (loggedInUser != null) {
                 logger.info("User logged out: {}. Session ID : {}", loggedInUser.getMId(), session.getId());
@@ -310,6 +311,7 @@ public class MainController {
 
             } else {
                 logger.warn("Logout attempted with no user in session. Session ID : {}", session.getId());
+                loggedInUser.updateLastLogin(LocalDateTime.now());
                 return "redirect:/api/login";
             }
         } catch (Exception e) {
