@@ -451,7 +451,7 @@
     let currentPageGyms = 0;
     let currentPage
     let currentPageReviews = 0;
-    const itemsPerPage = 12;
+    let itemsPerPage = 12;
     const pagesPerStep = 5;
 
 
@@ -523,23 +523,41 @@
     }
 
 
+    // totalElement = 80,000
     function updateReviewPagination(totalItems) {
         const pagination = document.querySelector('.pagination');
-        const totalPages = Math.floor(totalItems / itemsPerPage);
+        itemsPerPage = 24;
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
         pagination.innerHTML = '';
 
-        // 1번 버튼
-        const firstButton = document.createElement('button');
-        firstButton.textContent = '1';
-        firstButton.className = currentPageReviews === 0 ? 'active' : '';
-        firstButton.onclick = () => {
-            currentPageReviews = 0;
-            loadReviewList(0);
-        };
-        pagination.appendChild(firstButton);
+        // 시작 페이지와 끝 페이지 계산
+        let startPage = Math.floor(currentPageReviews / 5) * 5;
+        let endPage = Math.min(startPage + 4, totalPages - 1);
 
-        // 2페이지부터 totalPages까지 버튼 생성
-        for(let i = 1; i < totalPages; i++) {
+        // '<<' 버튼 (첫 페이지 그룹으로)
+        if(startPage > 0) {
+            const firstGroupButton = document.createElement('button');
+            firstGroupButton.innerHTML = '<<';
+            firstGroupButton.onclick = () => {
+                currentPageReviews = 0;
+                loadReviewList(0);
+            };
+            pagination.appendChild(firstGroupButton);
+        }
+
+        // '<' 버튼 (이전 페이지 그룹으로)
+        if(startPage > 0) {
+            const prevGroupButton = document.createElement('button');
+            prevGroupButton.innerHTML = '<';
+            prevGroupButton.onclick = () => {
+                currentPageReviews = startPage - 5;
+                loadReviewList(currentPageReviews);
+            };
+            pagination.appendChild(prevGroupButton);
+        }
+
+        // 페이지 번호 버튼들
+        for(let i = startPage; i <= endPage; i++) {
             const pageButton = document.createElement('button');
             pageButton.textContent = i + 1;
             pageButton.className = i === currentPageReviews ? 'active' : '';
@@ -550,23 +568,26 @@
             pagination.appendChild(pageButton);
         }
 
-        // 5페이지 이상일 때만 > 와 >> 버튼 표시
-        if(totalPages > 5) {
-            const nextButton = document.createElement('button');
-            nextButton.innerHTML = '>';
-            nextButton.onclick = () => {
-                currentPageReviews = Math.min(currentPageReviews + 1, totalPages - 1);
+        // '>' 버튼 (다음 페이지 그룹으로)
+        if(endPage < totalPages - 1) {
+            const nextGroupButton = document.createElement('button');
+            nextGroupButton.innerHTML = '>';
+            nextGroupButton.onclick = () => {
+                currentPageReviews = startPage + 5;
                 loadReviewList(currentPageReviews);
             };
-            pagination.appendChild(nextButton);
+            pagination.appendChild(nextGroupButton);
+        }
 
-            const lastButton = document.createElement('button');
-            lastButton.innerHTML = '>>';
-            lastButton.onclick = () => {
-                currentPageReviews = totalPages - 1;
+        // '>>' 버튼 (마지막 페이지 그룹으로)
+        if(endPage < totalPages - 1) {
+            const lastGroupButton = document.createElement('button');
+            lastGroupButton.innerHTML = '>>';
+            lastGroupButton.onclick = () => {
+                currentPageReviews = Math.floor((totalPages - 1) / 5) * 5;
                 loadReviewList(totalPages - 1);
             };
-            pagination.appendChild(lastButton);
+            pagination.appendChild(lastGroupButton);
         }
     }
 
@@ -1407,45 +1428,67 @@
 
 
     async function loadCategoryReviewStats() {
-        try {
-            const response = await fetch('/api/stats/category-reviews', {
-                credentials: 'include'
-            });
-            const data = await response.json();
+        // 로딩 상태 표시
+        const chartContainer = document.querySelector('.chart-container');
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'chart-loading';
+        loadingDiv.textContent = '데이터를 불러오는 중...';
+        chartContainer.appendChild(loadingDiv);
 
-            const ctx = document.getElementById('viewsChart').getContext('2d');
+        // canvas 요소
+        const ctx = document.getElementById('viewsChart');
+        if (ctx) {
+            ctx.style.opacity = '0.5'; // 로딩 중 차트 흐리게 표시
+        }
+
+        try {
+            console.log('API 호출 시작');
+            const response = await fetch('/api/stats/category-reviews', {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log('받은 데이터:', data);
+
+            // 로딩 상태 제거
+            loadingDiv.remove();
+            if (ctx) {
+                ctx.style.opacity = '1';
+            }
+
+            // 기존 차트 제거
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: data.map(item => {
-                        switch(item.category) {
-                            case 'water': return '수상 스포츠';
-                            case 'ball': return '구기 스포츠';
-                            case 'physics': return '피지컬';
-                            case 'battle': return '격투기';
-                            default: return item.category;
-                        }
-                    }),
+                    labels: data.map(item => item.category),
                     datasets: [{
                         label: '리뷰 수',
                         data: data.map(item => item.reviewCount),
                         backgroundColor: [
-                            'rgba(54, 162, 235, 0.7)',  // 수상 스포츠 - 파란색
-                            'rgba(255, 99, 132, 0.7)',  // 구기 스포츠 - 빨간색
-                            'rgba(75, 192, 192, 0.7)',  // 피지컬 - 초록색
-                            'rgba(255, 159, 64, 0.7)'   // 격투기 - 주황색
-                        ],
-                        borderColor: [
-                            'rgba(54, 162, 235, 1)',
-                            'rgba(255, 99, 132, 1)',
-                            'rgba(75, 192, 192, 1)',
-                            'rgba(255, 159, 64, 1)'
+                            'rgba(54, 162, 235, 0.7)',  // 수상 스포츠
+                            'rgba(255, 99, 132, 0.7)',  // 구기 스포츠
+                            'rgba(75, 192, 192, 0.7)',  // 피지컬
+                            'rgba(255, 159, 64, 0.7)'   // 격투기
                         ],
                         borderWidth: 1
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -1456,7 +1499,7 @@
                     },
                     plugins: {
                         legend: {
-                            display: false  // 범례 숨기기
+                            display: false
                         },
                         title: {
                             display: true,
@@ -1475,10 +1518,25 @@
                     }
                 }
             });
+
         } catch (error) {
             console.error('카테고리별 리뷰 통계 로드 실패:', error);
+            console.error('상세 에러:', error.message);
+
+            // 에러 상태 표시
+            loadingDiv.textContent = '데이터 로드 실패';
+            loadingDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.7)';
+
+            // 5초 후 에러 메시지 제거
+            setTimeout(() => {
+                loadingDiv.remove();
+                if (ctx) {
+                    ctx.style.opacity = '1';
+                }
+            }, 5000);
         }
     }
+
 
 
     async function loadUserTypeStats() {
@@ -1490,21 +1548,16 @@
 
             const ctx = document.getElementById('commentsChart').getContext('2d');
             new Chart(ctx, {
-                type: 'doughnut',  // 도넛 차트로 변경
+                type: 'doughnut',
                 data: {
-                    labels: ['일반 로그인', '카카오 로그인', '구글 로그인'],
+                    labels: ['일반', '카카오', '구글'],
                     datasets: [{
                         data: [
                             data.find(item => item.providerType === 'LOCAL')?.count || 0,
                             data.find(item => item.providerType === 'KAKAO')?.count || 0,
                             data.find(item => item.providerType === 'GOOGLE')?.count || 0
                         ],
-                        backgroundColor: [
-                            '#FF6384',  // 일반 로그인
-                            '#FFE500',  // 카카오 색상
-                            '#4285F4'   // 구글 색상
-                        ],
-                        hoverOffset: 4
+                        backgroundColor: ['#FF6384', '#FFE500', '#4285F4']
                     }]
                 },
                 options: {
@@ -1512,10 +1565,6 @@
                     plugins: {
                         legend: {
                             position: 'bottom'
-                        },
-                        title: {
-                            display: true,
-                            text: '로그인 타입별 회원 분포'
                         }
                     }
                 }

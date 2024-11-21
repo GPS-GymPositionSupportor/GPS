@@ -34,7 +34,7 @@
 	        
 	        <div class="find-regist-btn">
 		        	<button class="findIdPw-btn" id="findIdPwBtn">아이디/비밀번호 찾기</button>
-		        	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
+		        	<button class="register-btn" onclick="location.href='/api/register'">회원가입</button>
 			</div>
 			<p class="sns">sns로 시작하기</p>
 			<hr class="divideLine">

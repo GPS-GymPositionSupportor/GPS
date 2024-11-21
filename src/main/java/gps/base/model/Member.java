@@ -69,7 +69,7 @@ public class Member {
     @Column(name = "m_created_at")
     private LocalDateTime mCreatedAt;
 
-    @Column(name = "m_deleted-at")
+    @Column(name = "m_deleted_at")
     private LocalDateTime mDeletedAt;
 
     @Column(name = "last_login")

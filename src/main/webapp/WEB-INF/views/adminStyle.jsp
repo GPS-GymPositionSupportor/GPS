@@ -1021,3 +1021,24 @@ font-size: 14px;
 color: #666;
 }
 
+.chart-loading {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+padding: 10px 20px;
+background: rgba(0, 0, 0, 0.7);
+color: white;
+border-radius: 4px;
+z-index: 1000;
+}
+
+.chart-container {
+position: relative;
+min-height: 300px;
+}
+
+#viewsChart {
+transition: opacity 0.3s ease;
+}
+

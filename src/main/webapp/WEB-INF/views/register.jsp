@@ -119,9 +119,10 @@
 			}
 		}
 
-
+		// 중복 체크 닉네임
+		// 중복 체크 닉네임
 		async function checkNickname() {
-			const nickname = document.getElementById('nickname').value;
+			const nickname = document.getElementById('nickname').value;  // editNickname을 nickname으로 수정
 
 			if (!nickname) {
 				alert("닉네임을 입력해주세요.");
@@ -129,20 +130,24 @@
 			}
 
 			try {
-				const response = await fetch(`/api/check-nickname`, {  // URL에서 쿼리 파라미터 대신 POST 요청으로 수정
-					method: 'POST',  // POST 요청 사용
+				const response = await fetch('/api/check-nickname', {
+					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'  // JSON 형식으로 전송
+						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify({ nickname: nickname })  // JSON 형식으로 요청 본문에 nickname 전달
+					body: JSON.stringify({ nickname: nickname }),
+					credentials: 'include'
 				});
 
-				const data = await response.json();
-
-				if (data.isDuplicate) {
-					alert("이미 사용 중인 닉네임입니다.");
+				if (response.ok) {
+					const data = await response.json();
+					if (data.isDuplicate) {
+						alert("이미 사용 중인 닉네임입니다.");
+					} else {
+						alert("사용 가능한 닉네임입니다.");
+					}
 				} else {
-					alert("사용 가능한 닉네임입니다.");
+					throw new Error('중복 확인 실패');
 				}
 			} catch (error) {
 				console.error('Error:', error);
@@ -150,25 +155,22 @@
 			}
 		}
 
-
+		// DOM 로드 시 실행
 		document.addEventListener('DOMContentLoaded', function() {
 			const provider = '${provider}';
 
 			if (provider) {
-				// 소셜 로그인 정보 표시
 				const infoDiv = document.createElement('div');
 				infoDiv.className = `social-login-info ${provider.toLowerCase()}-login-info`;
 				infoDiv.textContent = `${provider} 계정으로 회원가입을 진행합니다.`;
 				document.querySelector('form').prepend(infoDiv);
 
-				// 이메일 필드가 readonly일 때 스타일 적용
 				const emailInput = document.getElementById('email');
 				if (emailInput.readOnly) {
 					emailInput.classList.add('readonly');
 				}
 			}
 		});
-
 	</script>
 
 </body>
