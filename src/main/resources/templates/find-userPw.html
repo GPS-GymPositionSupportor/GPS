@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>아이디 찾기</title>
+  <title>비밀번호 찾기</title>
   <script>
-    function sendVerificationCode(event) {
+    function sendVerificationCodeForPassword(event) {
       event.preventDefault();
-      const name = document.getElementById("name").value;
-      const email = document.getElementById("email").value;
+      const mId = document.getElementById("mId").value;
+      const email = document.getElementById("email-pw").value;
 
-      fetch('/api/sendVerificationCodeId', {
+      fetch('/api/sendVerificationCodePassword', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          name: name,
+          mId: mId,
           email: email
         })
       })
@@ -29,11 +29,11 @@
               });
     }
 
-    function verifyCode(event) {
+    function verifyCodeForPassword(event) {
       event.preventDefault();
-      const code = document.getElementById("code").value;
+      const code = document.getElementById("code-pw").value;
 
-      fetch('/api/verify-code', {
+      fetch('/api/verify-code-pw', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -53,19 +53,18 @@
   </script>
 </head>
 <body>
-<h1>아이디 찾기</h1>
-<form id="find-userId-form" onsubmit="sendVerificationCode(event)">
-  <label for="name">이름</label>
-  <input type="text" id="name" name="name" required><br>
-  <label for="email">이메일</label>
-  <input type="email" id="email" name="email" required><br>
+<h1>비밀번호 찾기</h1>
+<form id="find-password-form" onsubmit="sendVerificationCodeForPassword(event)">
+  <label for="mId">아이디:</label>
+  <input type="text" id="mId" name="mId" required><br>
+  <label for="email-pw">이메일:</label>
+  <input type="email" id="email-pw" name="email" required><br>
   <button type="submit">입력</button>
 </form>
 
-<h1>인증코드 검증</h1>
-<form id="verify-code-form" onsubmit="verifyCode(event)">
-  <label for="code">인증코드</label>
-  <input type="text" id="code" name="code" required><br>
+<form id="verify-code-form-pw" onsubmit="verifyCodeForPassword(event)">
+  <label for="code-pw">인증코드:</label>
+  <input type="text" id="code-pw" name="code" required><br>
   <button type="submit">입력</button>
 </form>
 <a href = "login.html">로그인 화면</a>

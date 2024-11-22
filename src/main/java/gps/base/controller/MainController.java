@@ -1,6 +1,5 @@
 package gps.base.controller;
 
-import gps.base.DTO.EmailRequest;
 import gps.base.model.Authority;
 import gps.base.service.EmailService;
 import gps.base.service.MemberService;
@@ -37,25 +36,22 @@ public class MainController {
         return "find-userId";
     }
 
-    @GetMapping("/send-email-form")
-    public String showSendEmailForm(Model model) {
-        model.addAttribute("emailRequest", new EmailRequest());
-        return "send-email";
+    @GetMapping("/find-userPw")
+    public String showFindPasswordForm() {
+        return "find-userPw";
     }
 
-    @PostMapping("/send-verification-code")
-    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(@RequestParam String name, @RequestParam String email, HttpSession session) {
+    // 아이디 찾기
+    @PostMapping("/sendVerificationCodeId")
+    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(
+            @RequestParam String name,
+            @RequestParam String email,
+            HttpSession session) {
         try {
-            if (emailService.validateNameAndEmail(name, email)) {
-                return emailService.sendMailAsync(email)
-                        .thenApply(number -> {
-                            session.setAttribute("verificationCode", number); // 인증 코드를 세션에 저장
-                            session.setAttribute("email", email); // 이메일도 세션에 저장
-                            return ResponseEntity.ok("메일 전송 완료");
-                        });
-            } else {
-                return CompletableFuture.completedFuture(ResponseEntity.status(400).body("등록된 이름과 이메일이 일치하지 않습니다."));
-            }
+            return emailService.sendVerificationCodeId(name, email, session)
+                    .thenApply(aVoid -> ResponseEntity.ok("메일 전송 완료"));
+        } catch (IllegalArgumentException e) {
+            return CompletableFuture.completedFuture(ResponseEntity.status(400).body(e.getMessage()));
         } catch (MailException e) {
             e.printStackTrace();
             return CompletableFuture.completedFuture(ResponseEntity.status(500).body("메일 전송 실패"));
@@ -67,8 +63,39 @@ public class MainController {
         Integer sessionCode = (Integer) session.getAttribute("verificationCode"); // 세션에서 인증 코드 가져오기
         String email = (String) session.getAttribute("email"); // 세션에서 이메일 가져오기
         if (sessionCode != null && sessionCode == code) { // 인증 코드 비교
-            emailService.sendUserIdAsync(email); // 인증이 성공하면 유저 아이디 전송
+            emailService.sendUserId(email); // 인증이 성공하면 유저 아이디 전송
             return ResponseEntity.ok("인증 성공 및 아이디가 이메일로 전송되었습니다.");
+        } else {
+            return ResponseEntity.status(400).body("인증 실패");
+        }
+    }
+
+    @PostMapping("/sendVerificationCodePassword")
+    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCodeForPassword(
+            @RequestParam String mId,
+            @RequestParam String email,
+            HttpSession session) {
+        try {
+            return emailService.sendVerificationCodePassword(mId, email, session)
+                    .thenApply(aVoid -> ResponseEntity.ok("인증 코드가 이메일로 전송되었습니다."));
+        } catch (IllegalArgumentException e) {
+            return CompletableFuture.completedFuture(ResponseEntity.status(400).body(e.getMessage()));
+        } catch (MailException e) {
+            e.printStackTrace();
+            return CompletableFuture.completedFuture(ResponseEntity.status(500).body("메일 전송 실패"));
+        }
+    }
+
+    @PostMapping("/verify-code-pw")
+    public @ResponseBody ResponseEntity<String> verifyCodeForPassword(
+            @RequestParam int code,
+            HttpSession session) {
+        Integer sessionCode = (Integer) session.getAttribute("verificationCode");
+        String email = (String) session.getAttribute("email");
+
+        if (sessionCode != null && sessionCode == code) {
+            emailService.sendTemporaryPassword(email, session); // 세션 전달
+            return ResponseEntity.ok("인증 성공! 임시 비밀번호가 이메일로 전송되었습니다.");
         } else {
             return ResponseEntity.status(400).body("인증 실패");
         }
@@ -81,7 +108,7 @@ public class MainController {
     }
 
     // 회원가입 데이터 POST
-    @PostMapping("/register")
+        @PostMapping("/register")
     public String registerMember(@ModelAttribute Member member, Model model) {
         logger.info("회원 등록 요청을 받았습니다. : {}", member.getMId());
         try {
