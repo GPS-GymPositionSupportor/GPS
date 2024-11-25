@@ -27,3 +27,35 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+
+
+sso:
+  token:
+    secret: ${SSO_TOKEN_SECRET}
+    expiration: ${SSO_TOKEN_EXPIRATION}
+  session:
+    timeout: ${SSO_SESSION_TIMEOUT:1800}
+  cors:
+    allowed-origin:
+      - http://localhost:8080
+      - http://localhost:3000
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allowed-headers:
+      - Authorization
+      - Content-Type
+    max-age: 3600
+  security:
+    public-paths:
+      - /api/public/**
+      - /oauth2/**
+      - /login/**
+      - /auth/**
+      - /error
+    protected-paths:
+      - /api/protected/**
+      - /api/private/**

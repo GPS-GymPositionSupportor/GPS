@@ -1,7 +1,7 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <script>
         <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-		
+
 		document.addEventListener('DOMContentLoaded', function() {
 			var loginForm = document.getElementById('loginForm');
 		    loginForm.addEventListener('submit', function(event) {
@@ -9,18 +9,18 @@
 		            event.preventDefault();
 		        }
 		    });
-		    
+
 			var loginForm = document.getElementById('loginForm');
 		    var username = loginForm.querySelector('input[name="username"]');
 		    var password = loginForm.querySelector('input[name="password"]');
 
-		
+
 		    loginForm.addEventListener('submit', function(event) {
 		        if (!validForm()) {
 		            event.preventDefault();
 		        }
 		    });
-		
+
 		    function validForm() {
 		        var isValid = true;
 
@@ -30,26 +30,26 @@
 		        } else {
 		            username.classList.remove('error');
 		        }
-		
+
 		        if (password.value.trim() === "") {
 		            password.classList.add('error');
 		            isValid = false;
 		        } else {
 		            password.classList.remove('error');
 		        }
-		
+
 		        return isValid;
 		    }
-		
+
 		    // id 유효성 검사 이후 id/pw 입력 폼 클릭 시 Error 제거
 		    username.addEventListener('focus', function() {
 		        username.classList.remove('error');
 		    });
-		
+
 		    password.addEventListener('focus', function() {
 		        password.classList.remove('error');
 		    });
-		    
+
 		    var togglePassword = document.getElementById('togglePassword');
 		    var passwordInput = document.getElementById('password');
 		    var eyeIcon = document.getElementById('eyeIcon');
@@ -57,19 +57,19 @@
 		    togglePassword.addEventListener('click', function() {
 		        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 		        passwordInput.setAttribute('type', type);
-		        
+
 		        eyeIcon.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 		    });
-		    
+
 
 		    var burButton = document.querySelector('.burbutton');
 		    var navLinks = document.getElementById('nav-links');
-	
+
 		    burButton.addEventListener('click', (event) => {
 		        event.currentTarget.classList.toggle('active');
 		        navLinks.classList.toggle('active');
 		    });
-	
+
 		    function adjustNavLinks() {
 	            var navLinks = document.getElementById('nav-links');
 
@@ -125,7 +125,7 @@
 
 	        window.addEventListener('resize', adjustNavLinks);
 		});
-    
+
 		document.getElementById('findIdPwBtn').addEventListener('click', function() {
 		    fetch('findIdPw.jsp')
 		        .then(response => response.text())
@@ -160,41 +160,95 @@
 		    }
 		}
 
+
+        /*
+        SSO 관련
+         */
+
+
+        // SSO 관련 유틸리티 함수
+        const SSOUtil = {
+            // SSO 토큰 저장
+            setToken(token) {
+                localStorage.setItem('ssoToken', token);
+            },
+
+            // SSO 토큰 가져오기
+            getToken() {
+                return localStorage.getItem('ssoToken');
+            },
+
+            // SSO 토큰 삭제
+            removeToken() {
+                localStorage.removeItem('ssoToken');
+            },
+
+
+            // SSO 상태 확인
+            async checkSSOStatus() {
+                try {
+                    // Redis 토큰 검증을 위한 엔드포인트 변경
+                    const response = await fetch('/auth/validate-token');
+                    const data = await response.json();
+                    return data.authenticated;
+                } catch (error) {
+                    console.error('SSO status check failed:', error);
+                    return false;
+                }
+            }
+        };
+
+
         // 소셜 로그인 버튼 클릭 핸들러
-        function kakaoLogin() {
+        async function kakaoLogin() {
+            // SSO 상태 확인
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated) {
+                window.location.href = '/'; // 이미 로그인된 경우 메인으로
+                return;
+            }
             window.location.href = '/oauth2/authorization/kakao';
         }
 
-        function googleLogin() {
+        async function googleLogin() {
             console.log('Initiating Google login');
 
-            fetch('/auth/google/url')
-                .then(response => {
-                    console.log('URL response:', response);
-                    return response.text();
-                })
-                .then(url => {
-                    console.log('Redirecting to:', url);
-                    window.location.href = url;
-                })
-                .catch(error => {
-                    console.error('Error getting Google auth URL:', error);
-                    alert('구글 로그인 초기화 중 오류가 발생했습니다.');
-                });
+            // SSO 상태 확인
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/google/url');
+                const url = await response.text();
+                console.log('Redirecting to:', url);
+                window.location.href = url;
+            } catch (error) {
+                console.error('Error getting Google auth URL:', error);
+                alert('구글 로그인 초기화 중 오류가 발생했습니다.');
+            }
         }
 
-        // 페이지 로드시 초기화 및 소셜 로그인 콜백 처리
-        document.addEventListener('DOMContentLoaded', function() {
 
+        // 페이지 로드시 초기화 및 소셜 로그인 콜백 처리
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log("DOM Content Loaded");
 
             const currentPath = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
-            console.log('Current Path:', currentPath); // 현재 경로 확인
-            console.log('Code:', code);               // code 파라미터 확인
+            console.log('Current Path:', currentPath);
+            console.log('Code:', code);
 
+            // SSO 상태 확인
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated && currentPath === '/login') {
+                window.location.href = '/';
+                return;
+            }
 
             // 카카오 로그인 콜백 처리
             if (currentPath === '/auth/kakao' && code) {
@@ -213,60 +267,83 @@
             }
         });
 
+
         // 카카오 로그인 콜백 처리
-        function handleKakaoCallback(code) {
+        async function handleKakaoCallback(code) {
             console.log('Handling Kakao callback with code:', code);
 
-            fetch(`/auth/kakao?code=${code}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Kakao login response:', data);
+            try {
+                const response = await fetch(`/auth/kakao?code=` + code);
+                const data = await response.json();
+                console.log('Kakao login response:', data);
 
-                    if (data.status === 'success') {
-                        window.location.href = data.redirectUrl;
-                    } else if (data.status === 'registration_required') {
-                        const params = new URLSearchParams({
-                            kakaoId: data.kakaoId,
-                            nickname: data.nickname,
-                            email: data.email,
-                            profileImage: data.profileImage,
-                            provider: 'KAKAO'
-                        });
-                        window.location.href = `/register?${params.toString()}`;
+                if (data.status === 'success') {
+                    // Redis 토큰 저장
+                    if (data.ssoToken) {
+                        SSOUtil.setToken(data.ssoToken);
                     }
-                })
-                .catch(error => {
-                    console.error('Kakao Login Error:', error);
-                    alert('카카오 로그인 처리 중 오류가 발생했습니다.');
-                });
+                    window.location.href = data.redirectUrl;
+                } else if (data.status === 'registration_required') {
+
+                    const params = new URLSearchParams();
+                    params.append('kakaoId', data.kakaoId);
+                    params.append('nickname', data.nickname);
+                    params.append('email', data.email);
+                    params.append('profileImage', data.profileImage);
+                    params.append('provider', 'KAKAO');
+                    window.location.href = '/register?' + params.toString();
+                }
+            } catch (error) {
+                console.error('Kakao Login Error:', error);
+                alert('카카오 로그인 처리 중 오류가 발생했습니다.');
+            }
         }
 
         // 구글 로그인 콜백 처리
-        function handleGoogleCallback(code) {
+        async function handleGoogleCallback(code) {
             console.log('Handling Google callback with code:', code);
 
-            fetch(`/auth/google?code=${code}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Google login response:', data);
+            try {
+                const response = await fetch(`/auth/google?code=` + code);
+                const data = await response.json();
+                console.log('Google login response:', data);
 
-                    if (data.status === 'success') {
-                        window.location.href = data.redirectUrl;
-                    } else if (data.status === 'registration_required') {
-                        const params = new URLSearchParams({
-                            googleId: data.providerId,
-                            name: data.name,
-                            email: data.email,
-                            profileImage: data.profileImage,
-                            provider: 'GOOGLE'
-                        });
-                        window.location.href = `/api/register?${params.toString()}`;
+                if (data.status === 'success') {
+                    // SSO 토큰 저장
+                    if (data.ssoToken) {
+                        SSOUtil.setToken(data.ssoToken);
                     }
-                })
-                .catch(error => {
-                    console.error('Google Login Error:', error);
-                    alert('구글 로그인 처리 중 오류가 발생했습니다.');
+                    window.location.href = data.redirectUrl;
+                } else if (data.status === 'registration_required') {
+                    const params = new URLSearchParams();
+                    params.append('googleId', data.providerId);
+                    params.append('name', data.name);
+                    params.append('email', data.email);
+                    params.append('profileImage', data.profileImage);
+                    params.append('provider', 'GOOGLE');
+                    window.location.href = '/api/register?' + params.toString();
+                }
+            } catch (error) {
+                console.error('Google Login Error:', error);
+                alert('구글 로그인 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 로그아웃 처리 (필요한 경우 추가)
+        async function logout() {
+            try {
+                await fetch('/auth/logout', {
+                    method: 'POST' ,
+                    headers: {
+                        'Authorization': 'Bearer ' + SSOUtil.getToken()
+                    }
                 });
+                SSOUtil.removeToken();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout Error:', error);
+                alert('로그아웃 처리 중 오류가 발생했습니다.');
+            }
         }
 
         // 회원가입 페이지에서 소셜 로그인 정보 처리
