@@ -8,12 +8,16 @@ import gps.base.repository.MemberRepository;
 import gps.base.service.OAuth2Service;
 import gps.base.service.TokenBasedSSOService;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.antlr.v4.runtime.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -36,6 +40,7 @@ public class OAuth2Controller {
     private final OAuth2Service oAuth2Service;
     private final TokenBasedSSOService ssoService;
     private final MemberRepository memberRepository;
+    private final RedisTemplate redisTemplate;
 
     @Value("${GOOGLE_CLIENT_ID}")
     private String googleClientId;
@@ -49,7 +54,7 @@ public class OAuth2Controller {
      * @return JWT 토큰을 포함한 응답
      */
     @GetMapping("/kakao")
-    public ResponseEntity<?> kakaoCallback(@RequestParam String code, HttpSession session, RedirectAttributes attributes) {
+    public String kakaoCallback(@RequestParam String code, HttpSession session, RedirectAttributes attributes) {
         try {
             Map<String, String> result = oAuth2Service.kakaoLogin(code);
 
@@ -58,33 +63,28 @@ public class OAuth2Controller {
                     result.get("providerId")
             );
 
-            Map<String, Object> response = new HashMap<>();
-
             if (existingMember.isPresent()) {
                 Member member = existingMember.get();
                 setupSSOAndSession(session, member);
                 logger.info("member : {} ", existingMember.get());
 
-                response.put("status", "success");
-                response.put("redirectUrl", "/");
+                // SSO 토큰 생성 및 세션에 저장
                 String ssoToken = ssoService.createSSOToken(member);
-                response.put("ssoToken", ssoToken);
+                session.setAttribute("ssoToken", ssoToken);
 
-                return ResponseEntity.ok(response);
+                return "redirect:/";
             } else {
-                response.put("status", "registration_required");
-                response.put("kakaoId", result.get("providerId"));
-                response.put("nickname", result.get("nickname"));
-                response.put("profileImage", result.get("profileImage"));
+                // RedirectAttributes를 사용하여 파라미터 전달
+                attributes.addAttribute("provider", "KAKAO");
+                attributes.addAttribute("kakaoId", result.get("providerId"));
+                attributes.addAttribute("nickname", result.get("nickname"));
+                attributes.addAttribute("profileImage", result.get("profileImage"));
 
-                return ResponseEntity.ok(response);
+                return "redirect:/api/register";  // 회원가입 페이지로 리다이렉트
             }
         } catch (Exception e) {
             logger.error("Kakao login failed", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("status", "error");
-            errorResponse.put("message", "kakao_login_failed");
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+            return "redirect:/?error=kakao_login_failed";
         }
     }
 
@@ -107,42 +107,25 @@ public class OAuth2Controller {
     public String googleCallback(@RequestParam String code, HttpSession session, RedirectAttributes attributes) {
         try {
             Map<String, String> result = oAuth2Service.googleLogin(code);
-
-
             Optional<Member> existingMember = memberRepository.findByProviderTypeAndProviderId(
                     ProviderType.GOOGLE,
                     result.get("providerId")
             );
 
-            if (code == null) {
-                log.error("No code parameter received");
-                return "redirect:/?error=no_code";
-            }
-
             if (existingMember.isPresent()) {
                 Member member = existingMember.get();
-                setupSSOAndSession(session,member);
-                return "redirect:/";  // 성공적으로 로그인 후 메인 페이지로 리디렉션
+                setupSSOAndSession(session, member);
+                return "redirect:/";
             } else {
-
                 attributes.addAttribute("provider", "GOOGLE");
-                attributes.addAttribute("googleId", result.get("googleId"));
+                attributes.addAttribute("googleId", result.get("providerId"));
                 attributes.addAttribute("nickname", result.get("nickname"));
                 attributes.addAttribute("email", result.get("email"));
                 attributes.addAttribute("profileImage", result.get("profileImage"));
-
-                // 로깅 추가
-                log.info("Redirecting to /api/register with attributes:");
-                log.info("Provider: {}", "GOOGLE");
-                log.info("Google ID: {}", result.get("googleId"));
-                log.info("Nickname: {}", result.get("nickname"));
-                log.info("Email: {}", result.get("email"));
-                log.info("Profile Image: {}", result.get("profileImage"));
-
-                return "redirect:/api/register";  // 신규 회원 등록 페이지로 리디렉션
+                return "redirect:/api/register";
             }
         } catch (Exception e) {
-            return "redirect:/?error=google_login_failed";  // 로그인 실패 시 에러 페이지로 리디렉션
+            return "redirect:/?error=google_login_failed";
         }
     }
 
@@ -171,7 +154,7 @@ public class OAuth2Controller {
     /**
      * SSO 토큰 생성 및 세션 설정을 처리하는 통합 메서드
      */
-    private void setupSSOAndSession(HttpSession session, Member member) {
+    private String setupSSOAndSession(HttpSession session, Member member) {
         // SSO 토큰 생성
         String ssoToken = ssoService.createSSOToken(member);
 
@@ -184,9 +167,9 @@ public class OAuth2Controller {
         session.setAttribute("nickname", member.getNickname());
         session.setAttribute("name", member.getName());
         session.setAttribute("authority", member.getAuthority());
-
-        // 세션 만료 시간 설정 (30분)
         session.setMaxInactiveInterval(1800);
+
+        return ssoToken;
     }
 
     /**
@@ -194,8 +177,19 @@ public class OAuth2Controller {
      */
     @PostMapping("/logout")
     public String logout(HttpSession session) {
+        // 세션에서 사용자 정보 가져오기
+        Member member = (Member) session.getAttribute("loggedInUser");
+        if (member != null) {
+            // Redis에서 토큰 삭제
+            String redisKey = "sso:token:" + member.getUserId();
+            redisTemplate.delete(redisKey);
+            logger.info("Removed SSO token for user: {}", member.getUserId());
+        }
+
+        // 세션 무효화
         session.removeAttribute("ssoToken");
         session.invalidate();
+
         return "redirect:/";
     }
 
@@ -209,12 +203,10 @@ public class OAuth2Controller {
         try {
             if (ssoToken != null) {
                 Claims claims = ssoService.validateSSOToken(ssoToken);
-                if (!claims.getExpiration().before(new Date())) {
-                    response.put("authenticated", true);
-                    response.put("userId", claims.get("userID"));
-                    response.put("expiresAt", claims.getExpiration());
-                    return ResponseEntity.ok(response);
-                }
+                response.put("authenticated", true);
+                response.put("userID", claims.get("userID"));
+                response.put("ssoToken", ssoToken);  // 토큰을 응답에 포함
+                return ResponseEntity.ok(response);
             }
         } catch (Exception e) {
             logger.error("Token validation failed", e);

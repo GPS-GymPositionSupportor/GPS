@@ -170,38 +170,27 @@ public class OAuth2Service {
         try {
             log.info("Starting Google login process with code: {}", code);
 
-            // 1. 액세스 토큰 받기 (구글의 OAuth2 API에 인증 코드로 요청)
+            // 1. 액세스 토큰 받기
             String accessToken = getGoogleAccessToken(code);
-            log.info("Access token received successfully: {}", accessToken);
+            log.info("Successfully got access token");
 
-            // 2. 액세스 토큰을 사용하여 사용자 정보 가져오기
+            // 2. 사용자 정보 가져오기
             Map<String, Object> userInfo = getGoogleUserInfo(accessToken);
-            log.info("User info received: {}", userInfo);
+            log.info("Successfully got user info");
 
-            // 3. 필요한 정보 추출
-            String providerId = String.valueOf((userInfo.get("id")));  // Google의 고유 ID
-            String email = (String) userInfo.get("email");
-            String name = (String) userInfo.get("name");
-            String picture = (String) userInfo.get("picture");
-
-            // 4. 결과 매핑
+            // 3. 결과 매핑
             Map<String, String> result = new HashMap<>();
-            result.put("providerId", providerId);
-            result.put("googleId", providerId);
+            result.put("providerId", String.valueOf(userInfo.get("id")));
+            result.put("nickname", (String) userInfo.get("name"));
+            result.put("email", (String) userInfo.get("email"));
+            result.put("profileImage", (String) userInfo.get("picture"));
 
-            result.put("email", email);
-            result.put("name", name);
-            result.put("profileImage", picture);
-
-            log.info("providerId = {}", providerId);
-
-
-            log.info("Google login process completed successfully");
+            log.info("Completed Google login process for user: {}", result.get("email"));
             return result;
 
         } catch (Exception e) {
-            log.error("Error in googleLogin", e);
-            throw new RuntimeException("Failed to process Google login: " + e.getMessage(), e);
+            log.error("Failed to process Google login", e);
+            throw new RuntimeException("Failed to process Google login", e);
         }
     }
 
@@ -211,47 +200,35 @@ public class OAuth2Service {
      * @return 구글 액세스 토큰
      */
     private String getGoogleAccessToken(String code) {
-        log.info("Getting Google access token...");
-        String url = "https://oauth2.googleapis.com/token";
+        String tokenUrl = "https://oauth2.googleapis.com/token";
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", googleClientId);
+        params.add("client_secret", googleClientSecret);
+        params.add("code", code);
+        params.add("redirect_uri", googleRedirectUri);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        log.debug("Requesting access token with params: {}", params);
 
         try {
-            // 구글 토큰 요청에 필요한 파라미터 설정
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("grant_type", "authorization_code");  // 정확한 값으로 설정
-            params.add("client_id", googleClientId);
-            params.add("client_secret", googleClientSecret);
-            params.add("code", code);
-            params.add("redirect_uri", googleRedirectUri);  // 정확한 redirect_uri
+            ResponseEntity<Map> response = restTemplate.postForEntity(tokenUrl, request, Map.class);
+            log.debug("Token response status: {}", response.getStatusCode());
 
-            // HTTP 헤더 설정
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);  // Content-Type 설정
-
-            // HTTP 요청 엔티티 생성
-            HttpEntity<MultiValueMap<String, String>> request =
-                    new HttpEntity<>(params, headers);
-
-            log.info("Token request params: {}", params);  // 파라미터 로깅
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    url,
-                    request,
-                    Map.class
-            );
-
-            log.info("Google token response status: {}", response.getStatusCode());
-
-            Map<String, Object> body = response.getBody();
-            if (body != null && body.containsKey("access_token")) {
-                return (String) body.get("access_token");
-            } else {
-                log.error("No access token in response: {}", body);
-                throw new RuntimeException("No access token in response");
+            if (response.getBody() != null && response.getBody().containsKey("access_token")) {
+                return (String) response.getBody().get("access_token");
             }
 
+            log.error("Token response body: {}", response.getBody());
+            throw new RuntimeException("Failed to get access token");
         } catch (Exception e) {
-            log.error("Error getting Google access token: {}", e.getMessage());
-            throw new RuntimeException("Failed to get Google access token", e);
+            log.error("Error getting access token", e);
+            throw new RuntimeException("Failed to get access token", e);
         }
     }
 
@@ -261,15 +238,29 @@ public class OAuth2Service {
      * @return 구글 사용자 정보
      */
     private Map<String, Object> getGoogleUserInfo(String accessToken) {
-        // 액세스 토큰을 사용하여 구글 사용자 정보를 받는 코드
         String userInfoUrl = "https://www.googleapis.com/oauth2/v2/userinfo";
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessToken);
 
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-        ResponseEntity<Map> response = restTemplate.exchange(userInfoUrl, HttpMethod.GET, entity, Map.class);
-        return response.getBody();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    userInfoUrl,
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+
+            if (response.getBody() != null) {
+                return response.getBody();
+            }
+
+            throw new RuntimeException("Empty response from Google user info endpoint");
+        } catch (Exception e) {
+            log.error("Error getting user info", e);
+            throw new RuntimeException("Failed to get user info", e);
+        }
     }
 
 

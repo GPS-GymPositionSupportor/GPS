@@ -373,7 +373,7 @@
     }
 
     function displayReviews(reviews, currentPage) {
-        const reviewList = document.querySelector('.review-list');
+        const reviewList = document.querySelector('.review-l857ist');
         if (!reviewList || !reviews) return;
 
         reviewList.innerHTML = '';

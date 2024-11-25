@@ -2,6 +2,7 @@
 <script>
         <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
+
 		document.addEventListener('DOMContentLoaded', function() {
 			var loginForm = document.getElementById('loginForm');
 		    loginForm.addEventListener('submit', function(event) {
@@ -9,8 +10,6 @@
 		            event.preventDefault();
 		        }
 		    });
-
-			var loginForm = document.getElementById('loginForm');
 		    var username = loginForm.querySelector('input[name="username"]');
 		    var password = loginForm.querySelector('input[name="password"]');
 
@@ -62,13 +61,14 @@
 		    });
 
 
-		    var burButton = document.querySelector('.burbutton');
-		    var navLinks = document.getElementById('nav-links');
-
-		    burButton.addEventListener('click', (event) => {
-		        event.currentTarget.classList.toggle('active');
-		        navLinks.classList.toggle('active');
-		    });
+            var burButton = document.querySelector('.burbutton');
+            var navLinks = document.getElementById('nav-links');
+            if(burButton && navLinks) { // 두 요소가 모두 존재할 때만 실행
+                burButton.addEventListener('click', (event) => {
+                    event.currentTarget.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
 
 		    function adjustNavLinks() {
 	            var navLinks = document.getElementById('nav-links');
@@ -99,7 +99,7 @@
 		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 		                </form>
 		                <div id="logoutContainer">
-		                    <form action="/api/logout" method="post" id="logoutForm">
+		                    <form action="/auth/logout" method="post" id="logoutForm">
 		                        <button type="submit" id="logoutButton">로그아웃 <img src="../image/Frame.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    <div>
@@ -114,7 +114,7 @@
 	                        <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
 	                        <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 	                    </form>
-	                    <form action="/api/logout" method="post">
+	                    <form action="/auth/logout" method="post">
 	                        <button type="submit" id="logoutButton">로그아웃</button>
 	                    </form>
 	                `;
@@ -168,47 +168,89 @@
 
         // SSO 관련 유틸리티 함수
         const SSOUtil = {
-            // SSO 토큰 저장
             setToken(token) {
-                localStorage.setItem('ssoToken', token);
+                if (token) {
+                    localStorage.setItem('ssoToken', token);
+                    console.log('Token saved:', token);
+                }
             },
 
-            // SSO 토큰 가져오기
             getToken() {
-                return localStorage.getItem('ssoToken');
+                const token = localStorage.getItem('ssoToken');
+                return token;
             },
 
-            // SSO 토큰 삭제
             removeToken() {
                 localStorage.removeItem('ssoToken');
             },
 
-
-            // SSO 상태 확인
             async checkSSOStatus() {
                 try {
-                    // Redis 토큰 검증을 위한 엔드포인트 변경
-                    const response = await fetch('/auth/validate-token');
+                    console.log('Checking SSO status...');
+                    const response = await fetch('/auth/validate-token', {
+                        credentials: 'include'  // 세션 쿠키 포함
+                    });
                     const data = await response.json();
+
+                    // 서버에서 토큰을 받으면 localStorage에 저장
+                    if (data.authenticated && data.ssoToken) {
+                        this.setToken(data.ssoToken);
+                    }
+
                     return data.authenticated;
                 } catch (error) {
-                    console.error('SSO status check failed:', error);
+                    console.error('SSO check failed:', error);
                     return false;
                 }
             }
         };
 
+        // 페이지 로드 시 SSO 상태 체크
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Checking SSO status on page load');
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            console.log('Authentication status:', isAuthenticated);
+        });
+
 
         // 소셜 로그인 버튼 클릭 핸들러
         async function kakaoLogin() {
-            // SSO 상태 확인
             const isAuthenticated = await SSOUtil.checkSSOStatus();
             if (isAuthenticated) {
-                window.location.href = '/'; // 이미 로그인된 경우 메인으로
+                window.location.href = '/';
                 return;
             }
             window.location.href = '/oauth2/authorization/kakao';
         }
+
+        async function handleKakaoCallback(code) {
+            console.log('Handling Kakao callback with code:', code);
+
+            try {
+                const response = await fetch(`/auth/kakao?code=` + code);
+                const data = await response.json();
+                console.log('Kakao login response:', data);
+
+                if (data.status === 'success') {
+                    if (data.ssoToken) {
+                        SSOUtil.setToken(data.ssoToken);
+                    }
+                    window.location.href = data.redirectUrl;
+                } else if (data.status === 'registration_required') {
+                    const params = new URLSearchParams();
+                    params.append('kakaoId', data.kakaoId);
+                    params.append('nickname', data.nickname);
+                    params.append('email', data.email);
+                    params.append('profileImage', data.profileImage);
+                    params.append('provider', 'KAKAO');
+                    window.location.href = '/register?' + params.toString();
+                }
+            } catch (error) {
+                console.error('Kakao Login Error:', error);
+                alert('카카오 로그인 처리 중 오류가 발생했습니다.');
+            }
+        }
+
 
         async function googleLogin() {
             console.log('Initiating Google login');
@@ -268,36 +310,6 @@
         });
 
 
-        // 카카오 로그인 콜백 처리
-        async function handleKakaoCallback(code) {
-            console.log('Handling Kakao callback with code:', code);
-
-            try {
-                const response = await fetch(`/auth/kakao?code=` + code);
-                const data = await response.json();
-                console.log('Kakao login response:', data);
-
-                if (data.status === 'success') {
-                    // Redis 토큰 저장
-                    if (data.ssoToken) {
-                        SSOUtil.setToken(data.ssoToken);
-                    }
-                    window.location.href = data.redirectUrl;
-                } else if (data.status === 'registration_required') {
-
-                    const params = new URLSearchParams();
-                    params.append('kakaoId', data.kakaoId);
-                    params.append('nickname', data.nickname);
-                    params.append('email', data.email);
-                    params.append('profileImage', data.profileImage);
-                    params.append('provider', 'KAKAO');
-                    window.location.href = '/register?' + params.toString();
-                }
-            } catch (error) {
-                console.error('Kakao Login Error:', error);
-                alert('카카오 로그인 처리 중 오류가 발생했습니다.');
-            }
-        }
 
         // 구글 로그인 콜백 처리
         async function handleGoogleCallback(code) {
@@ -338,6 +350,7 @@
                         'Authorization': 'Bearer ' + SSOUtil.getToken()
                     }
                 });
+
                 SSOUtil.removeToken();
                 window.location.href = '/login';
             } catch (error) {
@@ -495,6 +508,8 @@
                     alert('회원가입 처리 중 오류가 발생했습니다.');
                 });
         });
+
+
 
 
 
