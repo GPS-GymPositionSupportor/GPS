@@ -76,12 +76,12 @@
 	                	<div class="myPage">
 		                    <div class="user-info">
 		                        <img
-            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.png" %>"
+            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
             alt="myPage_image" title="myPage_image" class="picture">
 		                        <div class="greeting">
 		                            <a class="hello">안녕하세요</a>
 		                            <div class="mrUser">
-		                                <a class="mrUserName"><%= session.getAttribute("userID") %></a>
+		                                <a class="mrUserName"><%= session.getAttribute("nickname") %></a>
 		                                <a class="mr">님</a>
 		                            </div>
 		                        </div>
@@ -97,7 +97,7 @@
 		                </form>
 		                <div id="logoutContainer">
 		                	<form action="/auth/logout" method="post" id="logoutForm">	// action 나중에 다시 변경
-		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
+		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/logout.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    </div>
 	                `;
@@ -107,12 +107,12 @@
 	                	<div class="myPage">
 		                    <div class="user-info">
 		                        <img
-            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.png" %>"
+            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
             alt="myPage_image" title="myPage_image" class="picture">
 		                        <div class="greeting">
 		                            <a class="hello">안녕하세요</a>
 		                            <div class="mrUser">
-		                                <a class="mrUserName"><%= session.getAttribute("userID") %></a>
+		                                <a class="mrUserName"><%= session.getAttribute("nickname") %></a>
 		                                <a class="mr">님</a>
 		                            </div>
 		                        </div>
@@ -128,7 +128,7 @@
 		                </form>
 		                <div id="logoutContainer">
 		                	<form action="/auth/logout" method="post">
-		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
+		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/logout.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    </div>
 	                `;

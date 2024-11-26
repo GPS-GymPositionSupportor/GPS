@@ -22,9 +22,53 @@
         	<img src="image/icon_search2.svg" alt="검색" />
 		</span>
 		</div>
+		
+		<div id="imgBtns">
+			<div id="profileBtnBlock">
+				<button id="profileBtn" onclick="location.href='index.jsp?selectedNav=B'">
+				<img
+		            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
+		            alt="myPage_image" title="myPage_image" class="picture">
+		            <p id="mrUserName"><%= session.getAttribute("nickname") %></p>
+		            <p id="name"><%= session.getAttribute("name") %></p>
+		            <p id="gender"><%= session.getAttribute("gender") %></p>
+				</button>
+			</div>
+			<div id="findGymBlock">
+			<button id="findGym" onclick="location.href='index.jsp?selectedNav=A'">
+				<p id="findGymP">운동시설 찾기</p>
+				<img src="image/findGym.svg" alt="findGym" class="findGym">
+			</button>
+			</div>
+			<div id="justDoItBlock">
+				<img src="image/just.svg" alt="justDoIt" class="justDoIt">
+			</div>
+			<div id="recommendFeedBlock">
+				<button id="recommendFeed" onclick="location.href='index.jsp?selectedNav=C'">
+					<p id="recommendFeedP">추천피드</p>
+					<img src="image/recommendFeed.svg" alt="recommendFeed" class="recommendFeed">
+				</button>
+			</div>
+				<div id="myReviewBlock">
+				<button id="myReview" onclick="location.href='index.jsp?selectedNav=D'">
+					<p id="myReviewP">내가 쓴 리뷰</p>
+					<img src="image/myReview.svg" alt="myReview" class="myReview">
+				</button>
+			</div>
+				<div id="scrapBlock">
+				<button id="scrap" onclick="location.href='index.jsp?selectedNav=E'">
+					<p id="scrapP">스크랩한 장소</p>
+					<img src="image/scrap.svg" alt="scrap" class="scrap">
+				</button>
+			</div>
+		</div>
 	</div>
-	<button onclick="location.href='index.jsp'"> index.jsp </button>
 	
+	<div id="logoutContainer">
+		<form action="/auth/logout" method="post">
+		<button type="submit" id="logoutButton">로그아웃 <img src="image/logout.png" alt="logout_icon" class="logout_icon"></button>
+		</form>
+	</div>
 	<script>
 		document.getElementById('searchIcon').addEventListener('click', function() {
 		    var searchQuery = document.getElementById('searchInput').value;
