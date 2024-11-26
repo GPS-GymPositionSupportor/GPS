@@ -1,12 +1,8 @@
-package gps.base.ElasticError.DTO;
+package gps.base.ElasticError.Handler;
 
 import gps.base.ElasticError.ElasticErrorCode;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 

@@ -1,6 +1,10 @@
 package gps.base.ElasticSearchService;
 
+import co.elastic.clients.elasticsearch.indices.AnalyzeRequest;
+import co.elastic.clients.elasticsearch.indices.AnalyzeResponse;
+import gps.base.ElasticDTO.GymSearchDTO;
 import gps.base.ElasticSearchEntity.Gym;
+import gps.base.ElasticSearchEntity.GymCategory;
 import gps.base.ElasticSearchEntity.Review;
 import gps.base.config.Elastic.Document.GymDocument;
 import gps.base.config.Elastic.GymSearchRepository;
@@ -8,6 +12,8 @@ import gps.base.repository.GymRepository;
 import gps.base.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.client.RequestOptions;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -20,6 +26,7 @@ public class GymSearchService {
     private final GymSearchRepository gymSearchRepository;
     private final GymRepository gymRepository;
     private final ReviewRepository reviewRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     private static final double NEARBY_DISTANCE_KM = 2.0;
     private static final int RECOMMEND_LIMIT = 5;
@@ -169,4 +176,63 @@ public class GymSearchService {
     }
 
 
+
+    public List<Gym> searchByKeywordAndSort(String keyword, double lat, double lon) {
+        log.info("Searching for gyms with keyword: {} near location: ({}, {})", keyword, lat, lon);
+
+        // 키워드로 검색
+        List<GymDocument> searchResults = gymSearchRepository.searchByKeyword(keyword);
+        log.info("Found {} documents in Elasticsearch", searchResults.size());
+
+        if (searchResults.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // ID로 체육관 정보 조회
+        List<Long> gymIds = searchResults.stream()
+                .map(doc -> Long.parseLong(doc.getId()))
+                .collect(Collectors.toList());
+
+        List<Gym> gyms = gymRepository.findAllById(gymIds);
+
+        // 거리 계산 및 정렬을 위한 데이터 구조
+        List<GymWithDistance> gymsWithDistance = gyms.stream()
+                .map(gym -> new GymWithDistance(gym,
+                        calculateDistance(lat, lon, gym.getLatitude(), gym.getLongitude())))
+                .collect(Collectors.toList());
+
+        // 거리순 정렬
+        gymsWithDistance.sort(Comparator.comparingDouble(GymWithDistance::getDistance));
+
+        // 결과 반환
+        return gymsWithDistance.stream()
+                .map(GymWithDistance::getGym)
+                .collect(Collectors.toList());
+    }
+
+    @lombok.Data
+    @lombok.AllArgsConstructor
+    private static class GymWithDistance {
+        private Gym gym;
+        private double distance;
+    }
+
+    /**
+     * 키워드와 카테고리로 체육관 검색
+     */
+    public List<Gym> searchByKeywordAndCategory(String keyword, GymCategory category) {
+        List<GymDocument> searchResults = gymSearchRepository.searchByKeywordAndCategory(keyword, category.name());
+        return convertToGymList(searchResults);
+    }
+
+    /**
+     * ElasticSearch 검색 결과를 JPA 엔티티로 변환
+     */
+    private List<Gym> convertToGymList(List<GymDocument> documents) {
+        return documents.stream()
+                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
 }

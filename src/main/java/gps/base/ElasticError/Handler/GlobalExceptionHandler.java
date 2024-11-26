@@ -1,4 +1,4 @@
-package gps.base.ElasticError.DTO;
+package gps.base.ElasticError.Handler;
 
 import gps.base.ElasticError.*;
 import lombok.extern.slf4j.Slf4j;

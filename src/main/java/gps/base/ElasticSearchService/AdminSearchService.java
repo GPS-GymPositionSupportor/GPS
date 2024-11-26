@@ -26,11 +26,20 @@ public class AdminSearchService {
     }
 
     public Page<Gym> searchGyms(String keyword, Pageable pageable) {
+        // Elasticsearch에서 검색
         List<GymDocument> elasticResults = gymSearchRepository.findByNameContaining(keyword);
+
+        // ID 리스트 추출
         List<Long> gymIds = elasticResults.stream()
                 .map(doc -> Long.parseLong(doc.getId()))
                 .collect(Collectors.toList());
 
+        // 빈 결과 처리
+        if (gymIds.isEmpty()) {
+            return Page.empty(pageable);
+        }
+
+        // JPA로 데이터 조회
         return gymRepository.findByIdIn(gymIds, pageable);
     }
 }
