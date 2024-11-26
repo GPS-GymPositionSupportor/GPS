@@ -21,7 +21,7 @@ body::-webkit-scrollbar {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem 0 0 0;
     width: 100%;
     position: -webkit-sticky;
     position: sticky;
@@ -51,6 +51,40 @@ body::-webkit-scrollbar {
     color: #222;
 }
 
+#search-container {
+	margin: 1rem;
+    z-index: 2;
+    position: relative;
+}
+
+#searchInput {
+    padding: 0.5rem;
+    font-size: 14px;
+    border: 1px solid #fff;
+    border-radius: 12px;
+    width: 18rem;
+    background: inherit;
+    padding-left: 1rem;
+    color: #fff;
+}
+
+#searchInput::placeholder {
+    color: #fff;
+}
+
+.search-icon {
+	position: absolute;
+    right: 1rem;
+    top: 55%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.search-icon img {
+    width: 20px;
+    height: auto;
+}
+
 .content-section {
     margin: 1rem;
 }
@@ -73,7 +107,7 @@ body::-webkit-scrollbar {
 }
 
 .burbutton span.middle {
-  width: 20px;
+  width: 30px;
 }
 
 #nav-links {
@@ -729,6 +763,8 @@ body::-webkit-scrollbar {
 	    position: sticky;
 	    top: 0;
 	    z-index: 10;
+	    display: flex;
+        justify-content: flex-end;
 	}
 
 	#nav-links {

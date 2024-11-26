@@ -197,7 +197,7 @@
 	    </div>
 	</div>
 	
-		<div id="modalRegist" style="display: none;">
+	<div id="modalRegist" style="display: none;">
 	    <div id="modal-content">
 	        <p>회원가입 되었습니다.</p>
 	        <div id="modal-buttons">
