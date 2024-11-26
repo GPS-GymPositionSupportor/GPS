@@ -28,15 +28,15 @@
 		    	<form id="certificationCodeIdForm" action="findIdComplete.jsp" method="post">
 		    		<input id="cCodeId" type="text" name="code" placeholder="인증코드 입력">
 		    		<%
-						String cCodeError = (String) session.getAttribute("cCodeError");
+						String cCodeErrorId = (String) session.getAttribute("cCodeErrorId");
 					%>
 					
 					<!-- 고정된 오류 메시지 공간 -->
 					<div id="error-message">
 						<%
-						if (cCodeError != null) {
-							out.print(cCodeError.replace("<br>", "<br/>"));
-							session.removeAttribute("cCodeError"); // 메시지 출력 후 세션에서 제거
+						if (cCodeErrorId != null) {
+							out.print(cCodeErrorId.replace("<br>", "<br/>"));
+							session.removeAttribute("cCodeErrorId"); // 메시지 출력 후 세션에서 제거
 							//잘못된 인증코드입니다. 메시지 저장 필요
 						}
 					%>

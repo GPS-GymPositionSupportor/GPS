@@ -353,7 +353,7 @@ body::-webkit-scrollbar {
     width: 70%;
 }
 
-#findIdEmailDomain {
+#findIdEmailDomain, #registerEmailDomain {
 	border: none;
     outline: none;
     flex: 1;
@@ -371,7 +371,7 @@ body::-webkit-scrollbar {
     width: 70%;
 }
 
-.email-input input {
+.email-input input, #regist-email input {
     border: none;
     outline: none;
     flex: 1;
@@ -382,7 +382,7 @@ body::-webkit-scrollbar {
     border-bottom: 1px solid #616161 !important;
 }
 
-.email-input span {
+.email-input span, #regist-email span {
     font-size: 14px;
 }
 
@@ -536,16 +536,172 @@ body::-webkit-scrollbar {
     margin: 10rem 0rem 0rem 0rem;
 }
 
-#duplicationCheck {
-
+#error-message-id, #error-message-pw, #error-message-nickname, #error-message-email {
+	 color: #FF3B30;
+	 text-align: center;
+	 font-size: 12px;
 }
 
-#gender {
+#duplicationCheck {
+	width: 30%;
+	padding: 0.8rem;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 2% 0% 2% 0%;
+}
 
+#duplicationCheck:hover, duplicationCheckEmail:hover {
+	background-color: #B35F00;
+}
+
+#duplicationCheck:active, duplicationCheckEmail:active {
+	background-color: #C79126;
+}
+
+#duplicationCheckEmail {
+	width: 30%;
+	padding: 0.8rem;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 2% 0% 2% 0%;
+}
+
+#id-form-group, #nickname-form-group {
+	display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-content: space-between;
+}
+
+#password {
+	margin: 1rem 0 1rem 0;
+}
+
+#confirmPassword {
+	margin: 0 0 2rem 0;
+}
+
+#togglePasswordRegist {
+	box-shadow: none !important;
+	margin: 0 0 2rem 0;
+}
+
+#email-form-group {
+	display: flex;
+}
+
+#birthdate-form-group {
+    display: flex;
+    align-items: center;
+}
+
+#birthYear, #birthMonth, #birthDay {
+	border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    background-color: inherit;
+    border-bottom: 1px solid #616161;
+}
+
+.birthP {
+	margin-right: 1rem;
+}
+
+#privacy {
+    box-shadow: none;
+    width: 2rem;
+    height: 1rem;
+}
+
+#privacyLabel {
+	font-size: 12px;
+	color: #555555;
 }
 
 #checkbox {
+	display: flex;
+	align-items: center;
+}
 
+#birthYear {
+	width: 20%;
+}
+
+#birthMonth, #birthDay {
+	width: 14%;
+}
+
+#gender input {
+	background-color: inherit;
+    width: 5%;
+    box-shadow: none;
+}
+
+#gender-form-group {
+	display: flex;
+	align-items: center;
+}
+
+#gender input[type="radio"] {
+    margin-left: 3rem;
+}
+
+#registBtn {
+	height: 3.5rem;
+}
+
+#modalBack {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 1rem;
+    width: 80%;
+    border-radius: 0.5rem;
+}
+
+#modal-content p {
+	font-size: 14px;
+	color: #757575;
+}
+
+#cancelBack {
+	border: none;
+    background-color: initial;
+    font-size: 14px;
+    color: #bdbdbd;
+}
+
+#confirmBack {
+	border: none;
+    background-color: initial;
+    font-size: 14px;
+}
+
+#modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
 }
 
 @media only screen and (max-width: 767px) {

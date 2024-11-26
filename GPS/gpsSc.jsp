@@ -58,12 +58,13 @@
 		    
 		    <%-- 햄버거 버튼 --%>
 		    var burButton = document.querySelector('.burbutton');
-		    var navLinks = document.getElementById('nav-links');
-	
-		    burButton.addEventListener('click', (event) => {
-		        event.currentTarget.classList.toggle('active');
-		        navLinks.classList.toggle('active');
-		    });
+            var navLinks = document.getElementById('nav-links');
+            if(burButton && navLinks) { // 두 요소가 모두 존재할 때만 실행
+                burButton.addEventListener('click', (event) => {
+                    event.currentTarget.classList.toggle('active');
+                    navLinks.classList.toggle('active');
+                });
+            }
 	
 		    <%-- 사용자 화면당 화면 구조 변경 --%>
 		    function adjustNavLinks() {
@@ -95,7 +96,7 @@
 		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 		                </form>
 		                <div id="logoutContainer">
-		                    <form action="logout.jsp" method="post" id="logoutForm">
+		                	<form action="/auth/logout" method="post" id="logoutForm">	// action 나중에 다시 변경
 		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    </div>
@@ -126,7 +127,7 @@
 		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
 		                </form>
 		                <div id="logoutContainer">
-		                    <form action="/api/logout" method="post" id="logoutForm">
+		                	<form action="/auth/logout" method="post">
 		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/Frame.png" alt="logout_icon" class="logout_icon"></button>
 		                    </form>
 	                    </div>
@@ -322,117 +323,206 @@
 		            .catch(error => console.error('Error loading findIdPw.jsp:', error));
 		    }
 		});
-		
-        // ìì ë¡ê·¸ì¸ ë²í¼ í´ë¦­ í¸ë¤ë¬
-        function kakaoLogin() {
+		/*
+        SSO 관련
+         */
+
+
+        // SSO 관련 유틸리티 함수
+        const SSOUtil = {
+            setToken(token) {
+            	if (token) {
+            }
+                localStorage.setItem('ssoToken', token);
+                console.log('Token saved:', token);
+            }
+        },
+
+        getToken() {
+        	const token = localStorage.getItem('ssoToken');
+            return token;
+        },
+
+        removeToken() {
+            localStorage.removeItem('ssoToken');
+        },
+
+        async checkSSOStatus() {
+            try {
+            	 console.log('Checking SSO status...');
+                 const response = await fetch('/auth/validate-token', {
+                     credentials: 'include'  // 세션 쿠키 포함
+                 });
+                 const data = await response.json();
+
+                 // 서버에서 토큰을 받으면 localStorage에 저장
+                 if (data.authenticated && data.ssoToken) {
+                     this.setToken(data.ssoToken);
+                 }
+
+                 return data.authenticated;
+            } catch (error) {
+            	 console.error('SSO check failed:', error);
+            	   return false;
+            }
+        }
+    };
+    // 페이지 로드 시 SSO 상태 체크
+    document.addEventListener('DOMContentLoaded', async function() {
+        console.log('Checking SSO status on page load');
+        const isAuthenticated = await SSOUtil.checkSSOStatus();
+        console.log('Authentication status:', isAuthenticated);
+    });
+            }
+		}
+        
+		// 소셜 로그인 버튼 클릭 핸들러
+        async function kakaoLogin() {
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated) {
+                window.location.href = '/';
+                return;
+            }
             window.location.href = '/oauth2/authorization/kakao';
         }
 
-        function googleLogin() {
-            console.log('Initiating Google login');
+        async function handleKakaoCallback(code) {
+            console.log('Handling Kakao callback with code:', code);
 
-            fetch('/auth/google/url')
-                .then(response => {
-                    console.log('URL response:', response);
-                    return response.text();
-                })
-                .then(url => {
-                    console.log('Redirecting to:', url);
-                    window.location.href = url;
-                })
-                .catch(error => {
-                    console.error('Error getting Google auth URL:', error);
-                    alert('êµ¬ê¸ ë¡ê·¸ì¸ ì´ê¸°í ì¤ ì¤ë¥ê° ë°ìíìµëë¤.');
-                });
+            try {
+                const response = await fetch(`/auth/kakao?code=` + code);
+                const data = await response.json();
+                console.log('Kakao login response:', data);
+
+                if (data.status === 'success') {
+                    if (data.ssoToken) {
+                        SSOUtil.setToken(data.ssoToken);
+                    }
+                    window.location.href = data.redirectUrl;
+                } else if (data.status === 'registration_required') {
+                    const params = new URLSearchParams();
+                    params.append('kakaoId', data.kakaoId);
+                    params.append('nickname', data.nickname);
+                    params.append('email', data.email);
+                    params.append('profileImage', data.profileImage);
+                    params.append('provider', 'KAKAO');
+                    window.location.href = '/register?' + params.toString();
+                }
+            } catch (error) {
+                console.error('Kakao Login Error:', error);
+                alert('카카오 로그인 처리 중 오류가 발생했습니다.');
+            }
         }
 
-        // íì´ì§ ë¡ëì ì´ê¸°í ë° ìì ë¡ê·¸ì¸ ì½ë°± ì²ë¦¬
-        document.addEventListener('DOMContentLoaded', function() {
 
+        async function googleLogin() {
+            console.log('Initiating Google login');
+
+            // SSO 상태 확인
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated) {
+                window.location.href = '/';
+                return;
+            }
+
+            try {
+                const response = await fetch('/auth/google/url');
+                const url = await response.text();
+                console.log('Redirecting to:', url);
+                window.location.href = url;
+            } catch (error) {
+                console.error('Error getting Google auth URL:', error);
+                alert('구글 로그인 초기화 중 오류가 발생했습니다.');
+            }
+        }
+
+
+        // 페이지 로드시 초기화 및 소셜 로그인 콜백 처리
+        document.addEventListener('DOMContentLoaded', async function() {
             console.log("DOM Content Loaded");
 
             const currentPath = window.location.pathname;
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
-            console.log('Current Path:', currentPath); // íì¬ ê²½ë¡ íì¸
-            console.log('Code:', code);               // code íë¼ë¯¸í° íì¸
+            console.log('Current Path:', currentPath);
+            console.log('Code:', code);
 
+            // SSO 상태 확인
+            const isAuthenticated = await SSOUtil.checkSSOStatus();
+            if (isAuthenticated && currentPath === '/login') {
+                window.location.href = '/';
+                return;
+            }
 
-            // ì¹´ì¹´ì¤ ë¡ê·¸ì¸ ì½ë°± ì²ë¦¬
+            // 카카오 로그인 콜백 처리
             if (currentPath === '/auth/kakao' && code) {
                 console.log('Processing Kakao callback');
                 handleKakaoCallback(code);
             }
-            // êµ¬ê¸ ë¡ê·¸ì¸ ì½ë°± ì²ë¦¬
+            // 구글 로그인 콜백 처리
             else if (currentPath === '/auth/google' && code) {
                 console.log('Processing Google callback');
                 handleGoogleCallback(code);
             }
-            // íìê°ì íì´ì§ìì ìì ë¡ê·¸ì¸ ì ë³´ ì²ë¦¬
+            // 회원가입 페이지에서 소셜 로그인 정보 처리
             else if (currentPath === '/register') {
                 console.log('Processing registration page');
                 handleSocialRegistration();
             }
         });
 
-        // ì¹´ì¹´ì¤ ë¡ê·¸ì¸ ì½ë°± ì²ë¦¬
-        function handleKakaoCallback(code) {
-            console.log('Handling Kakao callback with code:', code);
 
-            fetch(`/auth/kakao?code=${code}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Kakao login response:', data);
 
-                    if (data.status === 'success') {
-                        window.location.href = data.redirectUrl;
-                    } else if (data.status === 'registration_required') {
-                        const params = new URLSearchParams({
-                            kakaoId: data.kakaoId,
-                            nickname: data.nickname,
-                            email: data.email,
-                            profileImage: data.profileImage,
-                            provider: 'KAKAO'
-                        });
-                        window.location.href = `/register?${params.toString()}`;
-                    }
-                })
-                .catch(error => {
-                    console.error('Kakao Login Error:', error);
-                    alert('ì¹´ì¹´ì¤ ë¡ê·¸ì¸ ì²ë¦¬ ì¤ ì¤ë¥ê° ë°ìíìµëë¤.');
-                });
-        }
-
-        // êµ¬ê¸ ë¡ê·¸ì¸ ì½ë°± ì²ë¦¬
-        function handleGoogleCallback(code) {
+        // 구글 로그인 콜백 처리
+        async function handleGoogleCallback(code) {
             console.log('Handling Google callback with code:', code);
 
-            fetch(`/auth/google?code=${code}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Google login response:', data);
+            try {
+                const response = await fetch(`/auth/google?code=` + code);
+                const data = await response.json();
+                console.log('Google login response:', data);
 
-                    if (data.status === 'success') {
-                        window.location.href = data.redirectUrl;
-                    } else if (data.status === 'registration_required') {
-                        const params = new URLSearchParams({
-                            googleId: data.providerId,
-                            name: data.name,
-                            email: data.email,
-                            profileImage: data.profileImage,
-                            provider: 'GOOGLE'
-                        });
-                        window.location.href = `/api/register?${params.toString()}`;
+                if (data.status === 'success') {
+                    // SSO 토큰 저장
+                    if (data.ssoToken) {
+                        SSOUtil.setToken(data.ssoToken);
                     }
-                })
-                .catch(error => {
-                    console.error('Google Login Error:', error);
-                    alert('êµ¬ê¸ ë¡ê·¸ì¸ ì²ë¦¬ ì¤ ì¤ë¥ê° ë°ìíìµëë¤.');
-                });
+                    window.location.href = data.redirectUrl;
+                } else if (data.status === 'registration_required') {
+                    const params = new URLSearchParams();
+                    params.append('googleId', data.providerId);
+                    params.append('name', data.name);
+                    params.append('email', data.email);
+                    params.append('profileImage', data.profileImage);
+                    params.append('provider', 'GOOGLE');
+                    window.location.href = '/api/register?' + params.toString();
+                }
+            } catch (error) {
+                console.error('Google Login Error:', error);
+                alert('구글 로그인 처리 중 오류가 발생했습니다.');
+            }
         }
 
-        // íìê°ì íì´ì§ìì ìì ë¡ê·¸ì¸ ì ë³´ ì²ë¦¬
+        // 로그아웃 처리 (필요한 경우 추가)
+        async function logout() {
+            try {
+                await fetch('/auth/logout', {
+                    method: 'POST' ,
+                    headers: {
+                        'Authorization': 'Bearer ' + SSOUtil.getToken()
+                    }
+                });
+
+                SSOUtil.removeToken();
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout Error:', error);
+                alert('로그아웃 처리 중 오류가 발생했습니다.');
+            }
+        }
+
+        // 회원가입 페이지에서 소셜 로그인 정보 처리
         function handleSocialRegistration() {
             const urlParams = new URLSearchParams(window.location.search);
             const provider = urlParams.get('provider');
@@ -444,43 +534,43 @@
             }
         }
 
-        // ì¹´ì¹´ì¤ íìê°ì í¼ ì¤ì 
+        // 카카오 회원가입 폼 설정
         function setupKakaoRegistration(urlParams) {
-            // ID/PW íë ì¨ê¸°ê¸°
+            // ID/PW 필드 숨기기
             hideLoginFields();
 
-            // í¼ ìë ìì±
+            // 폼 자동 완성
             autoFillKakaoForm(urlParams);
 
-            // Hidden íë ì¶ê°
+            // Hidden 필드 추가
             addKakaoHiddenFields(urlParams);
 
-            // ìë´ ë©ìì§ ì¶ê°
-            addSocialLoginInfo('ì¹´ì¹´ì¤');
+            // 안내 메시지 추가
+            addSocialLoginInfo('카카오');
 
-            // ì¤íì¼ ì ì©
+            // 스타일 적용
             applySocialLoginStyles();
         }
 
-        // êµ¬ê¸ íìê°ì í¼ ì¤ì 
+        // 구글 회원가입 폼 설정
         function setupGoogleRegistration(urlParams) {
-            // ID/PW íë ì¨ê¸°ê¸°
+            // ID/PW 필드 숨기기
             hideLoginFields();
 
-            // í¼ ìë ìì±
+            // 폼 자동 완성
             autoFillGoogleForm(urlParams);
 
-            // Hidden íë ì¶ê°
+            // Hidden 필드 추가
             addGoogleHiddenFields(urlParams);
 
-            // ìë´ ë©ìì§ ì¶ê°
-            addSocialLoginInfo('êµ¬ê¸');
+            // 안내 메시지 추가
+            addSocialLoginInfo('구글');
 
-            // ì¤íì¼ ì ì©
+            // 스타일 적용
             applySocialLoginStyles();
         }
 
-        // ì í¸ë¦¬í° í¨ìë¤
+        // 유틸리티 함수들
         function hideLoginFields() {
             document.querySelector('.form-group:has(#username)').style.display = 'none';
             document.querySelector('.form-group:has(#password)').style.display = 'none';
@@ -491,7 +581,7 @@
             document.getElementById('nickname').value = urlParams.get('nickname') || '';
             document.getElementById('email').value = urlParams.get('email') || '';
 
-            // ìë ìë ¥ë íë ì½ê¸° ì ì© ì¤ì 
+            // 자동 입력된 필드 읽기 전용 설정
             document.getElementById('email').readOnly = true;
             document.getElementById('nickname').readOnly = true;
         }
@@ -500,7 +590,7 @@
             document.getElementById('name').value = urlParams.get('name') || '';
             document.getElementById('email').value = urlParams.get('email') || '';
 
-            // ìë ìë ¥ë íë ì½ê¸° ì ì© ì¤ì 
+            // 자동 입력된 필드 읽기 전용 설정
             document.getElementById('email').readOnly = true;
             document.getElementById('name').readOnly = true;
         }
@@ -529,7 +619,7 @@
             const form = document.querySelector('form');
             const infoText = document.createElement('div');
             infoText.className = 'social-login-info';
-            infoText.innerHTML = `${provider} ê³ì ì¼ë¡ íìê°ìì ì§íí©ëë¤.<br>ì¶ê° ì ë³´ë¥¼ ìë ¥í´ì£¼ì¸ì.`;
+            infoText.innerHTML = `${provider} 계정으로 회원가입을 진행합니다.<br>추가 정보를 입력해주세요.`;
             form.insertBefore(infoText, form.firstChild);
         }
 
@@ -553,7 +643,7 @@
             document.head.appendChild(style);
         }
 
-        // íìê°ì í¼ ì ì¶ ì²ë¦¬
+        // 회원가입 폼 제출 처리
         document.querySelector('form')?.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -570,19 +660,16 @@
                 .then(response => response.json())
                 .then(result => {
                     if (result.status === 'success') {
-                        alert('íìê°ìì´ ìë£ëììµëë¤.');
+                        alert('회원가입이 완료되었습니다.');
                         window.location.href = '/';
                     } else {
-                        alert(result.message || 'íìê°ì ì¤ ì¤ë¥ê° ë°ìíìµëë¤.');
+                        alert(result.message || '회원가입 중 오류가 발생했습니다.');
                     }
                 })
                 .catch(error => {
                     console.error('Registration Error:', error);
-                    alert('íìê°ì ì²ë¦¬ ì¤ ì¤ë¥ê° ë°ìíìµëë¤.');
+                    alert('회원가입 처리 중 오류가 발생했습니다.');
                 });
         });
-
-
-
 
     </script>

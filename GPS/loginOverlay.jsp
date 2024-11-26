@@ -21,7 +21,7 @@
 		        %>
 		    </div>
 		    
-	        <form action="loginProcess.jsp" method="post" id="loginForm">
+	        <form action="/api/login" method="post" id="loginForm">
 	            <input type="text" name="username" placeholder="아이디를 입력해주세요">
 	            <div class="password-container">
 			        <input type="password" name="password" id="password" minlength="8" maxlength="16" placeholder="비밀번호를 입력해주세요">
@@ -34,7 +34,7 @@
 	        
 	        <div class="find-regist-btn">
 		        	<button class="findIdPw-btn" id="findIdPwBtn">아이디/비밀번호 찾기</button>
-		        	<button class="register-btn" onclick="location.href='register.jsp'">회원가입</button>
+		        	<button class="register-btn" onclick="location.href='/api/register'">회원가입</button>
 			</div>
 			<p class="sns">sns로 시작하기</p>
 			<hr class="divideLine">
@@ -48,3 +48,5 @@
 	        </div>
 	    </div>
 	</div>
+
+

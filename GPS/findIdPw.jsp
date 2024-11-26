@@ -27,13 +27,11 @@
                     <div class="email-input">
 			            <input type="text" id="findIdEmailId" name="emailId">
 			            <span>@</span>
+			            <!-- 직접 입력 폼 제작 필 -->
 			            <select id="findIdEmailDomain" name="emailDomain" onchange="toggleCustomDomainInput('findIdEmailDomain', 'customDomainInput')">
-			            	<option value="gmail.com">gmail.com</option>
+			            	<option value="google.com">google.com</option>
                             <option value="naver.com">naver.com</option>
                             <option value="daum.net">daum.net</option>
-                            <option value="hotmail.com">hotmail.com</option>
-                            <option value="yahoo.com">yahoo.com</option>
-                            <option value="etc">기타</option>
 			            </select>
 			        </div>
                     <button type="submit">다음으로</button>

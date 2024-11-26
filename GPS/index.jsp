@@ -52,7 +52,7 @@
                     <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
                 <% } %>
             </form>
-            <form action="/api/logout" method="post">
+            <form action="/auth/logout" method="post">
                 <% if(session.getAttribute("userID") != null) { %>
                     <button type="submit" id="logoutButton">로그아웃</button>
                 <% } %>
