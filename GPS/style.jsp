@@ -554,11 +554,11 @@ body::-webkit-scrollbar {
 	margin: 2% 0% 2% 0%;
 }
 
-#duplicationCheck:hover, duplicationCheckEmail:hover {
+#duplicationCheck:hover, #duplicationCheckEmail:hover {
 	background-color: #B35F00;
 }
 
-#duplicationCheck:active, duplicationCheckEmail:active {
+#duplicationCheck:active, #duplicationCheckEmail:active {
 	background-color: #C79126;
 }
 

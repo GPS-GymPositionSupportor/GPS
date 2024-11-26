@@ -197,6 +197,15 @@
 	    </div>
 	</div>
 	
+		<div id="modalRegist" style="display: none;">
+	    <div id="modal-content">
+	        <p>회원가입 되었습니다.</p>
+	        <div id="modal-buttons">
+		        <button id="registComplete">확인</button>
+			</div>
+	    </div>
+	</div>
+	
 	<script>
 		async function checkUsername() {
 			var username = document.getElementById('username').value;
