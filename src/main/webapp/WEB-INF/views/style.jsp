@@ -5,6 +5,11 @@ body {
     background-color: #F5F5F5;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    max-width: 800px;
+    width: 100%;
+    margin: 0 auto !important;
+    overflow-x: hidden;
+    max-height: 90%
 }
 
 body::-webkit-scrollbar {
@@ -16,7 +21,7 @@ body::-webkit-scrollbar {
     display: flex;
     justify-content: space-around;
     align-items: center;
-    padding: 1rem 0;
+    padding: 1rem 0 0 0;
     width: 100%;
     position: -webkit-sticky;
     position: sticky;
@@ -46,6 +51,40 @@ body::-webkit-scrollbar {
     color: #222;
 }
 
+#search-container {
+	margin: 1rem;
+    z-index: 2;
+    position: relative;
+}
+
+#searchInput {
+    padding: 0.5rem;
+    font-size: 14px;
+    border: 1px solid #fff;
+    border-radius: 12px;
+    width: 18rem;
+    background: inherit;
+    padding-left: 1rem;
+    color: #fff;
+}
+
+#searchInput::placeholder {
+    color: #fff;
+}
+
+.search-icon {
+	position: absolute;
+    right: 1rem;
+    top: 55%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.search-icon img {
+    width: 20px;
+    height: auto;
+}
+
 .content-section {
     margin: 1rem;
 }
@@ -68,7 +107,7 @@ body::-webkit-scrollbar {
 }
 
 .burbutton span.middle {
-  width: 20px;
+  width: 30px;
 }
 
 #nav-links {
@@ -163,7 +202,6 @@ body::-webkit-scrollbar {
 	0px 1px 1px 0px #0000000D,
 	0px 2px 1px 0px #00000003,
 	0px 3px 1px 0px #00000000;
-	
 }
 
 .login-form input::placeholder {
@@ -211,6 +249,16 @@ body::-webkit-scrollbar {
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.findIdPw-btn:hover, .register-btn:hover {
+	color: #A02400 !important;
+}
+
+.findIdPw-btn:active, .register-btn:active {
+	color: #3A1C16 !important;
 }
 
 #toLogin {
@@ -229,6 +277,8 @@ body::-webkit-scrollbar {
 	font-size: 12px !important;
 	background-color: #ffffff00 !important;
 	box-shadow: none !important;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 .kakao-btn {
@@ -252,7 +302,11 @@ body::-webkit-scrollbar {
 }
 
 .login-form button:hover {
-	background-color: #0056b3;
+	background-color: #B35F00;
+}
+
+.login-form button:active {
+	background-color: #C79126;
 }
 
 .social-buttons {
@@ -298,6 +352,12 @@ body::-webkit-scrollbar {
     box-shadow: none !important;
 }
 
+.picture {
+	max-width: 5rem;
+	border-radius: 30px;
+	width: 5rem;
+}
+
 .form-container {
     display: flex;
     flex-direction: column;
@@ -310,17 +370,38 @@ body::-webkit-scrollbar {
     text-align: center;
 }
 
-#findIdForm2 {
+#findIdForm2, #findPwForm2 {
 	display: contents;
-	
 }
 
-#findIdF {
+#findIdF, #findPwF{
 	margin: 5% 0% 15% 0%;
 }
 
-#PlzEmail {
+#plzEmailId, #plzEmailPw {
 	color: #616161;
+}
+
+#plzEmailId.error, #plzEmailPw.error {
+	color: #FF3B30 !important;
+}
+
+#regist-email {
+	display: flex;
+    align-items: center;
+    margin: 0 auto;
+    width: 70%;
+}
+
+#findIdEmailDomain, #registerEmailDomain {
+	border: none;
+    outline: none;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    background-color: inherit;
+    border-bottom: 1px solid #616161;
 }
 
 .email-input {
@@ -330,7 +411,7 @@ body::-webkit-scrollbar {
     width: 70%;
 }
 
-.email-input input {
+.email-input input, #regist-email input {
     border: none;
     outline: none;
     flex: 1;
@@ -341,12 +422,334 @@ body::-webkit-scrollbar {
     border-bottom: 1px solid #616161 !important;
 }
 
-.email-input span {
+.email-input span, #regist-email span {
     font-size: 14px;
 }
 
-@media only screen and (max-width: 767px) {
+#findCId, #findCPw {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
 
+#findIdP, #findPwP {
+	font-size: 24px;
+	margin: 4.5rem 2rem 5rem 2rem;
+	font-weight: 400;
+	line-height: 17px;
+	text-align: left;
+}
+
+#sendMail {
+	text-align: center;
+	color: #616161;
+	font-size: 16px;
+	margin: 2rem;
+}
+
+#certificationCodeId, #certificationCodePw {
+	display: grid;
+    width: 100%;
+    justify-content: center;
+}
+
+#certificationCodeIdForm, #certificationCodePwForm {
+	display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-end;
+}
+
+#certificationCodeIdForm input, #certificationCodePwForm input {
+	display: block;
+	margin: 10px 0px 10px 0px;
+	padding: 10px 15px 10px 15px;
+	width: 100%;
+	background-color: #f2f2f2;
+	border: 0px solid;
+	border-radius: 12px 12px 0 0;
+	font-size: 16px;
+	box-shadow: 0 1px 0px #999999;
+	box-sizing: border-box;
+	height: 3.5rem;
+}
+
+#certificationCodeIdForm button, #certificationCodePwForm button {
+	width: 32%;
+	padding: 10px;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	margin: 10px 0px 10px 0px;
+	box-shadow: 0px 1px 1px 0px #00000017,
+	0px 1px 1px 0px #0000000D,
+	0px 2px 1px 0px #00000003,
+	0px 3px 1px 0px #00000000;
+}
+
+#toLoginFindId, #toLoginFindPw {
+	color: #555 !important;
+    font-size: 12px !important;
+    background-color: #ffffff00;
+    position: absolute;
+    bottom: 2rem;
+    border-color: initial;
+    border: none;
+    text-decoration: underline;
+}
+
+#cCodeError {
+	color: #FF3B30;
+    text-align: center;
+    font-size: 12px;
+}
+
+#certificationCodeIdForm input.error, #certificationCodePwForm input.error {
+    color: #FF3B30 !important;
+    box-shadow: 0px 1px 1px 0px #FF3B30 !important;
+}
+
+#certificationCodeIdForm input.error::placeholder,
+#certificationCodePwForm input.error::placeholder {
+	color: #FF3B30 !important;
+}
+
+#certificationCodeIdForm input::placeholder,
+#certificationCodePwForm input::placeholder {
+    color: #ccc !important;
+}
+
+#findId-btn {
+	background-color: #B35F00 !important;
+}
+
+#findId-btn:hover {
+	background-color: #D7AF66 !important;
+}
+
+#findId-btn:active {
+	background-color: #9F7E70 !important;
+}
+
+#inputCCode:hover {
+	background-color: #B35F00;
+}
+
+#inputCCode:active {
+	background-color: #C79126;
+}
+
+#toFindPw {
+	width: 80%;
+	height: 3.5rem;
+	padding: 10px;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 16px;
+	margin: 10px 0px 10px 0px;
+	box-shadow: 0px 1px 1px 0px #00000017,
+	0px 1px 1px 0px #0000000D,
+	0px 2px 1px 0px #00000003,
+	0px 3px 1px 0px #00000000;
+	bottom: 5rem;
+    position: absolute;
+}
+
+#toFindPw:hover {
+	background-color: #B35F00; 
+}
+
+#toFindPw:active {
+	background-color: #C79126;
+}
+
+#findIdComplete, #findPwComplete {
+	display: grid;
+    justify-items: center;
+    text-align: center;
+    margin: 10rem 0rem 0rem 0rem;
+}
+
+#error-message-id, #error-message-pw, #error-message-nickname, #error-message-email {
+	 color: #FF3B30;
+	 text-align: center;
+	 font-size: 12px;
+}
+
+#duplicationCheck {
+	width: 30%;
+	padding: 0.8rem;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 2% 0% 2% 0%;
+}
+
+#duplicationCheck:hover, #duplicationCheckEmail:hover {
+	background-color: #B35F00;
+}
+
+#duplicationCheck:active, #duplicationCheckEmail:active {
+	background-color: #C79126;
+}
+
+#duplicationCheckEmail {
+	width: 30%;
+	padding: 0.8rem;
+	background-color: #402E32;
+	color: white;
+	border: none;
+	border-radius: 12px;
+	cursor: pointer;
+	font-size: 14px;
+	margin: 2% 0% 2% 0%;
+}
+
+#id-form-group, #nickname-form-group {
+	display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-content: space-between;
+}
+
+#password {
+	margin: 1rem 0 1rem 0;
+}
+
+#confirmPassword {
+	margin: 0 0 2rem 0;
+}
+
+#togglePasswordRegist {
+	box-shadow: none !important;
+	margin: 0 0 2rem 0;
+}
+
+#email-form-group {
+	display: flex;
+}
+
+#birthdate-form-group {
+    display: flex;
+    align-items: center;
+}
+
+#birthYear, #birthMonth, #birthDay {
+	border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    background-color: inherit;
+    border-bottom: 1px solid #616161;
+}
+
+.birthP {
+	margin-right: 1rem;
+}
+
+#privacy {
+    box-shadow: none;
+    width: 2rem;
+    height: 1rem;
+}
+
+#privacyLabel {
+	font-size: 12px;
+	color: #555555;
+}
+
+#checkbox {
+	display: flex;
+	align-items: center;
+}
+
+#birthYear {
+	width: 20%;
+}
+
+#birthMonth, #birthDay {
+	width: 14%;
+}
+
+#gender input {
+	background-color: inherit;
+    width: 5%;
+    box-shadow: none;
+}
+
+#gender-form-group {
+	display: flex;
+	align-items: center;
+}
+
+#gender input[type="radio"] {
+    margin-left: 3rem;
+}
+
+#registBtn {
+	height: 3.5rem;
+}
+
+#modalBack {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+
+#modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 1rem;
+    width: 80%;
+    border-radius: 0.5rem;
+}
+
+#modal-content p {
+	font-size: 14px;
+	color: #757575;
+}
+
+#cancelBack {
+	border: none;
+    background-color: initial;
+    font-size: 14px;
+    color: #bdbdbd;
+}
+
+#confirmBack {
+	border: none;
+    background-color: initial;
+    font-size: 14px;
+}
+
+#modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+@media only screen and (max-width: 767px) {
+	body {
+		max-height: 100%;
+		height: 100%;
+	}
+	
     .burbutton {
         display:block;
         z-index: 10;
@@ -366,6 +769,8 @@ body::-webkit-scrollbar {
 	    position: sticky;
 	    top: 0;
 	    z-index: 10;
+	    display: flex;
+        justify-content: flex-end;
 	}
 
 	#nav-links {
@@ -511,37 +916,4 @@ body::-webkit-scrollbar {
 		position: absolute;
 	    bottom: 3rem;
 	    right: -0.5rem;
-	}
-
-	.form-group {
-		margin-bottom: 1rem;
-	}
-
-	.form-group.hidden {
-		display: none;
-	}
-
-	.form-group label {
-		display: block;
-		margin-bottom: 0.5rem;
-	}
-
-	.form-group input[readonly] {
-		background-color: #f8f9fa;
-		cursor: not-allowed;
-	}
-
-	.social-login-info {
-		background-color: #FEE500;
-		color: #000000;
-		padding: 15px;
-		border-radius: 5px;
-		margin-bottom: 20px;
-		text-align: center;
-		font-weight: bold;
-	}
-
-	.required-field::after {
-		content: " *";
-		color: red;
 	}

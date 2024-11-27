@@ -72,7 +72,7 @@ public class OAuth2Controller {
                 String ssoToken = ssoService.createSSOToken(member);
                 session.setAttribute("ssoToken", ssoToken);
 
-                return "redirect:/";
+                return "redirect:/api/main";
             } else {
                 // RedirectAttributes를 사용하여 파라미터 전달
                 attributes.addAttribute("provider", "KAKAO");
@@ -115,7 +115,7 @@ public class OAuth2Controller {
             if (existingMember.isPresent()) {
                 Member member = existingMember.get();
                 setupSSOAndSession(session, member);
-                return "redirect:/";
+                return "redirect:/api/main";
             } else {
                 attributes.addAttribute("provider", "GOOGLE");
                 attributes.addAttribute("googleId", result.get("providerId"));

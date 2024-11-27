@@ -247,6 +247,7 @@ public class MainController {
             session.setAttribute("name", member.getName());
             session.setAttribute("authority", member.getAuthority());
             session.setAttribute("profile_img", member.getProfileImg());
+            session.setAttribute("gender", member.getGender());
             session.setMaxInactiveInterval(1800);
 
             // 권한 체크 및 리다이렉션
@@ -254,7 +255,7 @@ public class MainController {
             if ("ADMIN".equals(authority)) {
                 return "redirect:/api/admin";
             }
-            return "redirect:/";
+            return "redirect:/api/home";
 
         } catch (Exception e) {
             session.setAttribute("loginError", "로그인 처리 중 오류가 발생했습니다.");
@@ -333,7 +334,7 @@ public class MainController {
         if(session.getAttribute("loggedInUser") == null) {
             return "redirect:/api/login";
         }
-        return "index";
+        return "home";
     }
 
 
