@@ -4,8 +4,8 @@ import gps.base.model.Member;
 import gps.base.repository.MemberRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -14,28 +14,31 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class EmailService {
 
     private final JavaMailSender javaMailSender;
     private final MemberRepository memberRepository;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String senderEmail = "whalsrnr2741@naver.com";
-    public static int number;
+    public static String number;
 
     @Autowired
-    public EmailService(JavaMailSender javaMailSender, MemberRepository memberRepository) {
+    public EmailService(JavaMailSender javaMailSender, MemberRepository memberRepository, RedisTemplate<String, String> redisTemplate) {
         this.javaMailSender = javaMailSender;
         this.memberRepository = memberRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     // 랜덤으로 숫자 생성
     public static void createNumber() {
-        number = (int) (Math.random() * 900000) + 100000;
+        number = Integer.toString((int) (Math.random() * 900000) + 100000);
     }
 
     @Async
-    public CompletableFuture<Void> sendVerificationCodeId(String name, String email, HttpSession session) {
+    public CompletableFuture<Void> sendVerificationCodeId(String name, String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent() && member.get().getName().equals(name)) {
             createNumber();
@@ -54,8 +57,8 @@ public class EmailService {
                 helper.setText(body, true);
                 javaMailSender.send(message);
 
-                session.setAttribute("verificationCode", number); // 인증 코드를 세션에 저장
-                session.setAttribute("email", email); // 이메일도 세션에 저장
+                // Redis에 인증 코드 저장 (유효기간 5분)
+                redisTemplate.opsForValue().set(email + ":verificationCode", number, 5, TimeUnit.MINUTES);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
@@ -66,7 +69,7 @@ public class EmailService {
     }
 
     @Async
-    public CompletableFuture<Void> sendVerificationCodePassword(String mId, String email, HttpSession session) {
+    public CompletableFuture<Void> sendVerificationCodePassword(String mId, String email) {
         Optional<Member> member1 = memberRepository.findBymId(mId);
         Optional<Member> member2 = memberRepository.findByEmail(email);
         if (member1.isPresent() && member2.isPresent() && member1.get().getEmail().equals(email)) {
@@ -86,8 +89,8 @@ public class EmailService {
                 helper.setText(body, true);
                 javaMailSender.send(message);
 
-                session.setAttribute("verificationCode", number); // 인증 코드를 세션에 저장
-                session.setAttribute("email", email); // 이메일도 세션에 저장
+                // Redis에 인증 코드 저장 (유효기간 5분)
+                redisTemplate.opsForValue().set(email + ":verificationCode", number, 5, TimeUnit.MINUTES);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
@@ -98,7 +101,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendTemporaryPassword(String email, HttpSession session) {
+    public void sendTemporaryPassword(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);
         if (member.isPresent()) {
             String tempPassword = generateTemporaryPassword();
@@ -107,7 +110,7 @@ public class EmailService {
                 MimeMessageHelper helper = new MimeMessageHelper(message, true);
                 helper.setFrom(senderEmail);
                 helper.setTo(email);
-                helper.setSubject("임시 비밀번호");
+                helper.setSubject("임시 비밀번호 전송");
 
                 String body = "";
                 body += "<h3>요청하신 임시 비밀번호입니다.</h3>";
@@ -117,12 +120,13 @@ public class EmailService {
                 helper.setText(body, true);
                 javaMailSender.send(message);
 
-                session.setAttribute("temporaryPassword", tempPassword); // 임시 비밀번호 세션에 저장
+                // Redis에 임시 비밀번호 저장 (유효기간 5분)
+                redisTemplate.opsForValue().set(email + ":temporaryPassword", tempPassword, 5, TimeUnit.MINUTES);
             } catch (MessagingException e) {
                 e.printStackTrace();
             }
         } else {
-            throw new IllegalArgumentException("등록된 이메일이 아닙니다.");
+            throw new IllegalArgumentException("등록된 이메일이 존재하지 않습니다.");
         }
     }
 

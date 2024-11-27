@@ -10,7 +10,7 @@
       const mId = document.getElementById("mId").value;
       const email = document.getElementById("email-pw").value;
 
-      fetch('/api/sendVerificationCodePassword', {
+      fetch('/api/send-verification-code-pw', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -32,6 +32,7 @@
     function verifyCodeForPassword(event) {
       event.preventDefault();
       const code = document.getElementById("code-pw").value;
+      const email = document.getElementById("email-pw").value;  // 이메일을 추가로 전송
 
       fetch('/api/verify-code-pw', {
         method: 'POST',
@@ -39,7 +40,8 @@
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          code: code
+          code: code,
+          email: email  // 이메일을 추가로 전송
         })
       })
               .then(response => response.json())
@@ -67,6 +69,6 @@
   <input type="text" id="code-pw" name="code" required><br>
   <button type="submit">입력</button>
 </form>
-<a href = "login.html">로그인 화면</a>
+<a href="login.html">로그인 화면</a>
 </body>
 </html>

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
@@ -29,6 +30,9 @@ public class MainController {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @GetMapping("/find-userId")
@@ -42,13 +46,10 @@ public class MainController {
     }
 
     // 아이디 찾기
-    @PostMapping("/sendVerificationCodeId")
-    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(
-            @RequestParam String name,
-            @RequestParam String email,
-            HttpSession session) {
+    @PostMapping("/send-verification-code")
+    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(@RequestParam String name, @RequestParam String email) {
         try {
-            return emailService.sendVerificationCodeId(name, email, session)
+            return emailService.sendVerificationCodeId(name, email)
                     .thenApply(aVoid -> ResponseEntity.ok("메일 전송 완료"));
         } catch (IllegalArgumentException e) {
             return CompletableFuture.completedFuture(ResponseEntity.status(400).body(e.getMessage()));
@@ -59,10 +60,9 @@ public class MainController {
     }
 
     @PostMapping("/verify-code")
-    public @ResponseBody ResponseEntity<String> verifyCode(@RequestParam int code, HttpSession session) {
-        Integer sessionCode = (Integer) session.getAttribute("verificationCode"); // 세션에서 인증 코드 가져오기
-        String email = (String) session.getAttribute("email"); // 세션에서 이메일 가져오기
-        if (sessionCode != null && sessionCode == code) { // 인증 코드 비교
+    public @ResponseBody ResponseEntity<String> verifyCode(@RequestParam String code, @RequestParam String email) {
+        String redisCode =  redisTemplate.opsForValue().get(email + ":verificationCode"); // Redis에서 인증 코드 가져오기
+        if (redisCode != null && redisCode.equals(code)) { // 인증 코드 비교
             emailService.sendUserId(email); // 인증이 성공하면 유저 아이디 전송
             return ResponseEntity.ok("인증 성공 및 아이디가 이메일로 전송되었습니다.");
         } else {
@@ -70,13 +70,11 @@ public class MainController {
         }
     }
 
-    @PostMapping("/sendVerificationCodePassword")
-    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCodeForPassword(
-            @RequestParam String mId,
-            @RequestParam String email,
-            HttpSession session) {
+    // 비밀번호 찾기
+    @PostMapping("/send-verification-code-pw")
+    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCodeForPassword(@RequestParam String mId, @RequestParam String email) {
         try {
-            return emailService.sendVerificationCodePassword(mId, email, session)
+            return emailService.sendVerificationCodePassword(mId, email)
                     .thenApply(aVoid -> ResponseEntity.ok("인증 코드가 이메일로 전송되었습니다."));
         } catch (IllegalArgumentException e) {
             return CompletableFuture.completedFuture(ResponseEntity.status(400).body(e.getMessage()));
@@ -87,14 +85,10 @@ public class MainController {
     }
 
     @PostMapping("/verify-code-pw")
-    public @ResponseBody ResponseEntity<String> verifyCodeForPassword(
-            @RequestParam int code,
-            HttpSession session) {
-        Integer sessionCode = (Integer) session.getAttribute("verificationCode");
-        String email = (String) session.getAttribute("email");
-
-        if (sessionCode != null && sessionCode == code) {
-            emailService.sendTemporaryPassword(email, session); // 세션 전달
+    public @ResponseBody ResponseEntity<String> verifyCodeForPassword(@RequestParam String code, @RequestParam String email) {
+        String redisCode = redisTemplate.opsForValue().get(email + ":verificationCode"); // Redis에서 인증 코드 가져오기
+        if (redisCode != null && redisCode.equals(code)) { // 인증 코드 비교
+            emailService.sendTemporaryPassword(email); // 인증 성공 시 임시 비밀번호 전송
             return ResponseEntity.ok("인증 성공! 임시 비밀번호가 이메일로 전송되었습니다.");
         } else {
             return ResponseEntity.status(400).body("인증 실패");

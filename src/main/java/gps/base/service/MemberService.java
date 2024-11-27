@@ -6,6 +6,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,9 @@ public class MemberService {
 
     @Autowired
     MemberRepository memberRepository;
+    @Qualifier("redisTemplate")
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     public String generateTemporaryPassword() {
         return UUID.randomUUID().toString().substring(0, 8);  // 8자리 임시 비밀번호 생성
@@ -65,8 +70,21 @@ public class MemberService {
                     .orElse(null);
 
 
-            if (member != null && mPassword.equals((member.getMPassword()))) {
-                return member;
+            if (member != null) {
+                // Redis에서 임시 비밀번호 가져오기
+                String redisKey = member.getEmail() + ":temporaryPassword";
+                String temporaryPassword = (String) redisTemplate.opsForValue().get(redisKey);
+
+                if (temporaryPassword != null && temporaryPassword.equals(mPassword)) {
+                    // 임시 비밀번호 일치 시 Redis에서 삭제
+                    redisTemplate.delete(redisKey);
+                    return member;
+                }
+
+                // 일반 비밀번호 확인
+                if (mPassword.equals(member.getMPassword())) {
+                    return member;
+                }
             }
             return null;
         } catch (EntityNotFoundException e) {
