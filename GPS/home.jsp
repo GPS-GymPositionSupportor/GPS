@@ -14,7 +14,7 @@
 
 <body>
 	<div id="homePage">
-		<img src="image/homeLogo.svg" alt="logo" title="logo" class="picture">
+		<img src="image/homeLogo.svg" alt="logo" title="logo" class="homeLogo">
 		
 		<div id="search-container">
 	    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
@@ -80,6 +80,13 @@
 		        alert('검색어를 입력하세요.');
 		    }
 		});
+		
+		window.onload = function() {
+	        // 스크롤 잠금
+	        document.body.style.position = 'fixed';
+	        document.body.style.width = '100%';
+	        document.body.style.height = '100%';
+	    };
 	</script>
 </body>
 </html>

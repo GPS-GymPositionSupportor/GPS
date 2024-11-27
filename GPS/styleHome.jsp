@@ -1,3 +1,8 @@
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
 	font-family: Roboto;
     margin: 0;
@@ -5,11 +10,11 @@ body {
     background-color: #FFFBF3;
 	scrollbar-width: none;
     -ms-overflow-style: none;
-    max-width: 1000px;
+    max-width: 800px;
     width: 100%;
     margin: 0 auto !important;
     overflow-x: hidden;
-    max-height: 90%
+    max-height: 95%
 }
 
 body::-webkit-scrollbar {
@@ -23,7 +28,8 @@ body::-webkit-scrollbar {
 }
 
 .picture {
-	width:
+	max-width: 3.5rem;
+	border-radius: 30px;
 }
 
 #search-container {
@@ -105,6 +111,14 @@ body::-webkit-scrollbar {
     align-items: center;
 }
 
+#profileBtn:hover {
+	background-color: #F5ECD9;
+}
+
+#profileBtn:active {
+	background-color: #F6E8DF;
+}
+
 #findGym {
 	display: flex;
     border-radius: 12px;
@@ -119,6 +133,14 @@ body::-webkit-scrollbar {
     flex-direction: column;
     padding-bottom: 0.5rem;
     padding-left: 1rem;
+}
+
+#findGym:hover {
+	background-color: #E0E0E0;
+}
+
+#findGym:active {
+	background-color: #BDBDBD;
 }
 
 .findGym {
@@ -162,6 +184,14 @@ body::-webkit-scrollbar {
     padding-left: 1rem;
 }
 
+#recommendFeed:hover {
+	background-color: #EDEDED;
+}
+
+#recommendFeed:active {
+	background-color: #9F7E70;
+}
+
 #recommendFeedP {
 	color: #3A1C16;
 }
@@ -191,6 +221,14 @@ body::-webkit-scrollbar {
     padding-bottom: 1rem;
     padding-left: 1rem;
     align-items: flex-end;
+}
+
+#myReview:hover {
+	background-color: #734937;
+}
+
+#myReview:active {
+	background-color: #7F5B5E;
 }
 
 #myReviewP {
@@ -224,6 +262,14 @@ body::-webkit-scrollbar {
     padding-left: 1rem;
 }
 
+#scrap:hover {
+	background-color: #E7CFA2;
+}
+
+#scrap:active {
+	background-color: #BBAFB0;
+}
+
 #scrapP {
 	color: #3A1C16;
 	padding-left: 1rem;
@@ -243,6 +289,6 @@ body::-webkit-scrollbar {
 
 #logoutContainer {
 	position: absolute;
-	bottom: 3rem;
+	bottom: 0;
 	right: 0.5rem;
 }

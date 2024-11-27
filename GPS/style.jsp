@@ -5,7 +5,7 @@ body {
     background-color: #F5F5F5;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    max-width: 1000px;
+    max-width: 800px;
     width: 100%;
     margin: 0 auto !important;
     overflow-x: hidden;
@@ -350,6 +350,12 @@ body::-webkit-scrollbar {
     font-size: inherit !important;
     margin: 0 !important;
     box-shadow: none !important;
+}
+
+.picture {
+	max-width: 5rem;
+	border-radius: 30px;
+	width: 5rem;
 }
 
 .form-container {
