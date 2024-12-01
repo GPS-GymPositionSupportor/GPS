@@ -1,7 +1,9 @@
 package gps.base.controller;
 
+import gps.base.DTO.FavoriteDto;
 import gps.base.model.Authority;
 import gps.base.service.EmailService;
+import gps.base.service.FavoriteService;
 import gps.base.service.MemberService;
 import gps.base.model.Member;
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -33,6 +36,9 @@ public class MainController {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private FavoriteService favoriteService;
+
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 
     @GetMapping("/find-userId")
@@ -46,20 +52,20 @@ public class MainController {
     }
 
     // 아이디 찾기
-    @PostMapping("/send-verification-code")
-    public @ResponseBody CompletableFuture<ResponseEntity<String>> sendVerificationCode(@RequestParam String name, @RequestParam String email) {
+    @PostMapping("/send-verification-code-id")
+    public CompletableFuture<String> sendVerificationCode(@RequestParam String name, @RequestParam String email) {
         try {
             return emailService.sendVerificationCodeId(name, email)
-                    .thenApply(aVoid -> ResponseEntity.ok("메일 전송 완료"));
+                    .thenApply(aVoid -> "메일 전송 완료");
         } catch (IllegalArgumentException e) {
-            return CompletableFuture.completedFuture(ResponseEntity.status(400).body(e.getMessage()));
+            return CompletableFuture.completedFuture("에러: " + e.getMessage());
         } catch (MailException e) {
             e.printStackTrace();
-            return CompletableFuture.completedFuture(ResponseEntity.status(500).body("메일 전송 실패"));
+            return CompletableFuture.completedFuture("메일 전송 실패");
         }
     }
-
-    @PostMapping("/verify-code")
+    // 인증코드 비교 및 아이디 전송
+    @PostMapping("/verify-code-id")
     public @ResponseBody ResponseEntity<String> verifyCode(@RequestParam String code, @RequestParam String email) {
         String redisCode =  redisTemplate.opsForValue().get(email + ":verificationCode"); // Redis에서 인증 코드 가져오기
         if (redisCode != null && redisCode.equals(code)) { // 인증 코드 비교
@@ -83,7 +89,7 @@ public class MainController {
             return CompletableFuture.completedFuture(ResponseEntity.status(500).body("메일 전송 실패"));
         }
     }
-
+    // 인증코드 비교 및 임시 비밀번호 전송
     @PostMapping("/verify-code-pw")
     public @ResponseBody ResponseEntity<String> verifyCodeForPassword(@RequestParam String code, @RequestParam String email) {
         String redisCode = redisTemplate.opsForValue().get(email + ":verificationCode"); // Redis에서 인증 코드 가져오기
@@ -93,6 +99,28 @@ public class MainController {
         } else {
             return ResponseEntity.status(400).body("인증 실패");
         }
+    }
+
+    // 즐겨찾기 추가
+    @PostMapping("/favorite/add")
+    public ResponseEntity<FavoriteDto> addFavorite(@RequestParam Long userId, @RequestParam Long gymId) {
+        FavoriteDto favoriteDto = favoriteService.addFavorite(userId, gymId);
+        return ResponseEntity.ok(favoriteDto);
+    }
+
+    // 즐겨찾기 삭제
+    @PostMapping("/favorite/remove")
+    public ResponseEntity<Void> removeFavoriteUsingPost(@RequestParam Long userId, @RequestParam Long gymId) {
+        favoriteService.removeFavorite(userId, gymId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 특정 유저의 즐겨찾기 조회
+    @GetMapping("/favorite/user/{userId}")
+    public String getUserFavorites(@PathVariable Long userId, Model model) {
+        List<FavoriteDto> favorites = favoriteService.getUserFavorites(userId);
+        model.addAttribute("favoriteList", favorites);
+        return "favoriteTest";
     }
 
     // 회원가입 폼
@@ -118,7 +146,6 @@ public class MainController {
             return "/register";
         }
     }
-
 
     // 로그인 폼
     @GetMapping("/login")
@@ -193,10 +220,10 @@ public class MainController {
     // 메인 페이지 Form
     @GetMapping("/main")
     public String mainPage(HttpSession session) {
-        if(session.getAttribute("loggedInUser") == null) {
-            return "redirect:/api/login";
-        }
-        return "main";
+       // if(session.getAttribute("loggedInUser") == null) {
+       //     return "redirect:/api/login";
+       // }
+        return "favoriteTest";
     }
 
     // 사용자 정보 Get

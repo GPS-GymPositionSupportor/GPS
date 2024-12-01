@@ -3,7 +3,6 @@ package gps.base.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,7 +37,7 @@ public class Member {
     private String nickname;
 
     @Column(name = "birth")
-    private LocalDate birth;
+    private LocalDateTime birth;
 
     @Column(name = "gender")
     private String gender;
