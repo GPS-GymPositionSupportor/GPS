@@ -27,7 +27,7 @@ public class Image {
     @Column(name = "added_at", nullable = false)
     private LocalDateTime addedAt;
 
-    @Column(name = "ImageURL", nullable = false, length = 1000)
+    @Column(name = "imageURL", nullable = false, length = 1000)
     private String imageUrl;
 
     @Column(name = "user_id", nullable = false)

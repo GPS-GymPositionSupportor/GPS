@@ -2,6 +2,7 @@ package gps.base.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
@@ -11,12 +12,13 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "favorite")
 @IdClass(FavoriteId.class)
+@NoArgsConstructor
 public class Favorite {
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private Member user;
+    private Member user;    // id 값이 x
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,7 +35,7 @@ public class Favorite {
 
     // Constructor
 
-    public Favorite() {
+    public Favorite(Member member, Gym gym, boolean b) {
     }
 
 
