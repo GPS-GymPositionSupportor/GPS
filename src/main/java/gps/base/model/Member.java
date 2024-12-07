@@ -44,7 +44,7 @@ public class Member {
     @Column(name = "nickname", nullable = true)
     private String nickname;
 
-    @Column(name = "profile_img", nullable = true)
+    @Column(name = "profile_image", nullable = true)
     private String profileImg;
 
     @Column(name = "birth")
