@@ -25,7 +25,7 @@
 		
 		<div id="imgBtns">
 			<div id="profileBtnBlock">
-				<button id="profileBtn" onclick="location.href='index.jsp?selectedNav=B'">
+				<button id="profileBtn" onclick="location.href='myPage.jsp'">
 				<img
 		            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
 		            alt="myPage_image" title="myPage_image" class="picture">

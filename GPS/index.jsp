@@ -43,39 +43,17 @@
 </head>
 
 <body>
-	<% if(session.getAttribute("userID") != null) { %>
+
 	    <div class="navbar">
-	        
-			<div class="burbutton" id="burbutton">
-	            <span></span>
-	            <span class="middle"></span>
-	            <span></span>
-	        </div>
-	        
+	        <div>
+				<a href="home.jsp" class="exit-button" title="BackToHome"></a>
+			</div>
 	    <div id="search-container">
 		    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
 		    <span id="searchIcon" class="search-icon">
 	        	<img src="image/icon_search.png" alt="검색" />
 			</span>
 		</div>
-	<% } %>
-
-        <div id="nav-links">
-            <form id="navForm" method="get">
-                <% if(session.getAttribute("userID") != null) { %>
-                    <button type="submit" name="selectedNav" value="A">A</button>
-                    <button type="submit" name="selectedNav" value="B">프로필</button>
-                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
-                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
-                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
-                <% } %>
-            </form>
-            <form action="/auth/logout" method="post">
-                <% if(session.getAttribute("userID") != null) { %>
-                    <button type="submit" id="logoutButton">로그아웃</button>
-                <% } %>
-            </form>
-        </div>
     </div> 
 
     <div>
