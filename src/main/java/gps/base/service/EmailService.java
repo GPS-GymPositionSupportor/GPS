@@ -130,6 +130,32 @@ public class EmailService {
         }
     }
 
+
+    @Async
+    public CompletableFuture<Void> sendVerificationCodeRegistration(String email) {
+        createNumber();
+        MimeMessage message = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(senderEmail);
+            helper.setTo(email);
+            helper.setSubject("회원가입 인증코드");
+
+            String body = "<h3>요청하신 인증 번호입니다.</h3>" +
+                    "<h1>" + number + "</h1>" +
+                    "<h3>감사합니다.</h3>";
+
+            helper.setText(body, true);
+            javaMailSender.send(message);
+
+            // Redis에 인증 코드 저장 (유효기간 5분)
+            redisTemplate.opsForValue().set(email + ":verificationCode", number, 5, TimeUnit.MINUTES);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        return CompletableFuture.completedFuture(null);
+    }
+
     @Async
     public void sendUserId(String email) {
         Optional<Member> member = memberRepository.findByEmail(email);

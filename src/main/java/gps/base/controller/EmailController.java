@@ -4,6 +4,7 @@ import gps.base.DTO.FavoriteDTO;
 import gps.base.service.EmailService;
 import gps.base.service.FavoriteService;
 import gps.base.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,36 @@ public class EmailController {
     private FavoriteService favoriteService;
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+
+
+    
+    /*
+    회원가입 관련
+     */
+
+    // 회원가입을 위한 이메일 인증 코드 전송
+    @PostMapping("/send-verification-code-registration")
+    public String sendVerificationCodeRegistration(@RequestParam String email, HttpServletRequest request) {
+        try {
+            emailService.sendVerificationCodeRegistration(email).get(); // 비동기 작업 완료 대기
+            request.setAttribute("email", email); // 이메일을 전달
+            return "forward:/verifyEmail.jsp"; // 인증 코드 입력 페이지로 포워드
+        } catch (Exception e) {
+            request.setAttribute("emailError", "메일 전송 실패: " + e.getMessage());
+            return "forward:/register.jsp";
+        }
+    }
+    
+    /*
+    아이디 & 비밀번호 관련
+     */
+    
+    
+    // 아이디 & 비밀번호 찾기 폼
+    @GetMapping("/findIdPassword")
+    public String findIdPassword(Model model) {
+        return "findIdPw";
+    }
 
     // 아이디 찾기
     @PostMapping("/send-verification-code-id")
@@ -83,6 +114,11 @@ public class EmailController {
             return ResponseEntity.status(400).body("인증 실패");
         }
     }
+    
+    
+    /*
+    즐겨 찾기 관련
+     */
 
     // 즐겨찾기 추가
     @PostMapping("/favorite/add")

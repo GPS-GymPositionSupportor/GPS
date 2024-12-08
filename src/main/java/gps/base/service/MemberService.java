@@ -85,6 +85,9 @@ public class MemberService {
         if (member != null) {
             String storedPassword = member.getMPassword();
 
+
+
+
             // BCrypt로 암호화된 비밀번호는 항상 $2a$, $2b$ 또는 $2y$로 시작
             boolean isEncrypted = storedPassword.startsWith("$2a$") ||
                     storedPassword.startsWith("$2b$") ||
