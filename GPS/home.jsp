@@ -41,7 +41,7 @@
 			</button>
 			</div>
 			<div id="justDoItBlock">
-				<img src="image/just.svg" alt="justDoIt" class="justDoIt">
+				<img src="image/just.svg" alt="justDoIt" id="justDoIt">
 			</div>
 			<div id="recommendFeedBlock">
 				<button id="recommendFeed" onclick="location.href='index.jsp?selectedNav=C'">

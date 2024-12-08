@@ -381,6 +381,34 @@
 		        return ''; // 모달을 표시하기 위해 빈 문자열 반환
 		    });
 		});
+	    
+	    document.addEventListener('DOMContentLoaded', function() {
+		    var registButton = document.getElementById('registBtn');
+		    var modal = document.getElementById('modalRegist');
+		    var registComplete = document.getElementById('registComplete');
+
+		    registButton.addEventListener('click', function(event) {
+		        event.preventDefault();
+		        modal.style.display = 'block';
+		    });
+		
+		    registComplete.addEventListener('click', function() {
+		    	window.location.href = 'index.jsp';
+		    });
+		
+		    // 창 밖을 클릭하면 모달 닫기
+		    window.addEventListener('click', function(event) {
+		        if (event.target === modal) {
+		            modal.style.display = 'none';
+		        }
+		    });
+		    
+		    window.addEventListener('beforeunload', function(event) {
+		        event.preventDefault();
+		        modal.style.display = 'block';
+		        return '';
+		    });
+		});
 	</script>
 
 </body>

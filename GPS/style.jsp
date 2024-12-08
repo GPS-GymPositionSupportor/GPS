@@ -700,7 +700,7 @@ body::-webkit-scrollbar {
 	height: 3.5rem;
 }
 
-#modalBack {
+#modalBack, #modalRegist {
     display: none;
     position: fixed;
     z-index: 1000;
@@ -725,7 +725,7 @@ body::-webkit-scrollbar {
 	color: #757575;
 }
 
-#cancelBack {
+#cancelBack, #registComplete {
 	border: none;
     background-color: initial;
     font-size: 14px;
@@ -861,8 +861,8 @@ body::-webkit-scrollbar {
 	
 	.register-form {
 		display: flex;
-		justify-content: center; /* 수평 중앙 정렬 */
-		align-items: center; /* 수직 중앙 정렬 */
+		justify-content: center;
+		align-items: center;
 		flex-direction: column;
 	}
 	
