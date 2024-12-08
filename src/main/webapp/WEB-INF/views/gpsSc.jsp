@@ -65,80 +65,6 @@
                     navLinks.classList.toggle('active');
                 });
             }
-	
-		    <%-- 사용자 화면당 화면 구조 변경 --%>
-		    function adjustNavLinks() {
-	            var navLinks = document.getElementById('nav-links');
-
-	            if (window.innerWidth <= 767) {
-	                // 모바일 구조로 변경
-	            	navLinks.innerHTML = `
-	                	<div class="myPage">
-		                    <div class="user-info">
-		                        <img
-            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
-            alt="myPage_image" title="myPage_image" class="picture">
-		                        <div class="greeting">
-		                            <a class="hello">안녕하세요</a>
-		                            <div class="mrUser">
-		                                <a class="mrUserName"><%= session.getAttribute("nickname") %></a>
-		                                <a class="mr">님</a>
-		                            </div>
-		                        </div>
-		                    </div>
-		                </div>
-	                <div>
-	                	<form id="navForm" method="get">
-		                    <button type="submit" name="selectedNav" value="A">A</button>
-		                    <button type="submit" name="selectedNav" value="B">프로필</button>
-		                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
-		                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
-		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
-		                </form>
-		                <div id="logoutContainer">
-		                	<form action="/auth/logout" method="post" id="logoutForm">	// action 나중에 다시 변경
-		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/logout.png" alt="logout_icon" class="logout_icon"></button>
-		                    </form>
-	                    </div>
-	                `;
-	            } else {
-	                // 데스크톱 구조로 변경
-	            	navLinks.innerHTML = `
-	                	<div class="myPage">
-		                    <div class="user-info">
-		                        <img
-            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
-            alt="myPage_image" title="myPage_image" class="picture">
-		                        <div class="greeting">
-		                            <a class="hello">안녕하세요</a>
-		                            <div class="mrUser">
-		                                <a class="mrUserName"><%= session.getAttribute("nickname") %></a>
-		                                <a class="mr">님</a>
-		                            </div>
-		                        </div>
-		                    </div>
-		                </div>
-	                <div>
-	                	<form id="navForm" method="get">
-		                    <button type="submit" name="selectedNav" value="A">A</button>
-		                    <button type="submit" name="selectedNav" value="B">프로필</button>
-		                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
-		                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
-		                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
-		                </form>
-		                <div id="logoutContainer">
-		                	<form action="/auth/logout" method="post">
-		                        <button type="submit" id="logoutButton">로그아웃 <img src="image/logout.png" alt="logout_icon" class="logout_icon"></button>
-		                    </form>
-	                    </div>
-	                `;
-	            }
-	        }
-
-	        adjustNavLinks();
-
-	        window.addEventListener('resize', adjustNavLinks);
-		});
     
 		document.getElementById('findIdPwBtn').addEventListener('click', function() {
 		    fetch('findIdPw.jsp')
@@ -331,49 +257,50 @@
         // SSO 관련 유틸리티 함수
         const SSOUtil = {
             setToken(token) {
-                if (token) {
-                    localStorage.setItem('ssoToken', token);
-                    console.log('Token saved:', token);
-                }
-            },
-
-            getToken() {
-                const token = localStorage.getItem('ssoToken');
-                return token;
-            },
-
-            removeToken() {
-                localStorage.removeItem('ssoToken');
-            },
-
-            async checkSSOStatus() {
-                try {
-                    console.log('Checking SSO status...');
-                    const response = await fetch('/auth/validate-token', {
-                        credentials: 'include'  // 세션 쿠키 포함
-                    });
-                    const data = await response.json();
-
-                    // 서버에서 토큰을 받으면 localStorage에 저장
-                    if (data.authenticated && data.ssoToken) {
-                        this.setToken(data.ssoToken);
-                    }
-
-                    return data.authenticated;
-                } catch (error) {
-                    console.error('SSO check failed:', error);
-                    return false;
-                }
+            	if (token) {
             }
-        };
+                localStorage.setItem('ssoToken', token);
+                console.log('Token saved:', token);
+            }
+        },
 
+        getToken() {
+        	const token = localStorage.getItem('ssoToken');
+            return token;
+        },
+
+        removeToken() {
+            localStorage.removeItem('ssoToken');
+        },
+
+        async checkSSOStatus() {
+            try {
+            	 console.log('Checking SSO status...');
+                 const response = await fetch('/auth/validate-token', {
+                     credentials: 'include'  // 세션 쿠키 포함
+                 });
+                 const data = await response.json();
+
+                 // 서버에서 토큰을 받으면 localStorage에 저장
+                 if (data.authenticated && data.ssoToken) {
+                     this.setToken(data.ssoToken);
+                 }
+
+                 return data.authenticated;
+            } catch (error) {
+            	 console.error('SSO check failed:', error);
+            	   return false;
+            }
+        }
+    };
     // 페이지 로드 시 SSO 상태 체크
     document.addEventListener('DOMContentLoaded', async function() {
         console.log('Checking SSO status on page load');
         const isAuthenticated = await SSOUtil.checkSSOStatus();
         console.log('Authentication status:', isAuthenticated);
     });
-
+            }
+		}
         
 		// 소셜 로그인 버튼 클릭 핸들러
         async function kakaoLogin() {

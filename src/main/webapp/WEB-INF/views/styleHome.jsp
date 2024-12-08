@@ -68,6 +68,13 @@ body::-webkit-scrollbar {
     height: auto;
 }
 
+#imgBtns {
+	display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    justify-items: center;
+}
+
 #mrUserName {
 	font-size: 14px !important;
 	color: #212121;
@@ -89,9 +96,7 @@ body::-webkit-scrollbar {
 }
 
 #profileBtnBlock {
-	position: absolute;
-    left: 1rem;
-    z-index: 2;
+
 }
 
 #profileBtn {
@@ -133,6 +138,7 @@ body::-webkit-scrollbar {
     flex-direction: column;
     padding-bottom: 0.5rem;
     padding-left: 1rem;
+    transform: translateX(-1.5rem);
 }
 
 #findGym:hover {
@@ -151,23 +157,6 @@ body::-webkit-scrollbar {
 	color: #424242
 }
 
-#findGymBlock {
-	position: absolute;
-    right: 1rem;
-}
-
-#justDoItBlock {
-	position: absolute;
-    left: 2rem;
-    top: 27rem;
-}
-
-#recommendFeedBlock {
-	position: absolute;
-    right: 1rem;
-    top: 23.3rem;
-}
-
 #recommendFeed {
 	display: flex;
     border-radius: 12px;
@@ -182,6 +171,7 @@ body::-webkit-scrollbar {
     flex-direction: column;
     padding-bottom: 0.5rem;
     padding-left: 1rem;
+    transform: translate(-1.5rem, -3rem);
 }
 
 #recommendFeed:hover {
@@ -200,12 +190,6 @@ body::-webkit-scrollbar {
 	margin-left: 4.5rem;
 }
 
-#myReviewBlock {
-	position: absolute;
-	left: -1rem;
-	top: 36rem;
-}
-
 #myReview {
 	display: flex;
     border-radius: 12px;
@@ -221,6 +205,7 @@ body::-webkit-scrollbar {
     padding-bottom: 1rem;
     padding-left: 1rem;
     align-items: flex-end;
+    transform: translateY(-0.5rem);
 }
 
 #myReview:hover {
@@ -240,10 +225,8 @@ body::-webkit-scrollbar {
 	margin-right: 1rem;
 }
 
-#scrapBlock {
-	position: absolute;
-    right: -2rem;
-    top: 34.5rem;
+#justDoIt {
+	transform: translate(-0.5rem, 1rem);
 }
 
 #scrap {
@@ -260,6 +243,7 @@ body::-webkit-scrollbar {
     flex-direction: column;
     padding-bottom: 3rem;
     padding-left: 1rem;
+    transform: translateY(-2.5rem);
 }
 
 #scrap:hover {

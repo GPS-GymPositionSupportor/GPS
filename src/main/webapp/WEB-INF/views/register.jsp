@@ -57,13 +57,13 @@
 					<div class="password-container">
 					<input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 혼합 8~16자리">
 					<button type="button" id="togglePassword" class="eye-btn">
-			        	<img src="image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
 			        </button>
 			        </div>
 			        <div class="password-container">
 					<input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 재입력">
 					<button type="button" id="togglePasswordRegist" class="eye-btn">
-			        	<img src="image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
 			        </button>
 					</div>
 					<%
@@ -104,7 +104,7 @@
 	            	</div>
 	            </div>
 				<div class="form-group">
-					<label for="email">5. 이메일 주소를 입력해주세요</label>
+					<%--@declare id="email"--%><label for="email">5. 이메일 주소를 입력해주세요</label>
 					<!--  
 					<c:choose>
 						<c:when test="${provider == 'GOOGLE'}">
@@ -140,7 +140,7 @@
 					%>
 				</div>
 	            <div class="form-group">
-	                <label for="birthdate">6. 생년월일을 입력해주세요</label>
+	                <%--@declare id="birthdate"--%><label for="birthdate">6. 생년월일을 입력해주세요</label>
 	                <div id="birthdate-form-group">
 				        <select id="birthYear" name="birthYear">
 				        	<option disabled selected>0000</option>
@@ -235,6 +235,53 @@
 				console.error('Error:', error);
 				alert("중복 확인 중 오류가 발생했습니다.");
 			}
+		}
+
+		function checkEmail() {
+			// 이메일 조합하기
+			const emailId = document.getElementById('registerEmail').value;
+			const emailDomain = document.getElementById('registerEmailDomain').value;
+			const fullEmail = emailId + '@' + emailDomain;
+
+			// 이메일 유효성 검사
+			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			if (!emailRegex.test(fullEmail)) {
+				document.getElementById('error-message-email').innerHTML = '유효한 이메일 주소를 입력해주세요.';
+				return;
+			}
+
+			// 버튼 비활성화 (중복 클릭 방지)
+			const button = document.getElementById('duplicationCheckEmail');
+			button.disabled = true;
+			button.innerHTML = '전송중...';
+
+
+			// 서버에 이메일 인즞ㅇ 코드 전송 요청
+			fetch('/send-verification-code', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+
+				},
+				body: `email=${encodeURIComponent(fullEmail)}`
+			}).then((response) => {
+				if (!response.ok) {
+					throw new Error('서버 응답 오류');
+				}
+				return response.text();
+			}).then((data) => {
+				// 성공적으로 이메일이 전송된 경우
+				window.location.href = '/verifyEmail.jsp';
+			}).catch((error) => {
+				// 에러메시지 표시
+				document.getElementById('error-message-email').innerHTML = '이메일 전송 중 오류가 발생했습니다. 다시 시도해 주세요.';
+				console.error('Error:', error);
+			}).finally(() => {
+				// 버튼 상태 복구
+				button.disabled = false;
+				button.innerHTML = '인증하기';
+			});
+
 		}
 
 

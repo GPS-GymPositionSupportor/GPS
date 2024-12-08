@@ -14,18 +14,18 @@
 
 <body>
 	<div id="homePage">
-		<img src="../image/homeLogo.svg" alt="logo" title="logo" class="homeLogo">
+		<img src="../../../../../../branch/GPS/GPS/image/homeLogo.svg" alt="logo" title="logo" class="homeLogo">
 		
 		<div id="search-container">
 	    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
 	    <span id="searchIcon" class="search-icon">
-        	<img src="../image/icon_search2.svg" alt="검색" />
+        	<img src="../../../../../../branch/GPS/GPS/image/icon_search2.svg" alt="검색" />
 		</span>
 		</div>
 		
 		<div id="imgBtns">
 			<div id="profileBtnBlock">
-				<button id="profileBtn" onclick="location.href='index.jsp?selectedNav=B'">
+				<button id="profileBtn" onclick="location.href='myPage.jsp'">
 				<img
 		            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
 		            alt="myPage_image" title="myPage_image" class="picture">
@@ -37,28 +37,28 @@
 			<div id="findGymBlock">
 			<button id="findGym" onclick="location.href='index.jsp?selectedNav=A'">
 				<p id="findGymP">운동시설 찾기</p>
-				<img src="../image/findGym.svg" alt="findGym" class="findGym">
+				<img src="../../../../../../branch/GPS/GPS/image/findGym.svg" alt="findGym" class="findGym">
 			</button>
 			</div>
 			<div id="justDoItBlock">
-				<img src="../image/just.svg" alt="justDoIt" class="justDoIt">
+				<img src="../../../../../../branch/GPS/GPS/image/just.svg" alt="justDoIt" id="justDoIt">
 			</div>
 			<div id="recommendFeedBlock">
 				<button id="recommendFeed" onclick="location.href='index.jsp?selectedNav=C'">
 					<p id="recommendFeedP">추천피드</p>
-					<img src="../image/recommendFeed.svg" alt="recommendFeed" class="recommendFeed">
+					<img src="../../../../../../branch/GPS/GPS/image/recommendFeed.svg" alt="recommendFeed" class="recommendFeed">
 				</button>
 			</div>
 				<div id="myReviewBlock">
 				<button id="myReview" onclick="location.href='index.jsp?selectedNav=D'">
 					<p id="myReviewP">내가 쓴 리뷰</p>
-					<img src="../image/myReview.svg" alt="myReview" class="myReview">
+					<img src="../../../../../../branch/GPS/GPS/image/myReview.svg" alt="myReview" class="myReview">
 				</button>
 			</div>
 				<div id="scrapBlock">
 				<button id="scrap" onclick="location.href='index.jsp?selectedNav=E'">
 					<p id="scrapP">스크랩한 장소</p>
-					<img src="../image/scrap.svg" alt="scrap" class="scrap">
+					<img src="../../../../../../branch/GPS/GPS/image/scrap.svg" alt="scrap" class="scrap">
 				</button>
 			</div>
 		</div>
@@ -66,7 +66,7 @@
 	
 	<div id="logoutContainer">
 		<form action="/auth/logout" method="post">
-		<button type="submit" id="logoutButton">로그아웃 <img src="../image/logout.png" alt="logout_icon" class="logout_icon"></button>
+		<button type="submit" id="logoutButton">로그아웃 <img src="../../../../../../branch/GPS/GPS/image/logout.png" alt="logout_icon" class="logout_icon"></button>
 		</form>
 	</div>
 	<script>
