@@ -1,17 +1,16 @@
 package gps.base.ElasticSearchController;
 
-import gps.base.ElasticDTO.GymSearchDTO;
+import gps.base.ElasticDTO.LocationDTO;
 import gps.base.ElasticSearchEntity.GymCategory;
 import gps.base.ElasticSearchService.GymSearchService;
 import gps.base.ElasticSearchEntity.Gym;
+import gps.base.ElasticSearchService.LocationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/gyms")
@@ -19,6 +18,56 @@ import java.util.Map;
 @Slf4j
 public class GymSearchController {
     private final GymSearchService gymSearchService;
+    private final LocationService locationService;
+
+
+    @GetMapping("/search/current-location")
+    public ResponseEntity<List<Gym>> searchNearbyGymsFromCurrentLocation(
+            @RequestParam(name = "distance", defaultValue = "5.0") double distance
+    ) {
+        try {
+            LocationDTO currentLocation = locationService.getCurrentLocation();
+            List<Gym> results = gymSearchService.searchNearbyGyms(
+                    currentLocation.getLatitude(),
+                    currentLocation.getLongitude(),
+                    distance
+            );
+            log.info("Found {} gyms near current location", results.size());
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            log.error("Error searching nearby gyms from current location: ", e);
+            throw new RuntimeException("Failed to search nearby gyms", e);
+        }
+    }
+
+    @GetMapping("/recommend/current-location")
+    public ResponseEntity<List<Gym>> getRecommendedGymsFromCurrentLocation() {
+        LocationDTO currentLocation = locationService.getCurrentLocation();
+        List<Gym> recommendations = gymSearchService.recommendNearbyGyms(
+                currentLocation.getLatitude(),
+                currentLocation.getLongitude()
+        );
+        return ResponseEntity.ok(recommendations);
+    }
+
+    @GetMapping("/search/keyword/current-location")
+    public ResponseEntity<List<Gym>> searchByKeywordFromCurrentLocation(
+            @RequestParam String keyword) {
+        try {
+            LocationDTO currentLocation = locationService.getCurrentLocation();
+            log.info("Searching gyms with keyword: {} at current location", keyword);
+            List<Gym> results = gymSearchService.searchByKeywordAndSort(
+                    keyword,
+                    currentLocation.getLatitude(),
+                    currentLocation.getLongitude()
+            );
+            log.info("Found {} results for keyword: {}", results.size(), keyword);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            log.error("Error searching with keyword from current location: {}", keyword, e);
+            throw e;
+        }
+    }
 
     @GetMapping("/search/nearby")
     public ResponseEntity<List<Gym>> searchNearbyGyms(
