@@ -261,6 +261,7 @@ body::-webkit-scrollbar {
     margin-top: 2rem;
     margin-right: 7rem;
     width: 25%;
+    background-color: initial;
 }
 
 #profileNickname {
@@ -306,6 +307,7 @@ body::-webkit-scrollbar {
     margin-top: 2rem;
     margin-right: 7rem;
     width: 25%;
+    background-color: initial;
 }
 
 #checkNickname {
@@ -374,6 +376,7 @@ body::-webkit-scrollbar {
     margin-left: 2rem;
     margin-top: 2rem;
     width: 30%;
+    background-color: initial;
 }
 
 #editIdEmailDomain {
@@ -419,15 +422,18 @@ body::-webkit-scrollbar {
 	background-color: inherit;
     width: 5%;
     box-shadow: none;
+    background-color: initial;
 }
 
 #gender-form-group {
 	display: flex;
 	align-items: center;
+	margin-top: 2rem;
 }
 
 #editProfileGender input[type="radio"] {
     margin-left: 3rem;
+    background-color: initial;
 }
 
 #changePasswordBtn {
@@ -501,19 +507,20 @@ body::-webkit-scrollbar {
 	height: 2rem;
 }
 
-#deleteProfilePicture {
-	width: 50%;
-	background-color: #402E32;
-	color: white;
-	border: none;
-	border-radius: 12px;
-	cursor: pointer;
-	font-size: 14px;
-	box-shadow: 0px 1px 1px 0px #00000017,
-	0px 1px 1px 0px #0000000D,
-	0px 2px 1px 0px #00000003,
-	0px 3px 1px 0px #00000000;
-	height: 2rem;
+#profileBtn:hover,
+#editProfileId:hover,
+#editProfileName:hover,
+#editProfileNickname:hover,
+#editProfileEmail:hover,
+#editProfileGender:hover,
+#changePasswordBtn:hover,
+#profile:hover,
+#profileId:hover,
+#profileName:hover,
+#profileNickname:hover,
+#profileEmail:hover,
+#profileGender:hover {
+	background-color: #EEEEEE;
 }
 
 #modalBack, #modalDelete, #modalEdit {
