@@ -172,26 +172,6 @@ public class OAuth2Controller {
         return ssoToken;
     }
 
-    /**
-     * SSO 로그아웃 처리
-     */
-    @PostMapping("/logout")
-    public String logout(HttpSession session) {
-        // 세션에서 사용자 정보 가져오기
-        Member member = (Member) session.getAttribute("loggedInUser");
-        if (member != null) {
-            // Redis에서 토큰 삭제
-            String redisKey = "sso:token:" + member.getUserId();
-            redisTemplate.delete(redisKey);
-            logger.info("Removed SSO token for user: {}", member.getUserId());
-        }
-
-        // 세션 무효화
-        session.removeAttribute("ssoToken");
-        session.invalidate();
-
-        return "redirect:/";
-    }
 
 
     @GetMapping("/validate-token")

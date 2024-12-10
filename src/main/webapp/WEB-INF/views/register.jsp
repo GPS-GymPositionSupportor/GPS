@@ -49,7 +49,7 @@
 					        }
 					        %>
 					    </div>
-						<button type="button" id="duplicationCheck" onclick="checkUsername()">중복확인</button>
+						<button type="button" id="duplicationCheck">중복확인</button>
 						</div>
 					</div>
 				<div class="form-group">
@@ -100,7 +100,7 @@
 					        }
 					        %>
 					    </div>
-		                <button type="button" id="duplicationCheck" onclick="checkNickname()">중복확인</button>
+		                <button type="button" id="duplicationCheck">중복확인</button>
 	            	</div>
 	            </div>
 				<div class="form-group">
@@ -124,7 +124,7 @@
 	                            <option value="daum.net">daum.net</option>
 				            </select>
 				        </div>
-			        	<button type="button" id="duplicationCheckEmail" onclick="checkEmail()">인증하기</button>
+			        	<button type="button" id="duplicationCheckEmail" >인증하기</button>
 					</div>
 				</div>
 				<%
@@ -207,6 +207,15 @@
 	</div>
 	
 	<script>
+
+
+
+		document.addEventListener('DOMContentLoaded', function() {
+			document.getElementById('duplicationCheck').addEventListener('click', checkUsername);
+			document.getElementById('duplicationCheckEmail').addEventListener('click', checkEmail);
+			document.getElementById('nickname-check').addEventListener('click', checkNickname);
+		});
+
 		async function checkUsername() {
 			var username = document.getElementById('username').value;
 
@@ -256,14 +265,14 @@
 			button.innerHTML = '전송중...';
 
 
-			// 서버에 이메일 인즞ㅇ 코드 전송 요청
-			fetch('/send-verification-code', {
+			// 서버에 이메일 인증 코드 전송 요청
+			fetch('/email/send-verification-code-registration', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded',
 
 				},
-				body: `email=${encodeURIComponent(fullEmail)}`
+				body: 'email=' + encodeURIComponent(fullEmail)
 			}).then((response) => {
 				if (!response.ok) {
 					throw new Error('서버 응답 오류');
@@ -381,14 +390,14 @@
 	        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 	        passwordInput.setAttribute('type', type);
 	        
-	        eyeIcon1.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+	        eyeIcon1.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 	    });
 	    
 	    togglePasswordRegist.addEventListener('click', function() {
 	    	var type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 	    	confirmPasswordInput.setAttribute('type', type);
 	    	
-	    	eyeIcon2.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+	    	eyeIcon2.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 	    });
 	    
 	    // 뒤로가기 모달창

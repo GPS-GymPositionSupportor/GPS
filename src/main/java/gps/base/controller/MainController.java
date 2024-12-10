@@ -15,12 +15,14 @@ import gps.base.service.MemberService;
 import gps.base.service.ReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,6 +41,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class MainController {
 
@@ -50,6 +53,8 @@ public class MainController {
 
     @Autowired
     private GymService gymService;
+
+    private final RedisTemplate redisTemplate;
 
 
     private static final Logger logger = LoggerFactory.getLogger(MainController.class);
@@ -255,7 +260,7 @@ public class MainController {
             if ("ADMIN".equals(authority)) {
                 return "redirect:/api/admin";
             }
-            return "redirect:/api/home";
+            return "redirect:/api/main";
 
         } catch (Exception e) {
             session.setAttribute("loginError", "로그인 처리 중 오류가 발생했습니다.");
@@ -294,10 +299,19 @@ public class MainController {
     public String logout(HttpSession session) {
         Member loggedInUser = (Member) session.getAttribute("loggedInUser");
 
-
         try {
             if (loggedInUser != null) {
-                logger.info("User logged out: {}. Session ID : {}", loggedInUser.getMId(), session.getId());
+                logger.info("User logged out: {}. Session ID: {}", loggedInUser.getMId(), session.getId());
+
+                // SSO 관련 처리
+                String redisKey = "sso:token:" + loggedInUser.getUserId();
+                if (redisTemplate.hasKey(redisKey)) {
+                    redisTemplate.delete(redisKey);
+                    logger.info("Removed SSO token for user: {}", loggedInUser.getUserId());
+                }
+
+                // 마지막 로그인 시간 업데이트
+                loggedInUser.updateLastLogin(LocalDateTime.now());
 
                 // 세션에 설정된 모든 속성 제거
                 session.removeAttribute("loggedInUser");
@@ -305,16 +319,17 @@ public class MainController {
                 session.removeAttribute("nickname");
                 session.removeAttribute("name");
                 session.removeAttribute("authority");
+                session.removeAttribute("ssoToken");
 
                 // 세션 무효화
                 session.invalidate();
-                return "redirect:/api/login";
 
             } else {
-                logger.warn("Logout attempted with no user in session. Session ID : {}", session.getId());
-                loggedInUser.updateLastLogin(LocalDateTime.now());
-                return "redirect:/api/login";
+                logger.warn("Logout attempted with no user in session. Session ID: {}", session.getId());
             }
+
+            return "redirect:/api/login";
+
         } catch (Exception e) {
             logger.error("Error during logout: ", e);
             return "redirect:/";
