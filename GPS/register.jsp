@@ -34,7 +34,7 @@
 
 			<!-- ID/PW 필드 (소셜 로그인시 숨김) -->
 				<div class="form-group">
-					<label for="username">1. 아이디를 입력해주세요</label>
+					<label for="username" id="plzUsername">1. 아이디를 입력해주세요</label>
 					<div id="id-form-group">
 						<input type="text" id="username" name="username" placeholder="예) wowns3082">
 						<%
@@ -53,7 +53,7 @@
 						</div>
 					</div>
 				<div class="form-group">
-					<label for="password">2. 비밀번호를 입력해주세요</label>
+					<label for="password" id="plzPassword">2. 비밀번호를 입력해주세요</label>
 					<div class="password-container">
 					<input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 혼합 8~16자리">
 					<button type="button" id="togglePassword" class="eye-btn">
@@ -81,11 +81,11 @@
 				</div>
 
 	            <div class="form-group">
-	                <label for="name">3. 성명을 입력해주세요</label>
+	                <label for="name" id="plzName">3. 성명을 입력해주세요</label>
 	                <input type="text" id="name" name="name" placeholder="예) 홍길동">
 	            </div>
 	            <div class="form-group">
-	                <label for="nickname">4. 닉네임을 입력해주세요</label>
+	                <label for="nickname" id="plzNickname">4. 닉네임을 입력해주세요</label>
 	                <div id="nickname-form-group">
 		                <input type="text" id="nickname" name="nickname" placeholder="예) 레갈리엔">
 		                <%
@@ -104,7 +104,7 @@
 	            	</div>
 	            </div>
 				<div class="form-group">
-					<%--@declare id="email"--%><label for="email">5. 이메일 주소를 입력해주세요</label>
+					<%--@declare id="email"--%><label for="email" id="plzEmail">5. 이메일 주소를 입력해주세요</label>
 					<!--  
 					<c:choose>
 						<c:when test="${provider == 'GOOGLE'}">
@@ -147,7 +147,7 @@
 					</div>	
 			    </div>
 	            <div class="form-group">
-	                <%--@declare id="birthdate"--%><label for="birthdate">6. 생년월일을 입력해주세요</label>
+	                <%--@declare id="birthdate"--%><label for="birthdate" id="plzBirthdate">6. 생년월일을 입력해주세요</label>
 	                <div id="birthdate-form-group">
 				        <select id="birthYear" name="birthYear">
 				        	<option disabled selected>0000</option>
@@ -174,7 +174,7 @@
 				    </div>
 	            </div>
 	            <div id="gender">
-	                <label>7. 성별을 입력해주세요.</label>
+	                <label id="plzGender">7. 성별을 입력해주세요.</label>
 	                <div id="gender-form-group">
 		                <input type="radio" id="male" name="gender" value="male">
 		                <label for="male">남성</label>
@@ -221,6 +221,9 @@
 	        var confirmPassword = registerForm.querySelector('input[name="confirmPassword"]');
 	        var name = registerForm.querySelector('input[name="name"]');
 	        var nickname = registerForm.querySelector('input[name="nickname"]');
+	        var birthYear = registerForm.querySelector('select[name="birthYear"]'); // 생일 연도
+	        var birthMonth = registerForm.querySelector('select[name="birthMonth"]'); // 생일 월
+	        var birthDay = registerForm.querySelector('select[name="birthDay"]'); // 생일 일
 	        var gender = registerForm.querySelectorAll('input[name="gender"]'); // 성별 라디오 버튼
 	        var privacy = registerForm.querySelector('input[name="privacy"]'); // 동의 체크박스
 	
@@ -236,18 +239,22 @@
 	
 	            // 아이디 유효성 검사
 	            if (username.value.trim() === "") {
+	                plzUsername.classList.add('error');
 	                username.classList.add('error');
 	                isValid = false;
 	            } else {
-	                username.classList.remove('error');
+	            	plzUsername.classList.remove('error');
+	            	username.classList.remove('error');
 	            }
 	
 	            // 비밀번호 유효성 검사
 	            if (password.value.trim() === "") {
 	                password.classList.add('error');
+	                plzPassword.classList.add('error');
 	                isValid = false;
 	            } else {
 	                password.classList.remove('error');
+	                plzPassword.classList.remove('error');
 	            }
 	
 	            // 비밀번호 확인 유효성 검사
@@ -261,34 +268,54 @@
 	            // 성명 유효성 검사
 	            if (name.value.trim() === "") {
 	                name.classList.add('error');
+	                plzName.classList.add('error');
 	                isValid = false;
 	            } else {
 	                name.classList.remove('error');
+	                plzName.classList.remove('error');
 	            }
 	
 	            // 닉네임 유효성 검사
 	            if (nickname.value.trim() === "") {
 	                nickname.classList.add('error');
+	                plzNickname.classList.add('error');
 	                isValid = false;
 	            } else {
 	                nickname.classList.remove('error');
+	                plzNickname.classList.remove('error');
 	            }
-	
+
+	            // 생일 유효성 검사
+	            if (birthYear.value === "0000" || birthMonth.value === "0" || birthDay.value === "00") {
+	                isValid = false;
+	                if (birthYear.value === "0000") {
+	                	plzBirthdate.classList.add('error');
+	                }
+	                if (birthMonth.value === "0") {
+	                	plzBirthdate.classList.add('error');
+	                }
+	                if (birthDay.value === "00") {
+	                	plzBirthdate.classList.add('error');
+	                }
+	            } else {
+	            	plzBirthdate.classList.remove('error');
+	            }
+	            
 	            // 성별 유효성 검사
 	            var genderChecked = Array.from(gender).some(radio => radio.checked);
 	            if (!genderChecked) {
 	                isValid = false;
-	                gender.forEach(radio => radio.classList.add('error')); // 모든 라디오 버튼에 오류 클래스 추가
+	                plzGender.classList.add('error');
 	            } else {
-	                gender.forEach(radio => radio.classList.remove('error'));
+	                plzGender.classList.remove('error');
 	            }
 	
 	            // 동의 체크박스 유효성 검사
 	            if (!privacy.checked) {
-	                privacy.classList.add('error'); // 체크박스에 오류 클래스 추가
+	            	privacyLabel.classList.add('error');
 	                isValid = false;
 	            } else {
-	                privacy.classList.remove('error');
+	            	privacyLabel.classList.remove('error');
 	            }
 	
 	            return isValid; // 최종 유효성 검사 결과 반환
@@ -296,11 +323,13 @@
 	
 	        // 각 입력 필드에 포커스 시 오류 제거
 	        username.addEventListener('focus', function () {
-	            username.classList.remove('error');
+	        	plzUsername.classList.remove('error');
+	        	username.classList.remove('error');
 	        });
 	
 	        password.addEventListener('focus', function () {
 	            password.classList.remove('error');
+	            plzPassword.classList.remove('error');
 	        });
 	
 	        confirmPassword.addEventListener('focus', function () {
@@ -309,22 +338,37 @@
 	
 	        name.addEventListener('focus', function () {
 	            name.classList.remove('error');
+	            plzName.classList.remove('error');
 	        });
 	
 	        nickname.addEventListener('focus', function () {
 	            nickname.classList.remove('error');
+	            plzNickname.classList.remove('error');
 	        });
-	
+
+	        // 생일 선택 시 오류 제거
+	        birthYear.addEventListener('focus', function () {
+	        	plzBirthdate.classList.remove('error');
+	        });
+
+	        birthMonth.addEventListener('focus', function () {
+	        	plzBirthdate.classList.remove('error');
+	        });
+
+	        birthDay.addEventListener('focus', function () {
+	        	plzBirthdate.classList.remove('error');
+	        });
+	        
 	        // 성별 라디오 버튼 포커스 시 오류 제거
 	        gender.forEach(radio => {
 	            radio.addEventListener('focus', function () {
-	                gender.forEach(r => r.classList.remove('error'));
+	            	plzGender.classList.remove('error');
 	            });
 	        });
 	
 	        // 체크박스 포커스 시 오류 제거
 	        privacy.addEventListener('focus', function () {
-	            privacy.classList.remove('error');
+	        	privacyLabel.classList.remove('error');
 	        });
 	    });
 		
