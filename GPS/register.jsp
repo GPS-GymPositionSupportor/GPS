@@ -14,13 +14,13 @@
 		<a href="index.jsp" class="exit-button" title="BackToIndex"></a>
 	</div>
 
-	<%@ include file="gpsSc.jsp" %>
+
 		
 	<div class="register-form">
 		<div class="login-form">
 		<p class="regist">회원가입</p>
 		
-		<form action="/api/register" method="post"> <!-- 회원가입 로직을 처리할 파일로 이동 -->
+		<form action="/api/register" method="post" id="registerForm"> <!-- 회원가입 로직을 처리할 파일로 이동 -->
 			<!-- 공통 hidden 필드 -->
 			<input type="hidden" name="provider" value="${provider != null ? provider : 'LOCAL'}">
 			<input type="hidden" name="profileImage" value="${profileImage}">
@@ -57,13 +57,13 @@
 					<div class="password-container">
 					<input type="password" id="password" name="password" placeholder="영문, 숫자, 특수문자 혼합 8~16자리">
 					<button type="button" id="togglePassword" class="eye-btn">
-			        	<img src="image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
 			        </button>
 			        </div>
 			        <div class="password-container">
 					<input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 재입력">
 					<button type="button" id="togglePasswordRegist" class="eye-btn">
-			        	<img src="image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
 			        </button>
 					</div>
 					<%
@@ -104,7 +104,7 @@
 	            	</div>
 	            </div>
 				<div class="form-group">
-					<label for="email">5. 이메일 주소를 입력해주세요</label>
+					<%--@declare id="email"--%><label for="email">5. 이메일 주소를 입력해주세요</label>
 					<!--  
 					<c:choose>
 						<c:when test="${provider == 'GOOGLE'}">
@@ -125,22 +125,29 @@
 				            </select>
 				        </div>
 			        	<button type="button" id="duplicationCheckEmail" onclick="checkEmail()">인증하기</button>
-					</div>
-				</div>
-				<%
-				String emailError = (String) session.getAttribute("emailError");
-				%>
-				<!-- 고정된 오류 메시지 공간 -->
-				<div id="error-message-email">
-					<%
-						if (emailError != null) {
-						out.print(emailError.replace("<br>", "<br/>"));
-						session.removeAttribute("emailError");
-						}
-					%>
-				</div>
+			        	
+			        </div>
+			        <div id="certificationEmailFrom" style="display: none;">
+						<div id="certificationEmail">
+				        	<input type="text" id="certificationEmailInput" name="emailInput">
+				        	<button type="button" id="certificationCheckEmail" onclick="certificationCheckEmail()">확인하기</button>
+				        	<%
+							String emailError = (String) session.getAttribute("emailError");
+							%>
+							<!-- 고정된 오류 메시지 공간 -->
+							<div id="error-message-email">
+								<%
+									if (emailError != null) {
+									out.print(emailError.replace("<br>", "<br/>"));
+									session.removeAttribute("emailError");
+									}
+								%>
+							</div>
+				        </div>
+					</div>	
+			    </div>
 	            <div class="form-group">
-	                <label for="birthdate">6. 생년월일을 입력해주세요</label>
+	                <%--@declare id="birthdate"--%><label for="birthdate">6. 생년월일을 입력해주세요</label>
 	                <div id="birthdate-form-group">
 				        <select id="birthYear" name="birthYear">
 				        	<option disabled selected>0000</option>
@@ -207,6 +214,120 @@
 	</div>
 	
 	<script>
+		document.addEventListener('DOMContentLoaded', function() {
+	        var registerForm = document.getElementById('registerForm');
+	        var username = registerForm.querySelector('input[name="username"]');
+	        var password = registerForm.querySelector('input[name="password"]');
+	        var confirmPassword = registerForm.querySelector('input[name="confirmPassword"]');
+	        var name = registerForm.querySelector('input[name="name"]');
+	        var nickname = registerForm.querySelector('input[name="nickname"]');
+	        var gender = registerForm.querySelectorAll('input[name="gender"]'); // 성별 라디오 버튼
+	        var privacy = registerForm.querySelector('input[name="privacy"]'); // 동의 체크박스
+	
+	        registerForm.addEventListener('submit', function (event) {
+	            if (!validForm()) {
+	                event.preventDefault(); // 유효성 검사 실패 시 폼 제출 방지
+	            }
+	        });
+	
+	        // 회원가입 유효성 검사
+	        function validForm() {
+	            var isValid = true;
+	
+	            // 아이디 유효성 검사
+	            if (username.value.trim() === "") {
+	                username.classList.add('error');
+	                isValid = false;
+	            } else {
+	                username.classList.remove('error');
+	            }
+	
+	            // 비밀번호 유효성 검사
+	            if (password.value.trim() === "") {
+	                password.classList.add('error');
+	                isValid = false;
+	            } else {
+	                password.classList.remove('error');
+	            }
+	
+	            // 비밀번호 확인 유효성 검사
+	            if (confirmPassword.value.trim() === "" || confirmPassword.value !== password.value) {
+	                confirmPassword.classList.add('error');
+	                isValid = false;
+	            } else {
+	                confirmPassword.classList.remove('error');
+	            }
+	
+	            // 성명 유효성 검사
+	            if (name.value.trim() === "") {
+	                name.classList.add('error');
+	                isValid = false;
+	            } else {
+	                name.classList.remove('error');
+	            }
+	
+	            // 닉네임 유효성 검사
+	            if (nickname.value.trim() === "") {
+	                nickname.classList.add('error');
+	                isValid = false;
+	            } else {
+	                nickname.classList.remove('error');
+	            }
+	
+	            // 성별 유효성 검사
+	            var genderChecked = Array.from(gender).some(radio => radio.checked);
+	            if (!genderChecked) {
+	                isValid = false;
+	                gender.forEach(radio => radio.classList.add('error')); // 모든 라디오 버튼에 오류 클래스 추가
+	            } else {
+	                gender.forEach(radio => radio.classList.remove('error'));
+	            }
+	
+	            // 동의 체크박스 유효성 검사
+	            if (!privacy.checked) {
+	                privacy.classList.add('error'); // 체크박스에 오류 클래스 추가
+	                isValid = false;
+	            } else {
+	                privacy.classList.remove('error');
+	            }
+	
+	            return isValid; // 최종 유효성 검사 결과 반환
+	        }
+	
+	        // 각 입력 필드에 포커스 시 오류 제거
+	        username.addEventListener('focus', function () {
+	            username.classList.remove('error');
+	        });
+	
+	        password.addEventListener('focus', function () {
+	            password.classList.remove('error');
+	        });
+	
+	        confirmPassword.addEventListener('focus', function () {
+	            confirmPassword.classList.remove('error');
+	        });
+	
+	        name.addEventListener('focus', function () {
+	            name.classList.remove('error');
+	        });
+	
+	        nickname.addEventListener('focus', function () {
+	            nickname.classList.remove('error');
+	        });
+	
+	        // 성별 라디오 버튼 포커스 시 오류 제거
+	        gender.forEach(radio => {
+	            radio.addEventListener('focus', function () {
+	                gender.forEach(r => r.classList.remove('error'));
+	            });
+	        });
+	
+	        // 체크박스 포커스 시 오류 제거
+	        privacy.addEventListener('focus', function () {
+	            privacy.classList.remove('error');
+	        });
+	    });
+		
 		async function checkUsername() {
 			var username = document.getElementById('username').value;
 
@@ -230,6 +351,7 @@
 					alert("이미 사용 중인 아이디입니다.");
 				} else {
 					alert("사용 가능한 아이디입니다.");
+					button.style.color = '#007AFF';
 				}
 			} catch (error) {
 				console.error('Error:', error);
@@ -237,7 +359,55 @@
 			}
 		}
 
+		function checkEmail() {
+			// 이메일 조합하기
+			const emailId = document.getElementById('registerEmail').value;
+			const emailDomain = document.getElementById('registerEmailDomain').value;
+			const fullEmail = emailId + '@' + emailDomain;
 
+			// 이메일 유효성 검사
+			const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+			if (!emailRegex.test(fullEmail)) {
+				document.getElementById('error-message-email').innerHTML = '유효한 이메일 주소를 입력해주세요.';
+				return;
+			}
+
+			// 버튼 비활성화 (중복 클릭 방지)
+			const button = document.getElementById('duplicationCheckEmail');
+			button.disabled = true;
+			button.innerHTML = '전송중...';
+
+
+			// 서버에 이메일 인증 코드 전송 요청
+			fetch('/email/send-verification-code-registration', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded',
+
+				},
+				body: 'email=' + encodeURIComponent(fullEmail)
+			}).then((response) => {
+				if (!response.ok) {
+					throw new Error('서버 응답 오류');
+				}
+				return response.text();
+			}).then((data) => {
+				// 성공적으로 이메일이 전송된 경우
+				document.getElementById('certificationEmailFrom').style.display = 'block';
+				window.location.href = '/verifyEmail.jsp';
+			}).catch((error) => {
+				// 에러메시지 표시
+				document.getElementById('error-message-email').innerHTML = '이메일 전송 중 오류가 발생했습니다. 다시 시도해 주세요.';
+				console.error('Error:', error);
+			}).finally(() => {
+				// 버튼 상태 복구
+				button.disabled = false;
+				button.innerHTML = '인증하기';
+			});
+			
+			
+		}
+		
 		async function checkNickname() {
 			var nickname = document.getElementById('nickname').value;
 
@@ -261,6 +431,7 @@
 					alert("이미 사용 중인 닉네임입니다.");
 				} else {
 					alert("사용 가능한 닉네임입니다.");
+					button.style.color = '#007AFF';
 				}
 			} catch (error) {
 				console.error('Error:', error);
@@ -379,34 +550,6 @@
 		        event.preventDefault(); // 기본 동작 방지
 		        modal.style.display = 'block'; // 모달 표시
 		        return ''; // 모달을 표시하기 위해 빈 문자열 반환
-		    });
-		});
-	    
-	    document.addEventListener('DOMContentLoaded', function() {
-		    var registButton = document.getElementById('registBtn');
-		    var modal = document.getElementById('modalRegist');
-		    var registComplete = document.getElementById('registComplete');
-
-		    registButton.addEventListener('click', function(event) {
-		        event.preventDefault();
-		        modal.style.display = 'block';
-		    });
-		
-		    registComplete.addEventListener('click', function() {
-		    	window.location.href = 'index.jsp';
-		    });
-		
-		    // 창 밖을 클릭하면 모달 닫기
-		    window.addEventListener('click', function(event) {
-		        if (event.target === modal) {
-		            modal.style.display = 'none';
-		        }
-		    });
-		    
-		    window.addEventListener('beforeunload', function(event) {
-		        event.preventDefault();
-		        modal.style.display = 'block';
-		        return '';
 		    });
 		});
 	</script>
