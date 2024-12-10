@@ -17,6 +17,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -351,6 +352,29 @@ public class MainController {
         }
         return "home";
     }
+    
+    
+    /*
+    마이 페이지
+     */
+    @GetMapping("myPage")
+    public String myPage(HttpSession session) {
+
+        Member sessionUser = (Member) session.getAttribute("loggedInUser");
+        if(session.getAttribute("loggedInUser") == null) {
+            return "redirect:/api/login";
+        }
+
+        // 필요한 값들을 개별 세션 속성으로 설정
+        session.setAttribute("mId", sessionUser.getMId());
+        session.setAttribute("name", sessionUser.getName());
+        session.setAttribute("nickname", sessionUser.getNickname());
+        session.setAttribute("email", sessionUser.getEmail());
+        session.setAttribute("gender", sessionUser.getGender());
+        session.setAttribute("profile_img", sessionUser.getProfileImg());
+
+        return "myPage";
+    }
 
 
     // 사용자 정보 Get
@@ -394,7 +418,7 @@ public class MainController {
     체육관 관리
      */
 
-    // HTMl 호출
+    // HTMl 호출 [관리자 페이지 전용]
     @GetMapping("/showgyms")
     @ResponseBody
     public Map<String, Object> getGyms(
@@ -428,6 +452,28 @@ public class MainController {
             log.error("Error retrieving gyms: {}", e.getMessage());
             throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+
+    // 일반 HTML 호출 [일반 고객 전용]
+    @GetMapping("findGyms")
+    public String findGyms(HttpSession session) {
+        if(session.getAttribute("loggedInUser") == null) {
+            return "redirect:/api/login";
+        }
+
+        return "index";
+    }
+
+
+    // 추천 피드
+    @GetMapping("recommendFeed")
+    public String recommendFeed(HttpSession session) {
+        if(session.getAttribute("loggedInUser") == null) {
+            return "redirect:/api/login";
+        }
+
+        return "recommendFeed";
     }
 
 

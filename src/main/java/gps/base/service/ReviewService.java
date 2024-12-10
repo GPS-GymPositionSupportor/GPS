@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -492,5 +493,29 @@ public class ReviewService {
 
 
         return reviewMap;
+    }
+
+    public Page<ReviewDTO> getReviewsByUserId(Long userId, PageRequest pageRequest) {
+        Page<Review> reviews = reviewRepository.findByUserIdOrderByAddedAtDesc(userId, pageRequest);
+
+        return reviews.map(review -> {
+            // DTO를 나중에 생성
+            ReviewDTO dto = new ReviewDTO();
+
+            // 기본 정보 설정
+            dto.setRId(review.getRId());
+            dto.setAddedAt(review.getAddedAt());
+            dto.setUserId(review.getUserId());
+            dto.setComment(review.getComment());
+
+            // Member 정보 설정
+            memberRepository.findById(review.getUserId())
+                    .ifPresent(member -> {
+                        dto.setUserName(member.getName());
+                        // 필요한 다른 Member 정보들도 여기서 설정
+                    });
+
+            return dto;
+        });
     }
 }

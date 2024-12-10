@@ -1,16 +1,4 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    // 로그인 상태 확인
-    String userID = (String) session.getAttribute("userID");
-    boolean isRedirected = (Boolean) session.getAttribute("redirected") != null;
-
-    if (userID != null && !isRedirected) {
-        // 로그인한 경우 다른 메인 페이지로 리디렉션
-        session.setAttribute("redirected", true); // 리디렉션 플래그 설정
-        response.sendRedirect("home.jsp");
-        return; // 이후 코드 실행 방지
-    }
-%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -55,7 +43,7 @@
 	    <div id="search-container">
 		    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
 		    <span id="searchIcon" class="search-icon">
-	        	<img src="image/icon_search.png" alt="검색" />
+	        	<img src="../image/icon_search.png" alt="검색" />
 			</span>
 		</div>
 	<% } %>
@@ -70,7 +58,7 @@
                     <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
                 <% } %>
             </form>
-            <form action="/auth/logout" method="post">
+            <form action="/api/logout" method="post">
                 <% if(session.getAttribute("userID") != null) { %>
                     <button type="submit" id="logoutButton">로그아웃</button>
                 <% } %>

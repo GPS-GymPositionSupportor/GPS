@@ -6,6 +6,7 @@ import gps.base.error.ErrorCode;
 import gps.base.error.exception.CustomException;
 import gps.base.model.Authority;
 import gps.base.model.Comment;
+import gps.base.model.Member;
 import gps.base.model.Review;
 import gps.base.repository.CommentRepository;
 import gps.base.repository.ImageRepository;
@@ -46,6 +47,17 @@ public class ReviewController {
 
 
     private static final Logger logger = LoggerFactory.getLogger(ReviewController.class);
+
+
+    // 일반 리뷰 페이지 반환
+    @GetMapping("myReview")
+    public String myReview(HttpSession session) {
+        if(session.getAttribute("loggedInUser") == null) {
+            return "redirect:/api/login";
+        }
+
+        return "myReview";
+    }
 
 
     // 리뷰 보드 페이지 반환
@@ -149,6 +161,37 @@ public class ReviewController {
 
         return ResponseEntity.ok(reviews);
     }
+    
+    
+    // 로그인된 사용자의 모든 리뷰 가져오기
+    @GetMapping("/myReviews")
+    public ResponseEntity<Page<ReviewDTO>> getMyReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "24") int size,
+            HttpSession session
+    ) {
+        // 세션에서 로그인한 사용자 정보 가져오기
+        Member loggedInUser = (Member) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // 페이지 요청 객체 생성
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        // 로그인한 사용자의 리뷰만 조회
+        Page<ReviewDTO> reviews = reviewService.getReviewsByUserId(loggedInUser.getUserId(), pageRequest);
+
+        // 날짜 포맷팅
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        reviews.getContent().forEach(review ->
+                review.setFormattedDate(
+                        review.getAddedAt() != null ? review.getAddedAt().format(formatter) : ""
+                )
+        );
+
+        return ResponseEntity.ok(reviews);
+    }
 
 
 
@@ -163,6 +206,7 @@ public class ReviewController {
     @GetMapping("/comments/all")
     @ResponseBody
     public Page<CommentDTO> getAllComments(@PageableDefault(size = 24) Pageable pageable) {
+
         log.info("댓글 조회 요청 - page: {}, size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
 

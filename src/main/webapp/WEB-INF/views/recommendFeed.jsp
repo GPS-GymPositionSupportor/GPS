@@ -13,19 +13,19 @@
 </head>
 <body>
 	<div>
-		<a href="home.jsp" class="exit-button" title="BackToHome"></a>
+		<a href="/api/main" class="exit-button" title="BackToHome"></a>
 	</div>
 	<div id="recommendFeed">
 		<p id="recommendP">추천 피드</p>
 		<div id="feedContainer">
 			<div id="feed-item"> <!-- 반복으로 추가 되는 feed div -->
 				<img
-					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "image/logo.png" %>"
+					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "../image/logo.png" %>"
 				    alt="edit_recommendFeed_image" title="edit_recommendFeed_image" id="editRecommendFeedImage">
 				    <p id="gymName"><%= session.getAttribute("g_name") %></p>
 				    <p id="gymAddress"><%= session.getAttribute("address1") %></p>
 				    <button id="bookMark" onclick="toggleBookmark('${feed.id}', this)">
-				    	<img src="image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
+				    	<img src="../image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
 				    </button>
 				    <button id="gymReadMore" onclick="">자세히 보기</button>
 			</div>
@@ -101,9 +101,9 @@
 
 	    // 북마크 상태에 따라 이미지 변경
 	    if (isBookmarked) {
-	        icon.src = 'image/bookMark.svg'; // 북마크 해제
+	        icon.src = '../image/bookMark.svg'; // 북마크 해제
 	    } else {
-	        icon.src = 'image/bookMark2.svg'; // 북마크 추가
+	        icon.src = '../image/bookMark2.svg'; // 북마크 추가
 	    }
 
 	    // AJAX 요청으로 북마크 상태 저장

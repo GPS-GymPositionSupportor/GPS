@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import gps.base.model.Authority;
+import gps.base.model.Review;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,12 +22,13 @@ import java.util.List;
 @Builder
 public class ReviewDTO {
 
-    private Long rId;   // 리뷰 ID 추가
-    private LocalDateTime addedAt;  // 리뷰 작성 시간 추가
+    private Long rId;
+    private LocalDateTime addedAt;
     private Long userId;
     private Long gymId;
-    private String userName;    // Member의 이름
+    private String userName;
     private String comment;
+    private String formattedDate;  // 날짜 포맷팅용
 
 
 
@@ -43,7 +45,6 @@ public class ReviewDTO {
     @JsonSerialize(include = JsonSerialize.Inclusion.ALWAYS)    // 항상 직렬화
     private List<String> reviewImages = new ArrayList<>();  // 초기화
 
-    private String formattedDate;
 
     public ReviewDTO(Long userId, Long gymId, String userName, String comment) {
         this.userId = userId;
@@ -61,6 +62,18 @@ public class ReviewDTO {
         this.gymId = gymId;
         this.userName = userName;
         this.comment = comment;
+    }
+
+    public static ReviewDTO fromEntity(Review review) {
+        ReviewDTO dto = new ReviewDTO();
+        dto.setRId(review.getRId());
+        dto.setAddedAt(review.getAddedAt());
+        dto.setUserId(review.getUserId());
+        dto.setGymId(review.getGymId());  // 연관된 Gym에서 ID 가져오기
+        dto.setUserName(review.getMember().getName());
+        dto.setComment(review.getComment());
+
+        return dto;
     }
 
     // 명시적인 getter

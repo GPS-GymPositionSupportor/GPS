@@ -13,7 +13,7 @@
 </head>
 <body>
 	<div>
-		<a href="../../../../../../branch/GPS/GPS/home.jsp" class="exit-button" title="BackToHome"></a>
+		<a href="/api/main" class="exit-button" title="BackToHome"></a>
 	</div>
 	
 	<p id="profileP">프로필 정보</p>
@@ -24,7 +24,7 @@
 				<div id="profileStyle">
 					<p id="editProfilePicture">프로필 사진</p>
 					<img
-				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
+				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.svg" %>"
 				        alt="edit_myPage_image" title="edit_myPage_image" id="editMyPageImage">
 				        <div id="editProfileBtn">
 							<button id="changeProfilePicture" onclick="">변경하기</button>
@@ -35,7 +35,7 @@
 			
 			<div id="editProfileId">
 				<p class="pTitle">아이디</p>
-				<p id="userId"><%= session.getAttribute("m_id") %></p>
+				<p id="userId"><%= session.getAttribute("mid") %></p>
 			</div>
 			
 			<div id="editProfileName">
@@ -111,7 +111,7 @@
 			<div id="profile">
 				<button id="profileBtn" onclick="toggleEditMode()">
 					<img
-				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
+				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.svg" %>"
 				        alt="myPage_image" title="myPage_image" id="myPageImage">
 				    <p id="profilePicture">프로필 사진</p>
 				    <p id="tapToEdit">칸을 눌러 수정할 수 있습니다.</p>
@@ -120,7 +120,7 @@
 			
 			<div id="profileId">
 				<p class="pTitle">아이디</p>
-				<p id="userId"><%= session.getAttribute("m_id") %></p>
+				<p id="userId"><%= session.getAttribute("mId") %></p>
 			</div>
 			
 			<div id="profileName">
@@ -230,7 +230,7 @@
 	
 	    // 확인 버튼 클릭 시 뒤로가기
 	    confirmBack.addEventListener('click', function() {
-	    	window.location.href = 'home.jsp' // 이전 페이지로 이동
+	    	window.location.href = '/api/main' // 이전 페이지로 이동
 	    });
 	
 	    // 취소 버튼 클릭 시 모달 닫기

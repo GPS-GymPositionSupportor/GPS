@@ -3,8 +3,6 @@ package gps.base.model;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +33,10 @@ public class Review {
     // Member 정보를 가져오기
     @Transient
     private Member member;
+
+    // Gym 정보를 가져오기
+    @Transient
+    private Gym gym;
 
 
 

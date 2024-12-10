@@ -13,88 +13,156 @@
 </head>
 <body>
 	<div>
-		<a href="home.jsp" class="exit-button" title="BackToHome"></a>
+		<a href="/api/main" class="exit-button" title="BackToHome"></a>
 	</div>
 	<div id="review">
 		<p id="reviewP">내가 쓴 리뷰</p>
 		<div id="reviewContainer">
 			<div id="review-item"> <!-- 반복으로 추가 되는 review div -->
 				<img
-					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "image/logo.png" %>"
+					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "../image/logo.png" %>"
 				    alt="edit_review_image" title="edit_review_image" id="editReviewImage">
-				    <p id="gymName"><%= session.getAttribute("g_name") %></p>
-				    <p id="gymAddress"><%= session.getAttribute("address1") %></p>
+				    <p id="gymName"><%= session.getAttribute("gName") %></p>
+				    <p id="gymAddress"><%= session.getAttribute("gymAddress") %></p>
 				    <button id="bookMark" onclick="toggleBookmark('${review.id}', this)">
-				    	<img src="image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
+				    	<img src="../image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
 				    </button>
 				    <button id="gymReadMore" onclick="">자세히 보기</button>
 			</div>
 		</div> <!-- 스크랩 담을 컨테이너 -->
+		<div class="pagination"></div>
 		<div id="loading" style="display: none;">로딩 중...</div> <!-- 로딩 메시지 -->
 	</div>
 	
 	<script>
 	let currentPage = 0; // 현재 페이지 번호
-	var pageSize = 10; // 한 번에 로드할 피드 수
+	var itemsPerPage = 10; // 한 번에 로드할 피드 수
 
 	// 스크랩 로드하는 함수
-	function loadReviews() {
-	    var loadingDiv = document.getElementById('loading');
-	    loadingDiv.style.display = 'block'; // 로딩 메시지 표시
+	function displayReviews(reviews) {
+		const reviewContainer = document.getElementById('reviewContainer');
+		reviewContainer.innerHTML = '';
 
-	    // AJAX 요청을 통해 피드를 가져오는 예시
-	    fetch(`getReviews.jsp?page=${currentPage}&size=${pageSize}`)
-	        .then(response => response.json())
-	        .then(data => {
-	            var reviewContainer = document.getElementById('reviewContainer');
+		reviews.forEach(review => {
+			const reviewElement = document.createElement('div');
+			reviewElement.className = 'review-item';
 
-	            data.reviews.forEach(review => {
-	                var reviewDiv = document.createElement('div');
-	                reviewDiv.className = 'review-item'; // 피드 아이템 클래스 추가
+			// 날짜 포맷팅
+			const addedDate = new Date(review.addedAt);
+			const formattedDate = addedDate.toLocaleDateString('ko-KR', {
+				year: 'numeric',
+				month: '2-digit',
+				day: '2-digit'
+			});
 
-	                // HTML 구조에 맞춰 피드 항목 생성
-	                reviewDiv.innerHTML = `
-	                    <img
-	                        src="${review.imageUrl || 'image/logo.png'}" 
-	                        alt="edit_review_image" 
-	                        title="edit_review_image" 
-	                        id="editReviewImage">
-	                    <p id="gymName">${review.gymName}</p>
-	                    <p id="gymAddress">${review.gymAddress}</p>
-	                    <button id="bookMark">
-	                        <img src="image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
-	                    </button>
-	                    <button id="gymReadMore" onclick="readMore('${review.id}')">자세히 보기</button>
-	                `;
-	                
-	                reviewContainer.appendChild(reviewDiv); // 피드 컨테이너에 추가
-	            });
+			reviewElement.innerHTML =
+					'<img src="../image/logo.png"' +
+					'alt="edit_review_image"' +
+					'title="edit_review_image"' +
+					'id="editReviewImage">' +
+					'<p id="gymAddress">작성일: ' + review.formattedDate + '</p>' +
+					'<p>리뷰내용: ' + review.comment + '</p>' +
+					'<button id="bookMark">' +
+					'<img src="../image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon">' +
+					'</button>' +
+					'<button id="gymReadMore" onclick="readMore(\'' + review.rId + '\')">자세히 보기</button>';
 
-	            currentPage++; // 페이지 증가
-	            loadingDiv.style.display = 'none'; // 로딩 메시지 숨김
-	        })
-	        .catch(error => {
-	            console.error('Error loading reviews:', error);
-	            loadingDiv.style.display = 'none'; // 로딩 메시지 숨김
-	        });
+			reviewContainer.appendChild(reviewElement);
+		});
 	}
 
-	// 스크롤 이벤트로 더 많은 피드를 로드
-	window.addEventListener('scroll', () => {
-	    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-	        loadReviews(); // 스크롤이 바닥에 닿으면 피드 로드
-	    }
-	});
+	function updatePagination(totalItems) {
+		const pagination = document.querySelector('.pagination');
+		const totalPages = Math.ceil(totalItems / itemsPerPage);
+		pagination.innerHTML = '';
+
+		let startPage = Math.floor(currentPage / 5) * 5;
+		let endPage = Math.min(startPage + 4, totalPages - 1);
+
+		// '<<' 버튼
+		if(startPage > 0) {
+			const firstGroupButton = document.createElement('button');
+			firstGroupButton.innerHTML = '<<';
+			firstGroupButton.onclick = function() {
+				currentPage = 0;
+				loadReviews(0);
+			};
+			pagination.appendChild(firstGroupButton);
+		}
+
+		// '<' 버튼
+		if(startPage > 0) {
+			const prevGroupButton = document.createElement('button');
+			prevGroupButton.innerHTML = '<';
+			prevGroupButton.onclick = function() {
+				currentPage = startPage - 5;
+				loadReviews(currentPage);
+			};
+			pagination.appendChild(prevGroupButton);
+		}
+
+		// 페이지 번호 버튼들
+		for(let i = startPage; i <= endPage; i++) {
+			const pageButton = document.createElement('button');
+			pageButton.textContent = i + 1;
+			pageButton.className = i === currentPage ? 'active' : '';
+			pageButton.onclick = function() {
+				currentPage = i;
+				loadReviews(i);
+			};
+			pagination.appendChild(pageButton);
+		}
+
+		// '>' 버튼
+		if(endPage < totalPages - 1) {
+			const nextGroupButton = document.createElement('button');
+			nextGroupButton.innerHTML = '>';
+			nextGroupButton.onclick = function() {
+				currentPage = startPage + 5;
+				loadReviews(currentPage);
+			};
+			pagination.appendChild(nextGroupButton);
+		}
+
+		// '>>' 버튼
+		if(endPage < totalPages - 1) {
+			const lastGroupButton = document.createElement('button');
+			lastGroupButton.innerHTML = '>>';
+			lastGroupButton.onclick = function() {
+				currentPage = Math.floor((totalPages - 1) / 5) * 5;
+				loadReviews(totalPages - 1);
+			};
+			pagination.appendChild(lastGroupButton);
+		}
+	}
+
+	function loadReviews(page) {
+		const loadingDiv = document.getElementById('loading');
+		loadingDiv.style.display = 'block';
+
+		fetch('/api/reviews/myReviews?page=' + page + '&size=' + itemsPerPage)
+				.then(function(response) { return response.json(); })
+				.then(function(data) {
+					console.log("Received data:", data);
+					if (data && data.content) {
+						displayReviews(data.content);
+						updatePagination(data.totalElements);
+					}
+					loadingDiv.style.display = 'none';
+				})
+				.catch(function(error) {
+					console.error('Error loading reviews:', error);
+					loadingDiv.style.display = 'none';
+				});
+	}
 
 	// 초기 로드
-	loadReviews();
+	loadReviews(0);
 
-	// 자세히 보기 버튼 클릭 시 동작할 함수
 	function readMore(reviewId) {
-	    // 여기에 자세히 보기 로직을 추가
-	    console.log("자세히 보기 클릭:", reviewId);
+		console.error('자세히 보기:', reviewId);
+		// 자세히 보기 구현
 	}
-	
 	</script>
 	
 </body>
