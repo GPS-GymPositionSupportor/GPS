@@ -49,7 +49,7 @@
 					        }
 					        %>
 					    </div>
-						<button type="button" id="duplicationCheck">중복확인</button>
+						<button type="button" id="duplicationCheckId">중복확인</button>
 						</div>
 					</div>
 				<div class="form-group">
@@ -100,7 +100,7 @@
 					        }
 					        %>
 					    </div>
-		                <button type="button" id="duplicationCheck">중복확인</button>
+		                <button type="button" id="duplicationCheckNickname">중복확인</button>
 	            	</div>
 	            </div>
 				<div class="form-group">
@@ -211,9 +211,9 @@
 
 
 		document.addEventListener('DOMContentLoaded', function() {
-			document.getElementById('duplicationCheck').addEventListener('click', checkUsername);
+			document.getElementById('duplicationCheckId').addEventListener('click', checkUsername);
 			document.getElementById('duplicationCheckEmail').addEventListener('click', checkEmail);
-			document.getElementById('nickname-check').addEventListener('click', checkNickname);
+			document.getElementById('duplicationCheckNicknamew').addEventListener('click', checkNickname);
 		});
 
 		async function checkUsername() {
@@ -295,7 +295,10 @@
 
 
 		async function checkNickname() {
+			console.log("checkNickname 함수 시작"); // 함수 실행 확인
+
 			var nickname = document.getElementById('nickname').value;
+			console.log("입력된 nickname:", nickname);
 
 			if (!nickname) {
 				alert("닉네임을 입력해주세요.");
@@ -303,15 +306,18 @@
 			}
 
 			try {
-				var response = await fetch(`/api/check-nickname`, {  // URL에서 쿼리 파라미터 대신 POST 요청으로 수정
-					method: 'POST',  // POST 요청 사용
+				console.log("fetch 요청 시작"); // fetch 시작 확인
+				var response = await fetch(`/api/check-nickname`, {
+					method: 'POST',
 					headers: {
-						'Content-Type': 'application/json'  // JSON 형식으로 전송
+						'Content-Type': 'application/json'
 					},
-					body: JSON.stringify({ nickname: nickname })  // JSON 형식으로 요청 본문에 nickname 전달
+					body: JSON.stringify({ nickname: nickname })
 				});
+				console.log("서버 응답:", response); // 응답 확인
 
 				var data = await response.json();
+				console.log("응답 데이터:", data); // 데이터 확인
 
 				if (data.isDuplicate) {
 					alert("이미 사용 중인 닉네임입니다.");
@@ -319,7 +325,7 @@
 					alert("사용 가능한 닉네임입니다.");
 				}
 			} catch (error) {
-				console.error('Error:', error);
+				console.error('Error 상세:', error); // 에러 상세 정보
 				alert("중복 확인 중 오류가 발생했습니다.");
 			}
 		}
