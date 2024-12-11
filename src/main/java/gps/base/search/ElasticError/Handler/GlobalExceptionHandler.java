@@ -1,6 +1,7 @@
 package gps.base.search.ElasticError.Handler;
 
-import gps.base.ElasticError.*;
+
+import gps.base.search.ElasticError.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

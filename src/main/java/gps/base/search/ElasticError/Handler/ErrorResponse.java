@@ -1,6 +1,6 @@
 package gps.base.search.ElasticError.Handler;
 
-import gps.base.ElasticError.ElasticErrorCode;
+import gps.base.search.ElasticError.ElasticErrorCode;
 import lombok.Builder;
 import lombok.Getter;
 
