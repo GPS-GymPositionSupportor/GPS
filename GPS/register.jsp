@@ -14,7 +14,6 @@
 		<a href="index.jsp" class="exit-button" title="BackToIndex"></a>
 	</div>
 
-
 		
 	<div class="register-form">
 		<div class="login-form">

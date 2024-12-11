@@ -31,7 +31,7 @@ body::-webkit-scrollbar {
 	margin-left: 2.5rem;
 }
 
-#profileContainer, #editContainer {
+#profileContainer, #editMyPageForm {
 	display: flex;
 	flex-direction: column;
 	align-items: center;

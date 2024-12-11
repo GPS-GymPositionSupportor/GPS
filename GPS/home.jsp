@@ -25,7 +25,8 @@
 		
 		<div id="imgBtns">
 			<div id="profileBtnBlock">
-				<button id="profileBtn" onclick="location.href='myPage.jsp'">
+								<!-- myPage.jsp -->
+				<button id="profileBtn" onclick="/api/">
 				<img
 		            src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
 		            alt="myPage_image" title="myPage_image" class="picture">
@@ -35,7 +36,8 @@
 				</button>
 			</div>
 			<div id="findGymBlock">
-			<button id="findGym" onclick="location.href='index.jsp?selectedNav=A'">
+								<!-- index.jsp -->
+			<button id="findGym" onclick="/api/">
 				<p id="findGymP">운동시설 찾기</p>
 				<img src="image/findGym.svg" alt="findGym" class="findGym">
 			</button>
@@ -44,19 +46,22 @@
 				<img src="image/just.svg" alt="justDoIt" id="justDoIt">
 			</div>
 			<div id="recommendFeedBlock">
-				<button id="recommendFeed" onclick="location.href='index.jsp?selectedNav=C'">
+								<!-- recommendFeed.jsp -->
+				<button id="recommendFeed" onclick="/api/">
 					<p id="recommendFeedP">추천피드</p>
 					<img src="image/recommendFeed.svg" alt="recommendFeed" class="recommendFeed">
 				</button>
 			</div>
 				<div id="myReviewBlock">
-				<button id="myReview" onclick="location.href='index.jsp?selectedNav=D'">
+									<!-- myReview.jsp -->
+				<button id="myReview" onclick="/api/">
 					<p id="myReviewP">내가 쓴 리뷰</p>
 					<img src="image/myReview.svg" alt="myReview" class="myReview">
 				</button>
 			</div>
 				<div id="scrapBlock">
-				<button id="scrap" onclick="location.href='index.jsp?selectedNav=E'">
+									<!-- scrap.jsp -->
+				<button id="scrap" onclick="/api/">
 					<p id="scrapP">스크랩한 장소</p>
 					<img src="image/scrap.svg" alt="scrap" class="scrap">
 				</button>

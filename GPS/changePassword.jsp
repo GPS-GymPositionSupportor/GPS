@@ -47,7 +47,7 @@
 	</div>
 	
 	<div id="passwordChangeInput" style="display: none;">
-		<form id="ChangePasswordForm">
+		<form id="ChangePasswordForm" action="/api/" method="post">
 			<div class="form-group">
 					<label for="password" id="inputPassword">변경할 비밀번호를 입력해주세요</label>
 					<div class="password-container">
@@ -77,7 +77,7 @@
 				</div>
 		
 			<div id="change">
-						<button type="submit" id="changeBtn" onclick="">변경하기</button>
+						<button type="submit" id="changeBtn">변경하기</button>
 			</div>
 		</form>
 	</div>
