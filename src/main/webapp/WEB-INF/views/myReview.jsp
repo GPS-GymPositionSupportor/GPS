@@ -23,7 +23,8 @@
 					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "../image/logo.png" %>"
 				    alt="edit_review_image" title="edit_review_image" id="editReviewImage">
 				    <p id="gymName"><%= session.getAttribute("gName") %></p>
-				    <p id="gymAddress"><%= session.getAttribute("gymAddress") %></p>
+				    <p id="r_comment"><%= session.getAttribute("r_comment") %></p>
+					<p id="reviewWrite"><%= session.getAttribute("added_at") %>
 				    <button id="bookMark" onclick="toggleBookmark('${review.id}', this)">
 				    	<img src="../image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
 				    </button>
