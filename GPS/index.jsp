@@ -44,17 +44,17 @@
 
 <body>
 
-	    <div class="navbar">
+	    <div class="navbar" style="display: <%=(userID == null) ? "none" : "block" %>;">
 	        <div>
 				<a href="home.jsp" class="exit-button" title="BackToHome"></a>
 			</div>
-	    <div id="search-container">
-		    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
-		    <span id="searchIcon" class="search-icon">
-	        	<img src="image/icon_search.png" alt="검색" />
-			</span>
-		</div>
-    </div> 
+		    <div id="search-container">
+			    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
+			    <span id="searchIcon" class="search-icon">
+		        	<img src="image/icon_search.png" alt="검색" />
+				</span>
+			</div>
+    	</div> 
 
     <div>
         <% String selectedNav = request.getParameter("selectedNav"); %>
