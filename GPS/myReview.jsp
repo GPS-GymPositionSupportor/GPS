@@ -23,10 +23,8 @@
 					src="<%= session.getAttribute("ImageUrl") != null ? session.getAttribute("ImageUrl") : "image/logo.png" %>"
 				    alt="edit_review_image" title="edit_review_image" id="editReviewImage">
 				    <p id="gymName"><%= session.getAttribute("g_name") %></p>
-				    <p id="gymAddress"><%= session.getAttribute("address1") %></p>
-				    <button id="bookMark" onclick="toggleBookmark('${review.id}', this)">
-				    	<img src="image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
-				    </button>
+				    <p id="r_comment"><%= session.getAttribute("r_comment") %></p>
+				    <p id="reviewWrite"><%= session.getAttribute("added_at") %></p>
 				    <button id="gymReadMore" onclick="">자세히 보기</button>
 			</div>
 		</div> <!-- 스크랩 담을 컨테이너 -->
@@ -60,10 +58,8 @@
 	                        title="edit_review_image" 
 	                        id="editReviewImage">
 	                    <p id="gymName">${review.gymName}</p>
-	                    <p id="gymAddress">${review.gymAddress}</p>
-	                    <button id="bookMark">
-	                        <img src="image/bookMark.svg" alt="bookMarkIcon" class="bookMarkIcon" id="bookMarkIcon">
-	                    </button>
+	                    <p id="r_comment">${review.r_comment}</p>
+	                    <p id="reviewWrite">$(review.added_at) %></p>
 	                    <button id="gymReadMore" onclick="readMore('${review.id}')">자세히 보기</button>
 	                `;
 	                

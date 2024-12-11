@@ -68,7 +68,7 @@ body::-webkit-scrollbar {
     align-self: start;
 }
 
-#gymAddress {
+#r_comment {
 	grid-column: 2;
     grid-row: 2;
     align-self: flex-start;
@@ -92,4 +92,10 @@ body::-webkit-scrollbar {
     font-size: 12px;
     color: #9E9E9E;
     cursor: pointer;
+}
+
+#reviewWrite {
+	font-size: 12px;
+    color: #757575;
+    text-align: right;
 }
