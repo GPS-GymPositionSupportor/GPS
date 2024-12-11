@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ElasticMemberRepository extends JpaRepository<ElasticMember, Long> {
-    @Query("SELECT m FROM ElasticMember m WHERE m.email LIKE %:keyword% OR m.nickname LIKE %:keyword%")
+    @Query("SELECT m FROM Member m WHERE m.email LIKE %:keyword% OR m.nickname LIKE %:keyword%")
     Page<ElasticMember> searchByKeyword(String keyword, Pageable pageable);
 
     Page<ElasticMember> findByEmailContainingOrNicknameContaining(String keyword, String keyword1, Pageable pageable);
