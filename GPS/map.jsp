@@ -41,10 +41,16 @@
     var map = new kakao.maps.Map(container, options); // 지도 생성
 
  // 마커 초기화
-   var marker = new kakao.maps.Marker({
-          map: map,
-          position: options.center
-   });
+	var userImageSrc = 'image/userLocate.svg'; // 사용자 위치 마커 이미지 URL
+	var userImageSize = new kakao.maps.Size(32, 34); // 사용자 위치 마커 이미지 크기
+	var userImageOption = { offset: new kakao.maps.Point(27, 69) }; // 사용자 위치 마커 이미지 옵션
+	
+	var userMarkerImage = new kakao.maps.MarkerImage(userImageSrc, userImageSize, userImageOption);
+	var userMarker = new kakao.maps.Marker({
+	    map: map,
+	    position: options.center,
+	    image: userMarkerImage // 사용자 위치 마커 이미지 설정
+	});
    
    var locPosition;
    
@@ -57,7 +63,7 @@
                 locPosition = new kakao.maps.LatLng(lat, lon);
 
                 // 마커 위치 업데이트
-                marker.setPosition(locPosition);
+                userMarker.setPosition(locPosition);
 
                 // 지도 중심을 현재 위치로 이동
                 map.setCenter(locPosition);
@@ -119,6 +125,7 @@
             alert(place.place_name);
         });
     }
+    
 	// 현재 위치 버튼을 생성합니다
     var locationControl = document.createElement('div');
     locationControl.className = 'location-btn';
@@ -146,6 +153,34 @@
     window.onload = function() {
         map.relayout();
     };
+    
+    function displayMarker(place) {
+        // 헬스장 마커 이미지 설정
+        var gymImageSrc = 'image/gymMark.svg'; // 헬스장 마커 이미지 URL
+        var gymImageSize = new kakao.maps.Size(32, 34); // 헬스장 마커 이미지 크기
+        var gymImageOption = { offset: new kakao.maps.Point(27, 69) }; // 헬스장 마커 이미지 옵션
+
+        var gymMarkerImage = new kakao.maps.MarkerImage(gymImageSrc, gymImageSize, gymImageOption);
+        var marker = new kakao.maps.Marker({
+            map: map,
+            position: new kakao.maps.LatLng(place.y, place.x),
+            image: gymMarkerImage // 헬스장 마커 이미지 설정
+        });
+
+        kakao.maps.event.addListener(marker, 'click', function() {
+            alert(place.place_name);
+        });
+    }
+    
+    
+    gyms.forEach(function(gym) {
+        var markerPosition = new kakao.maps.LatLng(gym.lat, gym.lng);
+        var marker = new kakao.maps.Marker({
+            position: markerPosition
+        });
+        marker.setMap(map);
+    });
+    
     
     
 </script>
