@@ -13,7 +13,7 @@
 </head>
 <body>
 	<div>
-		<a href="myPage.jsp" class="exit-button" title="BackToHome"></a>
+		<a href="/api/myPage" class="exit-button" title="BackToHome"></a>
 	</div>
 	
 	<p id="changeP">비밀번호 변경</p>
@@ -24,7 +24,7 @@
 						<div class="password-container">
 						<input type="password" id="password" name="password" placeholder="비밀번호 입력">
 						<button type="button" id="togglePassword" class="eye-btn">
-				        	<img src="../../../../../../branch/GPS/GPS/image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
+				        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
 				        </button>
 			</div>
 				<%
@@ -47,19 +47,19 @@
 	</div>
 	
 	<div id="passwordChangeInput" style="display: none;">
-		<form id="ChangePasswordForm">
+		<form id="ChangePasswordForm" action="/api/" method="post">
 			<div class="form-group">
 					<label for="password" id="inputPassword">변경할 비밀번호를 입력해주세요</label>
 					<div class="password-container">
 					<input type="password" id="password2" name="password2" placeholder="영문, 숫자, 특수문자 혼합 8~16자리">
 					<button type="button" id="togglePassword2" class="eye-btn">
-			        	<img src="../../../../../../branch/GPS/GPS/image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon1">
 			        </button>
 			        </div>
 			        <div class="password-container">
 					<input type="password" id="confirmPassword" name="confirmPassword" placeholder="비밀번호 재입력">
 					<button type="button" id="togglePasswordRegist" class="eye-btn">
-			        	<img src="../../../../../../branch/GPS/GPS/image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
+			        	<img src="../image/closed_eyes.svg" alt="Toggle Password" id="eyeIcon2">
 			        </button>
 					</div>
 					<%
@@ -77,7 +77,7 @@
 				</div>
 		
 			<div id="change">
-						<button type="submit" id="changeBtn" onclick="">변경하기</button>
+						<button type="submit" id="changeBtn">변경하기</button>
 			</div>
 		</form>
 	</div>
@@ -116,21 +116,21 @@
 	        var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 	        passwordInput.setAttribute('type', type);
 	        
-	        eyeIcon1.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+	        eyeIcon1.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 	    });
 	    
 	    togglePassword2.addEventListener('click', function() {
 	        var type = passwordInput2.getAttribute('type') === 'password' ? 'text' : 'password';
 	        passwordInput2.setAttribute('type', type);
 	        
-	        eyeIcon1.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+	        eyeIcon1.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 	    });
 	    
 	    togglePasswordRegist.addEventListener('click', function() {
 	    	var type = confirmPasswordInput.getAttribute('type') === 'password' ? 'text' : 'password';
 	    	confirmPasswordInput.setAttribute('type', type);
 	    	
-	    	eyeIcon2.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+	    	eyeIcon2.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
 	    });
 	    
 		document.addEventListener('DOMContentLoaded', function() {

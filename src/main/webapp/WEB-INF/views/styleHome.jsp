@@ -7,24 +7,23 @@ body {
 	font-family: Roboto;
     margin: 0;
     padding: 0;
-    background-color: #FFFBF3;
 	scrollbar-width: none;
     -ms-overflow-style: none;
     max-width: 800px;
     width: 100%;
     margin: 0 auto !important;
     overflow-x: hidden;
-    max-height: 95%
-}
-
-body::-webkit-scrollbar {
-    display: none;
 }
 
 #homePage {
 	display: flex;
 	flex-direction: column;
     align-items: center;
+}
+
+#homeDiv {
+	background-color: #FFFBF3;
+	height: 100%;
 }
 
 .picture {
@@ -272,7 +271,7 @@ body::-webkit-scrollbar {
 }
 
 #logoutContainer {
-	position: absolute;
-	bottom: 0;
-	right: 0.5rem;
+	display: grid;
+    justify-content: end;
+    margin-top: 1rem;
 }

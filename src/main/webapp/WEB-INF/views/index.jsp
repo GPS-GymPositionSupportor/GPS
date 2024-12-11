@@ -1,4 +1,16 @@
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%
+    // 로그인 상태 확인
+    String userID = (String) session.getAttribute("userID");
+    boolean isRedirected = (Boolean) session.getAttribute("redirected") != null;
+
+    if (userID != null && !isRedirected) {
+        // 로그인한 경우 다른 메인 페이지로 리디렉션
+        session.setAttribute("redirected", true); // 리디렉션 플래그 설정
+        response.sendRedirect("home.jsp");
+        return; // 이후 코드 실행 방지
+    }
+%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,40 +43,18 @@
 </head>
 
 <body>
-	<% if(session.getAttribute("userID") != null) { %>
-	    <div class="navbar">
-	        
-			<div class="burbutton" id="burbutton">
-	            <span></span>
-	            <span class="middle"></span>
-	            <span></span>
-	        </div>
-	        
-	    <div id="search-container">
-		    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
-		    <span id="searchIcon" class="search-icon">
-	        	<img src="../image/icon_search.png" alt="검색" />
-			</span>
-		</div>
-	<% } %>
 
-        <div id="nav-links">
-            <form id="navForm" method="get">
-                <% if(session.getAttribute("userID") != null) { %>
-                    <button type="submit" name="selectedNav" value="A">A</button>
-                    <button type="submit" name="selectedNav" value="B">프로필</button>
-                    <button type="submit" name="selectedNav" value="C">추천 피드</button>
-                    <button type="submit" name="selectedNav" value="D">스크랩한 장소</button>
-                    <button type="submit" name="selectedNav" value="E">내가 쓴 리뷰</button>
-                <% } %>
-            </form>
-            <form action="/api/logout" method="post">
-                <% if(session.getAttribute("userID") != null) { %>
-                    <button type="submit" id="logoutButton">로그아웃</button>
-                <% } %>
-            </form>
-        </div>
-    </div> 
+	    <div class="navbar" style="display: <%=(userID == null) ? "none" : "flex" %>;">
+	        <div>
+				<a href="home.jsp" class="exit-button" title="BackToHome"></a>
+			</div>
+		    <div id="search-container">
+			    <input type="text" id="searchInput" placeholder="찾으시는 운동시설을 검색해주세요">
+			    <span id="searchIcon" class="search-icon">
+		        	<img src="image/icon_search.png" alt="검색" />
+				</span>
+			</div>
+    	</div> 
 
     <div>
         <% String selectedNav = request.getParameter("selectedNav"); %>

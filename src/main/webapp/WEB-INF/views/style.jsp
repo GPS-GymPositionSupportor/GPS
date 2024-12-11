@@ -62,7 +62,7 @@ body::-webkit-scrollbar {
     font-size: 14px;
     border: 1px solid #fff;
     border-radius: 12px;
-    width: 18rem;
+    width: 38rem;
     background: inherit;
     padding-left: 1rem;
     color: #fff;
@@ -171,7 +171,7 @@ body::-webkit-scrollbar {
 }
 
 .login-form {
-	width: 80%;
+	width: 45rem;
 	align-items: center;
 }
 		
@@ -576,7 +576,10 @@ body::-webkit-scrollbar {
     margin: 10rem 0rem 0rem 0rem;
 }
 
-#error-message-id, #error-message-pw, #error-message-nickname, #error-message-email {
+#error-message-id,
+#error-message-pw,
+#error-message-nickname,
+#error-message-email {
 	 color: #FF3B30;
 	 text-align: center;
 	 font-size: 12px;
@@ -594,11 +597,33 @@ body::-webkit-scrollbar {
 	margin: 2% 0% 2% 0%;
 }
 
-#duplicationCheck:hover, #duplicationCheckEmail:hover {
+#certificationEmail {
+	display: flex;
+	flex-direction: column;
+    align-items: flex-end;
+}
+
+#certificationCheckEmail {
+	width: 30%;
+    padding: 0.8rem;
+    background-color: #402E32;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 2% 0% 2% 0%;
+}
+
+#duplicationCheck:hover,
+#duplicationCheckEmail:hover,
+#certificationCheckEmail:hover {
 	background-color: #B35F00;
 }
 
-#duplicationCheck:active, #duplicationCheckEmail:active {
+#duplicationCheck:active,
+#duplicationCheckEmail:active,
+#certificationCheckEmail:active {
 	background-color: #C79126;
 }
 
@@ -742,6 +767,16 @@ body::-webkit-scrollbar {
     display: flex;
     justify-content: flex-end;
     margin-top: 2rem;
+}
+
+#plzUsername.error,
+#plzPassword.error,
+#plzName.error,
+#plzNickname.error,
+#plzBirthdate.error,
+#plzGender.error,
+#privacyLabel.error {
+	color: #FF3B30;
 }
 
 @media only screen and (max-width: 767px) {
@@ -916,4 +951,8 @@ body::-webkit-scrollbar {
 		position: absolute;
 	    bottom: 3rem;
 	    right: -0.5rem;
+	}
+	
+	#searchInput {
+	    width: 18rem;
 	}

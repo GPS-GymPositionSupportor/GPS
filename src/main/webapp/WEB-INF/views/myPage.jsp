@@ -13,13 +13,13 @@
 </head>
 <body>
 	<div>
-		<a href="/api/main" class="exit-button" title="BackToHome"></a>
+		<a href="home.jsp" class="exit-button" title="BackToHome"></a>
 	</div>
 	
 	<p id="profileP">프로필 정보</p>
 	
 	<div id="editContainerDisplay" style="display: none;">
-		<div id="editContainer">
+		<form action="/api/" method="post" id="editMyPageForm"> <!-- 프로필 변경 -->
 			<div id="profile">
 				<div id="profileStyle">
 					<p id="editProfilePicture">프로필 사진</p>
@@ -27,8 +27,9 @@
 				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.svg" %>"
 				        alt="edit_myPage_image" title="edit_myPage_image" id="editMyPageImage">
 				        <div id="editProfileBtn">
-							<button id="changeProfilePicture" onclick="">변경하기</button>
-							<button id="cancelProfilePicture" onclick="">삭제하기</button>
+				        	<input type="file" id="profileImageInput" accept="image/*" style="display: none;" />
+							<button type="button" id="changeProfilePicture">변경하기</button>
+							<button type="button" id="cancelProfilePicture">삭제하기</button>
 						</div>
 				</div>
 			</div>
@@ -46,7 +47,7 @@
 			<div id="editProfileNickname">
 				<p class="pTitle">닉네임</p>
 				<input type="text" id="userNicknameInput" value="<%= session.getAttribute("nickname") %>">
-				<button id="checkNickname" onclick="">중복확인</button>
+				<button type="button" id="checkNickname">중복확인</button>
 					<%
 			    	String checkNname = (String) session.getAttribute("checkNname");
 				    %>
@@ -66,7 +67,6 @@
 					<div class="email-input">
 			            <input type="text" id="editIdEmailId" name="emailId">
 			            <span id="emailSpan">@</span>
-			            <!-- 직접 입력 폼 제작 필 -->
 			            <select id="editIdEmailDomain" name="emailDomain" onchange="toggleCustomDomainInput('editIdEmailDomain', 'customDomainInput')">
 			            	<option value="google.com">google.com</option>
                             <option value="naver.com">naver.com</option>
@@ -92,18 +92,21 @@
 			</div>
 			
 			<div id="changePassword">
-				<button id="changePasswordBtn" onclick="location.href='changePassword.jsp'">비밀번호 변경</button>
+									<!-- changePassword.jsp -->
+				<button id="changePasswordBtn" onclick="/api/">비밀번호 변경</button>
 			</div>
-			
+									<!-- 내 정보 수정 데이터 저장 -->
 			<div id="save">
-				<button id="saveBtn2" onclick="">저장하기</button>
+				<button id="saveBtn2" onclick="/api/">저장하기</button>
 			</div>
 			
 			<div id="unsubscribe">
-				<button id="unsubscribeBtn2" onclick="">탈퇴하기</button>
+										<!-- 계정 탈퇴 -->
+				<button id="unsubscribeBtn2" onclick="/api/">탈퇴하기</button>
 			</div>
-	    </div>
-    </div>
+		</form>
+	</div>
+    
     
     <div id="profileContainerDisplay" style="display: block;">
 		<div id="profileContainer">
@@ -111,7 +114,7 @@
 			<div id="profile">
 				<button id="profileBtn" onclick="toggleEditMode()">
 					<img
-				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.svg" %>"
+				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
 				        alt="myPage_image" title="myPage_image" id="myPageImage">
 				    <p id="profilePicture">프로필 사진</p>
 				    <p id="tapToEdit">칸을 눌러 수정할 수 있습니다.</p>
@@ -120,7 +123,7 @@
 			
 			<div id="profileId">
 				<p class="pTitle">아이디</p>
-				<p id="userId"><%= session.getAttribute("mId") %></p>
+				<p id="userId"><%= session.getAttribute("mid") %></p>
 			</div>
 			
 			<div id="profileName">
@@ -144,15 +147,18 @@
 			</div>
 			
 			<div id="changePassword">
-				<button id="changePasswordBtn" onclick="location.href='changePassword.jsp'">비밀번호 변경</button>
+									<!-- changePassword.jsp -->
+				<button id="changePasswordBtn" onclick="/api/">비밀번호 변경</button> 
 			</div>
 			
 			<div id="save">
-				<button id="saveBtn1" onclick="">저장하기</button>
+									<!-- 내 정보 수정 데이터 저장 -->
+				<button id="saveBtn1" onclick="/api/">저장하기</button>
 			</div>
 			
 			<div id="unsubscribe">
-				<button id="unsubscribeBtn1" onclick="">탈퇴하기</button>
+										<!-- 계정 탈퇴 -->
+				<button id="unsubscribeBtn1" onclick="/api/">탈퇴하기</button>
 			</div>
 		</div>
 	</div>
@@ -203,18 +209,6 @@
 	    }
 	}
 	
-	function saveProfile() {
-	    // 여기에서 프로필 저장 로직
-	    var userName = document.getElementById("userNameInput").value;
-	    var userNickname = document.getElementById("userNicknameInput").value;
-	    var userEmail = document.getElementById("userEmailInput").value;
-	    var userGender = document.getElementById("userGenderInput").value;
-	
-	    // AJAX 요청을 통해 서버에 데이터 전송 또는 폼 제출
-	    alert("프로필이 저장되었습니다!");
-	    toggleEditMode();
-	}
-	
 	// 뒤로가기 모달창
     document.addEventListener('DOMContentLoaded', function() {
 	    var backButton = document.querySelector('.exit-button');
@@ -230,7 +224,7 @@
 	
 	    // 확인 버튼 클릭 시 뒤로가기
 	    confirmBack.addEventListener('click', function() {
-	    	window.location.href = '/api/main' // 이전 페이지로 이동
+	    	window.location.href = 'home.jsp' // 이전 페이지로 이동
 	    });
 	
 	    // 취소 버튼 클릭 시 모달 닫기
