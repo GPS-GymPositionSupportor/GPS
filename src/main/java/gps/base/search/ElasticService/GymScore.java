@@ -1,20 +1,20 @@
 package gps.base.search.ElasticService;
 
 
-import gps.base.search.ElasticEntity.Gym;
+import gps.base.search.ElasticEntity.ElasticGym;
 import lombok.Getter;
 
 @Getter
 public class GymScore {
     private static final double NEARBY_DISTANCE_KM = 2.0;
 
-    private final Gym gym;
+    private final ElasticGym elasticGym;
     private final Double similarityScore;
     private final Double distance;
     private final Double rating;
 
-    public GymScore(Gym gym, Double similarityScore, Double distance, Double rating) {
-        this.gym = gym;
+    public GymScore(ElasticGym elasticGym, Double similarityScore, Double distance, Double rating) {
+        this.elasticGym = elasticGym;
         this.similarityScore = similarityScore;
         this.distance = distance;
         this.rating = rating;

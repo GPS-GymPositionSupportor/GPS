@@ -11,14 +11,14 @@
       background-color: #f5f5f5;
     }
 
-    .gym-container {
+    .elasticGym-container {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
       padding: 20px;
     }
 
-    .gym-card {
+    .elasticGym-card {
       background: white;
       border-radius: 10px;
       overflow: hidden;
@@ -27,21 +27,21 @@
       transition: transform 0.2s;
     }
 
-    .gym-card:hover {
+    .elasticGym-card:hover {
       transform: translateY(-5px);
     }
 
-    .gym-info {
+    .elasticGym-info {
       padding: 15px;
     }
 
-    .gym-name {
+    .elasticGym-name {
       font-size: 1.2em;
       font-weight: bold;
       margin-bottom: 10px;
     }
 
-    .gym-category {
+    .elasticGym-category {
       display: inline-block;
       padding: 3px 8px;
       background-color: #007bff;
@@ -51,12 +51,12 @@
       margin-bottom: 10px;
     }
 
-    .gym-details {
+    .elasticGym-details {
       color: #666;
       font-size: 0.9em;
     }
 
-    .gym-rating {
+    .elasticGym-rating {
       color: #f8c51c;
       font-weight: bold;
       margin-top: 10px;
@@ -147,21 +147,21 @@
       padding: 20px;
     }
 
-    .gym-info {
+    .elasticGym-info {
       margin-bottom: 30px;
     }
 
-    .gym-header {
+    .elasticGym-header {
       margin-bottom: 20px;
     }
 
-    .gym-name {
+    .elasticGym-name {
       font-size: 1.8em;
       margin: 0 0 10px 0;
       color: #333;
     }
 
-    .gym-category {
+    .elasticGym-category {
       display: inline-block;
       padding: 5px 15px;
       background-color: #007bff;
@@ -170,7 +170,7 @@
       font-size: 0.9em;
     }
 
-    .gym-info-grid {
+    .elasticGym-info-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       gap: 20px;
@@ -191,17 +191,17 @@
       font-size: 0.9em;
     }
 
-    .gym-rating {
+    .elasticGym-rating {
       color: #ffc107;
       font-size: 1.2em;
     }
 
-    .gym-reviews {
+    .elasticGym-reviews {
       border-top: 1px solid #eee;
       padding-top: 20px;
     }
 
-    .gym-reviews h3 {
+    .elasticGym-reviews h3 {
       margin: 0 0 20px 0;
       color: #333;
     }
@@ -341,7 +341,7 @@
   </style>
 </head>
 <body>
-  <div class="gym-container" id="gymContainer">
+  <div class="elasticGym-container" id="gymContainer">
 
     <!-- 에러 메시지 -->
     <div id="error" class="error-message" style="display: none;"></div>
@@ -349,26 +349,26 @@
     <!-- 디버그 정보를 표시할 div 추가 -->
     <div id="debugInfo" class="debug-info"></div>
 
-    <div class="gym-card" onclick="location.href='/gyms/1'">
-      <div class="gym-info">
-        <div class="gym-name">체육관 이름</div>
-        <div class="gym-category">체육관 카테고리</div>
-        <div class="gym-details">
+    <div class="elasticGym-card" onclick="location.href='/elasticGyms/1'">
+      <div class="elasticGym-info">
+        <div class="elasticGym-name">체육관 이름</div>
+        <div class="elasticGym-category">체육관 카테고리</div>
+        <div class="elasticGym-details">
           <div>주소</div>
           <div>운영시간 정보 없음</div>
         </div>
-        <div class="gym-rating">★ N/A</div>
+        <div class="elasticGym-rating">★ N/A</div>
       </div>
     </div>
-    <div class="gym-card" onclick="location.href='/gyms/2'">
-      <div class="gym-info">
-        <div class="gym-name">체육관 이름</div>
-        <div class="gym-category">체육관 카테고리</div>
-        <div class="gym-details">
+    <div class="elasticGym-card" onclick="location.href='/elasticGyms/2'">
+      <div class="elasticGym-info">
+        <div class="elasticGym-name">체육관 이름</div>
+        <div class="elasticGym-category">체육관 카테고리</div>
+        <div class="elasticGym-details">
           <div>주소</div>
           <div>운영시간 정보 없음</div>
         </div>
-        <div class="gym-rating">★</div>
+        <div class="elasticGym-rating">★</div>
       </div>
     </div>
   </div>
@@ -380,37 +380,37 @@
         <span class="close-button" onclick="closeModal()">&times;</span>
       </div>
       <div id="gymDetailContent" class="modal-body">
-        <div class="gym-info">
-          <div class="gym-header">
-            <h3 class="gym-name"></h3>
-            <div class="gym-category"></div>
+        <div class="elasticGym-info">
+          <div class="elasticGym-header">
+            <h3 class="elasticGym-name"></h3>
+            <div class="elasticGym-category"></div>
           </div>
 
-          <div class="gym-info-grid">
+          <div class="elasticGym-info-grid">
             <div class="info-item">
               <div class="info-label">평점</div>
-              <div class="gym-rating"></div>
+              <div class="elasticGym-rating"></div>
             </div>
             <div class="info-item">
               <div class="info-label">주소</div>
-              <div class="gym-address"></div>
+              <div class="elasticGym-address"></div>
             </div>
             <div class="info-item">
               <div class="info-label">운영시간</div>
-              <div class="gym-hours"></div>
+              <div class="elasticGym-hours"></div>
             </div>
             <div class="info-item">
               <div class="info-label">연락처</div>
-              <div class="gym-phone"></div>
+              <div class="elasticGym-phone"></div>
             </div>
             <div class="info-item">
               <div class="info-label">홈페이지</div>
-              <div class="gym-homepage"></div>
+              <div class="elasticGym-homepage"></div>
             </div>
           </div>
         </div>
 
-        <div class="gym-reviews">
+        <div class="elasticGym-reviews">
           <h3>리뷰</h3>
           <div class="reviews-container"></div>
         </div>
@@ -443,7 +443,7 @@
         debugInfo.innerHTML = '데이터 로딩 중...';
       }
 
-      fetch('/api/gyms', {
+      fetch('/api/elasticGyms', {
         credentials: 'include',
         headers: {
           'Accept': 'application/json'
@@ -460,10 +460,10 @@
                 }
                 return response.json();
               })
-              .then(gyms => {
-                console.log('받은 데이터:', gyms);
+              .then(elasticGyms => {
+                console.log('받은 데이터:', elasticGyms);
                 if (isDebugMode) {
-                  debugInfo.innerHTML += `<br>받은 데이터: ${JSON.stringify(gyms, null, 2)}`;
+                  debugInfo.innerHTML += `<br>받은 데이터: ${JSON.stringify(elasticGyms, null, 2)}`;
                 }
 
                 if (loading) {
@@ -473,26 +473,26 @@
                 if (container) {
                   container.innerHTML = '';
 
-                  if (!Array.isArray(gyms)) {
+                  if (!Array.isArray(elasticGyms)) {
                     throw new Error('데이터가 배열 형식이 아닙니다.');
                   }
 
-                  gyms.forEach(gym => {
+                  elasticGyms.forEach(elasticGym => {
                     const gymCard = document.createElement('div');
-                    gymCard.className = 'gym-card';
+                    gymCard.className = 'elasticGym-card';
                     gymCard.onclick = () => {
-                      console.log('카드 클릭됨:', gym.gymId);
-                      showGymDetail(gym.gymId);
+                      console.log('카드 클릭됨:', elasticGym.gymId);
+                      showGymDetail(elasticGym.gymId);
                     };
 
                     gymCard.innerHTML = `
-                    <div class="gym-info">
-                        <div class="gym-name">${gym.gname || '이름 없음'}</div>
-                        <div class="gym-category">${translateCategory(gym.category)}</div>
-                        <div class="gym-details">
-                            <div>${gym.address || '주소 없음'}</div>
+                    <div class="elasticGym-info">
+                        <div class="elasticGym-name">${elasticGym.gname || '이름 없음'}</div>
+                        <div class="elasticGym-category">${translateCategory(elasticGym.category)}</div>
+                        <div class="elasticGym-details">
+                            <div>${elasticGym.address || '주소 없음'}</div>
                         </div>
-                        <div class="gym-rating">★ ${gym.rating || 'N/A'}</div>
+                        <div class="elasticGym-rating">★ ${elasticGym.rating || 'N/A'}</div>
                     </div>
                 `;
 
@@ -527,7 +527,7 @@
 
       modal.style.display = 'block';
 
-      fetch(`/api/gym/${gymId}`, {
+      fetch(`/api/elasticGym/${gymId}`, {
         credentials: 'include',
         headers: {
           'Accept': 'application/json'
@@ -537,39 +537,39 @@
               .then(data => {
                 console.log('받은 데이터2 :', data );
                 detailContent.innerHTML = `
-           <div class="gym-info">
-               <div class="gym-header">
-                   <h3 class="gym-name">${data.gName || '이름 없음'}</h3>
-                   <div class="gym-category">${translateCategory(data.category) || '카테고리 없음'}</div>
+           <div class="elasticGym-info">
+               <div class="elasticGym-header">
+                   <h3 class="elasticGym-name">${data.gName || '이름 없음'}</h3>
+                   <div class="elasticGym-category">${translateCategory(data.category) || '카테고리 없음'}</div>
                </div>
 
-               <div class="gym-info-grid">
+               <div class="elasticGym-info-grid">
                    <div class="info-item">
                        <div class="info-label">평점</div>
-                       <div class="gym-rating">★ ${data.rating || 'N/A'}</div>
+                       <div class="elasticGym-rating">★ ${data.rating || 'N/A'}</div>
                    </div>
                    <div class="info-item">
                        <div class="info-label">주소</div>
-                       <div class="gym-address">${data.address || '정보 없음'}</div>
+                       <div class="elasticGym-address">${data.address || '정보 없음'}</div>
                    </div>
                    <div class="info-item">
                        <div class="info-label">운영시간</div>
-                       <div class="gym-hours">${data.openHour || '정보 없음'}</div>
+                       <div class="elasticGym-hours">${data.openHour || '정보 없음'}</div>
                    </div>
                    <div class="info-item">
                        <div class="info-label">연락처</div>
-                       <div class="gym-phone">${data.phone || '정보 없음'}</div>
+                       <div class="elasticGym-phone">${data.phone || '정보 없음'}</div>
                    </div>
                    <div class="info-item">
                        <div class="info-label">홈페이지</div>
-                       <div class="gym-homepage">${data.homepage ?
+                       <div class="elasticGym-homepage">${data.homepage ?
                         `<a href="${data.homepage}" target="_blank">${data.homepage}</a>` :
                         '정보 없음'}</div>
                    </div>
                </div>
            </div>
 
-           <div class="gym-reviews">
+           <div class="elasticGym-reviews">
                <h3>리뷰</h3>
             <div class="reviews-container">
                 ${data.reviews && data.reviews.length > 0 ?

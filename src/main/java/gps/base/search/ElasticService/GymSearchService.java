@@ -2,12 +2,12 @@ package gps.base.search.ElasticService;
 
 
 import gps.base.search.ElasticConfig.Document.GymDocument;
-import gps.base.search.ElasticEntity.Gym;
-import gps.base.search.ElasticEntity.GymCategory;
-import gps.base.search.ElasticEntity.Review;
-import gps.base.search.ElasticRepository.GymRepository;
+import gps.base.search.ElasticEntity.ElasticGym;
+import gps.base.search.ElasticEntity.ElasticGymCategory;
+import gps.base.search.ElasticEntity.ElasticReview;
+import gps.base.search.ElasticRepository.ElasticGymRepository;
 import gps.base.search.ElasticRepository.GymSearchRepository;
-import gps.base.search.ElasticRepository.ReviewRepository;
+import gps.base.search.ElasticRepository.ElasticReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -21,15 +21,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GymSearchService {
     private final GymSearchRepository gymSearchRepository;
-    private final GymRepository gymRepository;
-    private final ReviewRepository reviewRepository;
+    private final ElasticGymRepository elasticGymRepository;
+    private final ElasticReviewRepository elasticReviewRepository;
     private final ElasticsearchOperations elasticsearchOperations;
 
     private static final double NEARBY_DISTANCE_KM = 2.0;
     private static final int RECOMMEND_LIMIT = 5;
 
 
-    public List<Gym> searchNearbyGyms(double lat, double lon, double distanceKm) {
+    public List<ElasticGym> searchNearbyGyms(double lat, double lon, double distanceKm) {
         List<GymDocument> nearbyGymDocs = gymSearchRepository.searchByLocation(distanceKm, lat, lon);
 
         // 거리 계산 및 정렬을 위한 Map 생성
@@ -43,7 +43,7 @@ public class GymSearchService {
 
         // 체육관 정보 조회 및 거리순 정렬
         return nearbyGymDocs.stream()
-                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+                .map(doc -> elasticGymRepository.findById(Long.parseLong(doc.getId())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .sorted(Comparator.comparingDouble(gym ->
@@ -63,7 +63,7 @@ public class GymSearchService {
         return R * c;
     }
 
-    public List<Gym> recommendNearbyGyms(double userLat, double userLon) {
+    public List<ElasticGym> recommendNearbyGyms(double userLat, double userLon) {
         // 1. 현재 위치 기준 2km 이내의 체육관들을 검색
         List<GymDocument> nearbyGymDocs = gymSearchRepository.findByLocationNear(NEARBY_DISTANCE_KM, userLat, userLon);
 
@@ -72,29 +72,29 @@ public class GymSearchService {
         }
 
         // 2. 근처 체육관들의 상세 정보 조회
-        List<Gym> nearbyGyms = nearbyGymDocs.stream()
-                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+        List<ElasticGym> nearbyElasticGyms = nearbyGymDocs.stream()
+                .map(doc -> elasticGymRepository.findById(Long.parseLong(doc.getId())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
 
         // 3. 각 체육관 쌍 간의 유사도 계산
         Map<Long, Map<Long, Double>> similarityMatrix = new HashMap<>();
-        for (Gym gym1 : nearbyGyms) {
-            similarityMatrix.put(gym1.getId(), new HashMap<>());
-            for (Gym gym2 : nearbyGyms) {
-                if (gym1.getId().equals(gym2.getId()) ||
-                        !gym1.getCategory().equals(gym2.getCategory())) {
+        for (ElasticGym elasticGym1 : nearbyElasticGyms) {
+            similarityMatrix.put(elasticGym1.getId(), new HashMap<>());
+            for (ElasticGym elasticGym2 : nearbyElasticGyms) {
+                if (elasticGym1.getId().equals(elasticGym2.getId()) ||
+                        !elasticGym1.getCategory().equals(elasticGym2.getCategory())) {
                     continue;
                 }
 
-                double similarity = calculateGymSimilarity(gym1, gym2);
-                similarityMatrix.get(gym1.getId()).put(gym2.getId(), similarity);
+                double similarity = calculateGymSimilarity(elasticGym1, elasticGym2);
+                similarityMatrix.get(elasticGym1.getId()).put(elasticGym2.getId(), similarity);
             }
         }
 
         // 4. 각 체육관의 최종 점수 계산 (유사도 + 거리 + 평점)
-        List<GymScore> gymScores = nearbyGyms.stream()
+        List<GymScore> gymScores = nearbyElasticGyms.stream()
                 .map(gym -> {
                     double similarityScore = calculateAverageSimilarity(gym.getId(), similarityMatrix);
                     double distance = calculateDistance(userLat, userLon, gym.getLatitude(), gym.getLongitude());
@@ -108,51 +108,38 @@ public class GymSearchService {
         return gymScores.stream()
                 .sorted(Comparator.comparing(GymScore::getCalculatedScore).reversed())
                 .limit(RECOMMEND_LIMIT)
-                .map(GymScore::getGym)
+                .map(GymScore::getElasticGym)
                 .collect(Collectors.toList());
     }
 
     /**
      * 두 체육관 간의 유사도 계산
      */
-    private double calculateGymSimilarity(Gym gym1, Gym gym2) {
-        List<Review> reviews1 = reviewRepository.findByGymId(gym1.getId());
-        List<Review> reviews2 = reviewRepository.findByGymId(gym2.getId());
+    private double calculateGymSimilarity(ElasticGym elasticGym1, ElasticGym elasticGym2) {
 
-        Map<Long, Double> ratings1 = reviews1.stream()
-                .collect(Collectors.toMap(
-                        Review::getUserId,
-                        Review::getRating,
-                        (r1, r2) -> r1
-                ));
+        double[] vector1 = {
+                elasticGym1.getRating(),
+                elasticGym1.getLatitude(),
+                elasticGym1.getLongitude()
+                // 필요한 다른 특성들 추가 가능
+        };
 
-        Map<Long, Double> ratings2 = reviews2.stream()
-                .collect(Collectors.toMap(
-                        Review::getUserId,
-                        Review::getRating,
-                        (r1, r2) -> r1
-                ));
-
-        // 공통 사용자 찾기
-        Set<Long> commonUsers = new HashSet<>(ratings1.keySet());
-        commonUsers.retainAll(ratings2.keySet());
-
-        if (commonUsers.isEmpty()) {
-            return 0.0;
-        }
+        double[] vector2 = {
+                elasticGym2.getRating(),
+                elasticGym2.getLatitude(),
+                elasticGym2.getLongitude()
+                // 필요한 다른 특성들 추가 가능
+        };
 
         // 코사인 유사도 계산
         double dotProduct = 0.0;
         double norm1 = 0.0;
         double norm2 = 0.0;
 
-        for (Long userId : commonUsers) {
-            double rating1 = ratings1.get(userId);
-            double rating2 = ratings2.get(userId);
-
-            dotProduct += rating1 * rating2;
-            norm1 += rating1 * rating1;
-            norm2 += rating2 * rating2;
+        for (int i = 0; i < vector1.length; i++) {
+            dotProduct += vector1[i] * vector2[i];
+            norm1 += vector1[i] * vector1[i];
+            norm2 += vector2[i] * vector2[i];
         }
 
         norm1 = Math.sqrt(norm1);
@@ -174,7 +161,7 @@ public class GymSearchService {
 
 
 
-    public List<Gym> searchByKeywordAndSort(String keyword, double lat, double lon) {
+    public List<ElasticGym> searchByKeywordAndSort(String keyword, double lat, double lon) {
         log.info("Searching for gyms with keyword: {} near location: ({}, {})", keyword, lat, lon);
 
         // 키워드로 검색
@@ -190,10 +177,10 @@ public class GymSearchService {
                 .map(doc -> Long.parseLong(doc.getId()))
                 .collect(Collectors.toList());
 
-        List<Gym> gyms = gymRepository.findAllById(gymIds);
+        List<ElasticGym> elasticGyms = elasticGymRepository.findAllById(gymIds);
 
         // 거리 계산 및 정렬을 위한 데이터 구조
-        List<GymWithDistance> gymsWithDistance = gyms.stream()
+        List<GymWithDistance> gymsWithDistance = elasticGyms.stream()
                 .map(gym -> new GymWithDistance(gym,
                         calculateDistance(lat, lon, gym.getLatitude(), gym.getLongitude())))
                 .collect(Collectors.toList());
@@ -203,21 +190,21 @@ public class GymSearchService {
 
         // 결과 반환
         return gymsWithDistance.stream()
-                .map(GymWithDistance::getGym)
+                .map(GymWithDistance::getElasticGym)
                 .collect(Collectors.toList());
     }
 
     @lombok.Data
     @lombok.AllArgsConstructor
     private static class GymWithDistance {
-        private Gym gym;
+        private ElasticGym elasticGym;
         private double distance;
     }
 
     /**
      * 키워드와 카테고리로 체육관 검색
      */
-    public List<Gym> searchByKeywordAndCategory(String keyword, GymCategory category) {
+    public List<ElasticGym> searchByKeywordAndCategory(String keyword, ElasticGymCategory category) {
         List<GymDocument> searchResults = gymSearchRepository.searchByKeywordAndCategory(keyword, category.name());
         return convertToGymList(searchResults);
     }
@@ -225,9 +212,9 @@ public class GymSearchService {
     /**
      * ElasticSearch 검색 결과를 JPA 엔티티로 변환
      */
-    private List<Gym> convertToGymList(List<GymDocument> documents) {
+    private List<ElasticGym> convertToGymList(List<GymDocument> documents) {
         return documents.stream()
-                .map(doc -> gymRepository.findById(Long.parseLong(doc.getId())))
+                .map(doc -> elasticGymRepository.findById(Long.parseLong(doc.getId())))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());

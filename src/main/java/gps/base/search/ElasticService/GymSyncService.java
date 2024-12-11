@@ -4,8 +4,8 @@ import gps.base.search.ElasticConfig.Document.GymDocument;
 import gps.base.search.ElasticConfig.event.GymCreatedEvent;
 import gps.base.search.ElasticConfig.event.GymDeletedEvent;
 import gps.base.search.ElasticConfig.event.GymUpdatedEvent;
-import gps.base.search.ElasticEntity.Gym;
-import gps.base.search.ElasticRepository.GymRepository;
+import gps.base.search.ElasticEntity.ElasticGym;
+import gps.base.search.ElasticRepository.ElasticGymRepository;
 import gps.base.search.ElasticRepository.GymSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GymSyncService {
     private final GymSearchRepository gymSearchRepository;
-    private final GymRepository gymRepository;
+    private final ElasticGymRepository elasticGymRepository;
 
     private static final int SYNC_LIMIT = 500;
 
@@ -41,7 +41,7 @@ public class GymSyncService {
             gymSearchRepository.deleteAll();
 
             // 상위 500개 체육관 정보 가져오기
-            List<Gym> gymsToSync = gymRepository.findAll(PageRequest.of(0, SYNC_LIMIT)).getContent();
+            List<ElasticGym> gymsToSync = elasticGymRepository.findAll(PageRequest.of(0, SYNC_LIMIT)).getContent();
             log.info("Found {} gyms to sync", gymsToSync.size());
 
             // ElasticSearch에 동기화
@@ -61,7 +61,7 @@ public class GymSyncService {
     public void scheduledSync() {
         try {
             log.info("Starting scheduled sync (limit: {})", SYNC_LIMIT);
-            List<Gym> gymsToSync = gymRepository.findAll(PageRequest.of(0, SYNC_LIMIT)).getContent();
+            List<ElasticGym> gymsToSync = elasticGymRepository.findAll(PageRequest.of(0, SYNC_LIMIT)).getContent();
             gymsToSync.forEach(this::syncGymToElasticsearch);
             log.info("Successfully completed scheduled sync of {} gyms", gymsToSync.size());
         } catch (Exception e) {
@@ -79,11 +79,11 @@ public class GymSyncService {
             long currentCount = gymSearchRepository.count();
 
             if (currentCount < SYNC_LIMIT) {
-                log.info("Handling gym creation event for gym ID: {}", event.getGym().getId());
-                syncGymToElasticsearch(event.getGym());
+                log.info("Handling gym creation event for gym ID: {}", event.getElasticGym().getId());
+                syncGymToElasticsearch(event.getElasticGym());
             } else {
                 log.warn("Sync limit reached ({}). Skipping gym creation sync for ID: {}",
-                        SYNC_LIMIT, event.getGym().getId());
+                        SYNC_LIMIT, event.getElasticGym().getId());
             }
         } catch (Exception e) {
             log.error("Failed to handle gym creation event: ", e);
@@ -97,9 +97,9 @@ public class GymSyncService {
     public void handleGymUpdated(GymUpdatedEvent event) {
         try {
             // 이미 인덱스에 있는 문서만 업데이트
-            if (gymSearchRepository.existsById(event.getGym().getId().toString())) {
-                log.info("Handling gym update event for gym ID: {}", event.getGym().getId());
-                syncGymToElasticsearch(event.getGym());
+            if (gymSearchRepository.existsById(event.getElasticGym().getId().toString())) {
+                log.info("Handling gym update event for gym ID: {}", event.getElasticGym().getId());
+                syncGymToElasticsearch(event.getElasticGym());
             }
         } catch (Exception e) {
             log.error("Failed to handle gym update event: ", e);
@@ -124,30 +124,30 @@ public class GymSyncService {
     /**
      * 개별 체육관 동기화
      */
-    private void syncGymToElasticsearch(Gym gym) {
+    private void syncGymToElasticsearch(ElasticGym elasticGym) {
         try {
-            GymDocument document = convertToDocument(gym);
+            GymDocument document = convertToDocument(elasticGym);
             gymSearchRepository.save(document);
-            log.debug("Successfully synced gym: {}", gym.getId());
+            log.debug("Successfully synced gym: {}", elasticGym.getId());
         } catch (Exception e) {
-            log.error("Failed to sync gym {}: ", gym.getId(), e);
+            log.error("Failed to sync gym {}: ", elasticGym.getId(), e);
         }
     }
 
     /**
      * Gym 엔티티를 GymDocument로 변환
      */
-    private GymDocument convertToDocument(Gym gym) {
-        if (gym == null) {
+    private GymDocument convertToDocument(ElasticGym elasticGym) {
+        if (elasticGym == null) {
             throw new IllegalArgumentException("Gym cannot be null");
         }
 
         return GymDocument.builder()
-                .id(gym.getId().toString())
-                .name(gym.getName())
-                .latitude(gym.getLatitude())
-                .longitude(gym.getLongitude())
-                .location(new GeoPoint(gym.getLatitude(), gym.getLongitude()))
+                .id(elasticGym.getId().toString())
+                .name(elasticGym.getName())
+                .latitude(elasticGym.getLatitude())
+                .longitude(elasticGym.getLongitude())
+                .location(new GeoPoint(elasticGym.getLatitude(), elasticGym.getLongitude()))
                 .build();
     }
 }

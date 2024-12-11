@@ -216,7 +216,7 @@
                 <button class="btn btn-primary" onclick="deleteSelectedGyms()">시설 삭제</button>
            </div>
        </div>
-       <div class="gym-table">
+       <div class="elasticGym-table">
            <table>
                <thead>
                    <tr>
@@ -256,40 +256,40 @@
         }
     }
 
-    function displayGyms(gyms, currentPage) {
+    function displayGyms(elasticGyms, currentPage) {
         const gymList = document.getElementById('gymList');
         const itemsPerPage = 12;
         const startIndex = currentPage * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
-        const currentGyms = gyms;
+        const currentGyms = elasticGyms;
 
         gymList.innerHTML = '';
 
-        currentGyms.forEach(gym => {
+        currentGyms.forEach(elasticGym => {
             const row = document.createElement('tr');
-            row.className = 'gym-row';
-            row.setAttribute('data-gym-id', gym.gymId);
-            const date = gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-';
-            const rating = gym.rating ? (gym.rating < 1 ? '0.0' : gym.rating.toFixed(1)) : '0.0';
+            row.className = 'elasticGym-row';
+            row.setAttribute('data-elasticGym-id', elasticGym.gymId);
+            const date = elasticGym.gCreatedAt ? elasticGym.gCreatedAt.split('T')[0] : '-';
+            const rating = elasticGym.rating ? (elasticGym.rating < 1 ? '0.0' : elasticGym.rating.toFixed(1)) : '0.0';
 
 
             // 체크박스
             const checkboxCell = document.createElement('td');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.className = 'gym-select';
-            checkbox.dataset.gymId = gym.gymId;
+            checkbox.className = 'elasticGym-select';
+            checkbox.dataset.gymId = elasticGym.gymId;
             checkboxCell.appendChild(checkbox);
 
             // 이미지
             const imgCell = document.createElement('td');
             const img = document.createElement('img');
-            if (gym.gymImage && gym.gymImage.imageUrl) {
+            if (elasticGym.gymImage && elasticGym.gymImage.imageUrl) {
                 // Google 드라이브 링크 체크
-                if (gym.gymImage.imageUrl.includes('google.com')) {
+                if (elasticGym.gymImage.imageUrl.includes('google.com')) {
                     img.src = '../image/logo.png';
                 } else {
-                    img.src = gym.gymImage.imageUrl;
+                    img.src = elasticGym.gymImage.imageUrl;
                 }
             } else {
                 img.src = '../image/logo.png';
@@ -303,12 +303,12 @@
 
             // 각 셀 생성
             const cells = [
-                { content: gym.gname || '-' },
-                { content: gym.address || '-' },
-                { content: gym.openHour || '-' },
-                { content: gym.homepage || '-' },
-                { content: gym.phone || '-' },
-                { content: gym.gCreatedBy || '-' },
+                { content: elasticGym.gname || '-' },
+                { content: elasticGym.address || '-' },
+                { content: elasticGym.openHour || '-' },
+                { content: elasticGym.homepage || '-' },
+                { content: elasticGym.phone || '-' },
+                { content: elasticGym.gCreatedBy || '-' },
                 { content: date },
                 { content: rating }
             ];
@@ -330,7 +330,7 @@
             gymList.appendChild(row);
         });
 
-        updateGymPagination(gyms.totalElements);
+        updateGymPagination(elasticGyms.totalElements);
 
     }
 
@@ -387,7 +387,7 @@
             const reviewElement = document.createElement('div');
             reviewElement.className = 'review-item';
             reviewElement.setAttribute('data-review-id', reviewData.rid);
-            reviewElement.setAttribute('data-gym-id', reviewData.gymId);
+            reviewElement.setAttribute('data-elasticGym-id', reviewData.gymId);
 
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -438,7 +438,7 @@
 
     // 탭별 currentPage 상태 저장
     let pageState = {
-        gyms: {
+        elasticGyms: {
             totalPages: 0,
             currentPage: 0
         },
@@ -608,7 +608,7 @@
             for (const checkbox of selectedCheckboxes) {
                 const reviewElement = checkbox.closest('.review-item');
                 const reviewId = parseInt(reviewElement.getAttribute('data-review-id'));
-                const gymId = parseInt(reviewElement.getAttribute('data-gym-id'));
+                const gymId = parseInt(reviewElement.getAttribute('data-elasticGym-id'));
 
 
                 console.log('Deleting review:', { reviewId, gymId }); // 삭제 시도 로그
@@ -635,7 +635,7 @@
     }
 
     async function deleteSelectedGyms() {
-        const selectedCheckboxes = document.querySelectorAll('.gym-select:checked');
+        const selectedCheckboxes = document.querySelectorAll('.elasticGym-select:checked');
         if (selectedCheckboxes.length === 0) {
             alert('삭제할 시설을 선택해주세요.');
             return;
@@ -643,10 +643,10 @@
 
         if (confirm('선택한 시설을 삭제하시겠습니까?')) {
             for (const checkbox of selectedCheckboxes) {
-                const gymElement = checkbox.closest('.gym-row');
-                const gymId = parseInt(gymElement.getAttribute('data-gym-id'));
+                const gymElement = checkbox.closest('.elasticGym-row');
+                const gymId = parseInt(gymElement.getAttribute('data-elasticGym-id'));
 
-                console.log('Deleting gym:', { gymId }); // 삭제 시도 로그
+                console.log('Deleting elasticGym:', { gymId }); // 삭제 시도 로그
 
                 try {
                     const response = await fetch(`/api/` + gymId, {
@@ -672,7 +672,7 @@
 
     // 모달
     async function showEditModal() {
-        const selectedCheckboxes = document.querySelectorAll('.gym-select:checked');
+        const selectedCheckboxes = document.querySelectorAll('.elasticGym-select:checked');
         if (selectedCheckboxes.length === 0) {
             alert('수정할 시설을 선택해주세요.');
             return;
@@ -683,18 +683,18 @@
             return;
         }
 
-        const gymRow = selectedCheckboxes[0].closest('.gym-row');
-        const gymId = parseInt(gymRow.getAttribute('data-gym-id'));
-        const gym = currentGyms.find(g => g.gymId === gymId);
+        const gymRow = selectedCheckboxes[0].closest('.elasticGym-row');
+        const gymId = parseInt(gymRow.getAttribute('data-elasticGym-id'));
+        const elasticGym = currentGyms.find(g => g.gymId === gymId);
 
-        if (!gym) return;
+        if (!elasticGym) return;
 
         const modal = document.createElement('div');
         modal.className = 'modal';
         modal.innerHTML = ''
             + '<div class="modal-content">\n'
-            + '    <div class="current-gym-image">\n'
-            + '        <img src="' + (gym.gymImage?.imageUrl || '../image/logo.png') + '" alt="체육관 이미지" class="gym-edit-image">\n'
+            + '    <div class="current-elasticGym-image">\n'
+            + '        <img src="' + (elasticGym.gymImage?.imageUrl || '../image/logo.png') + '" alt="체육관 이미지" class="elasticGym-edit-image">\n'
             + '        <input type="file" id="gymImageInput" accept="image/*" class="image-input">\n'
             + '        <label for="gymImageInput" class="image-upload-btn">\n'
             + '            <i class="fas fa-camera"></i> 이미지 변경\n'
@@ -703,43 +703,43 @@
             + '    <div class="basic-info">\n'
             + '        <div class="form-group">\n'
             + '            <label><i class="fas fa-store"></i> 시설명</label>\n'
-            + '            <input type="text" class="form-control" id="editGymName" value="' + (gym.gname || '') + '">\n'
+            + '            <input type="text" class="form-control" id="editGymName" value="' + (elasticGym.gname || '') + '">\n'
             + '        </div>\n'
             + '        <div class="form-group">\n'
             + '            <label><i class="fas fa-map-marker-alt"></i> 주소</label>\n'
-            + '            <input type="text" class="form-control" id="editAddress" value="' + (gym.address || '') + '">\n'
+            + '            <input type="text" class="form-control" id="editAddress" value="' + (elasticGym.address || '') + '">\n'
             + '        </div>\n'
             + '        <div class="form-group">\n'
             + '            <label><i class="fas fa-phone"></i> 전화번호</label>\n'
-            + '            <input type="text" class="form-control" id="editPhone" value="' + (gym.phone || '') + '">\n'
+            + '            <input type="text" class="form-control" id="editPhone" value="' + (elasticGym.phone || '') + '">\n'
             + '        </div>\n'
             + '        <div class="form-group">\n'
             + '            <label><i class="fas fa-globe"></i> 홈페이지</label>\n'
-            + '            <input type="text" class="form-control" id="editHomepage" value="' + (gym.homepage || '') + '">\n'
+            + '            <input type="text" class="form-control" id="editHomepage" value="' + (elasticGym.homepage || '') + '">\n'
             + '        </div>\n'
             + '    </div>\n'
             + '    <div class="operation-info">\n'
             + '        <div class="form-group">\n'
             + '            <label><i class="fas fa-clock"></i> 영업시간</label>\n'
-            + '            <textarea class="form-control operation-hours" id="editOpenHour">' + (gym.openHour || '') + '</textarea>\n'
+            + '            <textarea class="form-control operation-hours" id="editOpenHour">' + (elasticGym.openHour || '') + '</textarea>\n'
             + '        </div>\n'
             + '        <div class="fixed-info">\n'
             + '            <div class="fixed-info-item">\n'
             + '                <span>생성자</span>\n'
-            + '                <span>' + (gym.gCreatedBy || '-') + '</span>\n'
+            + '                <span>' + (elasticGym.gCreatedBy || '-') + '</span>\n'
             + '            </div>\n'
             + '            <div class="fixed-info-item">\n'
             + '                <span>생성일</span>\n'
-            + '                <span>' + (gym.gCreatedAt ? gym.gCreatedAt.split('T')[0] : '-') + '</span>\n'
+            + '                <span>' + (elasticGym.gCreatedAt ? elasticGym.gCreatedAt.split('T')[0] : '-') + '</span>\n'
             + '            </div>\n'
             + '            <div class="fixed-info-item">\n'
             + '                <span>평점</span>\n'
-            + '                <span>' + (gym.rating ? gym.rating.toFixed(1) : '0.0') + '</span>\n'
+            + '                <span>' + (elasticGym.rating ? elasticGym.rating.toFixed(1) : '0.0') + '</span>\n'
             + '            </div>\n'
             + '        </div>\n'
             + '    </div>\n'
             + '    <div class="edit-buttons">\n'
-            + '        <button class="btn-edit btn-save" onclick="saveGymChanges(' + gym.gymId + ')">변경 저장</button>\n'
+            + '        <button class="btn-edit btn-save" onclick="saveGymChanges(' + elasticGym.gymId + ')">변경 저장</button>\n'
             + '        <button class="btn-edit btn-cancel" onclick="closeModal()">나가기</button>\n'
             + '    </div>\n'
             + '</div>';
@@ -765,7 +765,7 @@
         };
 
         try {
-            const response = await fetch(`/api/gyms/` + gymId, {
+            const response = await fetch(`/api/elasticGyms/` + gymId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json'
@@ -794,7 +794,7 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.querySelector('.gym-edit-image').src = e.target.result;
+                    document.querySelector('.elasticGym-edit-image').src = e.target.result;
                 };
                 reader.readAsDataURL(file);
             }

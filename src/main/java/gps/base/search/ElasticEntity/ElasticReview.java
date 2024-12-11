@@ -6,15 +6,17 @@ import java.time.LocalDateTime;
 
 @Entity
 @Data
-public class Review {
+@Table(name = "review")
+public class ElasticReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "r_id")
     private Long rId;
 
-    @Column(name = "user_id")
+    @JoinColumn(name = "user_id")
     private Long userId;
 
-    @Column(name = "gym_id")
+    @JoinColumn(name = "gym_id")
     private Long gymId;
 
     @Column(name = "r_comment")
@@ -23,6 +25,4 @@ public class Review {
     @Column(name = "added_at")
     private LocalDateTime addedAt;
 
-    @Column(nullable = false)
-    private Double rating;
 }

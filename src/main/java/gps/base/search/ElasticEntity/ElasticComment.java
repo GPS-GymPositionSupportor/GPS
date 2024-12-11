@@ -1,5 +1,6 @@
 package gps.base.search.ElasticEntity;
 
+import gps.base.rdb.model.Review;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,24 +14,23 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Comment {
+public class ElasticComment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "c_id")
-    private Long commentId;
+    private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private Member member;
+    @Column(name = "added_at", nullable = false, updatable = false)
+    private LocalDateTime addedAt;
+
+    @JoinColumn(name = "user_id", nullable = false)
+    private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "r_id")
     private Review review;
 
-    @Column(name = "c_comment", columnDefinition = "TEXT")
-    private String content;
-
-    @CreationTimestamp
-    @Column(name = "added_at")
-    private LocalDateTime addedAt;
+    @Column(name = "c_comment", nullable = false, columnDefinition = "TEXT")
+    private String comment;
 }

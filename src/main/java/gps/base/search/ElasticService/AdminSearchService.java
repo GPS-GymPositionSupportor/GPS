@@ -2,11 +2,11 @@ package gps.base.search.ElasticService;
 
 
 import gps.base.search.ElasticConfig.Document.GymDocument;
-import gps.base.search.ElasticEntity.Gym;
-import gps.base.search.ElasticEntity.Member;
-import gps.base.search.ElasticRepository.GymRepository;
+import gps.base.search.ElasticEntity.ElasticGym;
+import gps.base.search.ElasticEntity.ElasticMember;
+import gps.base.search.ElasticRepository.ElasticGymRepository;
 import gps.base.search.ElasticRepository.GymSearchRepository;
-import gps.base.search.ElasticRepository.MemberRepository;
+import gps.base.search.ElasticRepository.ElasticMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,15 +18,15 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AdminSearchService {
-    private MemberRepository memberRepository;
-    private final GymRepository gymRepository;
+    private ElasticMemberRepository elasticMemberRepository;
+    private final ElasticGymRepository elasticGymRepository;
     private final GymSearchRepository gymSearchRepository;
 
-    public Page<Member> searchMembers(String keyword, Pageable pageable) {
-        return memberRepository.findByEmailContainingOrNicknameContaining(keyword, keyword, pageable);
+    public Page<ElasticMember> searchMembers(String keyword, Pageable pageable) {
+        return elasticMemberRepository.findByEmailContainingOrNicknameContaining(keyword, keyword, pageable);
     }
 
-    public Page<Gym> searchGyms(String keyword, Pageable pageable) {
+    public Page<ElasticGym> searchGyms(String keyword, Pageable pageable) {
         // Elasticsearch에서 검색
         List<GymDocument> elasticResults = gymSearchRepository.findByNameContaining(keyword);
 
@@ -41,6 +41,6 @@ public class AdminSearchService {
         }
 
         // JPA로 데이터 조회
-        return gymRepository.findByIdIn(gymIds, pageable);
+        return elasticGymRepository.findByIdIn(gymIds, pageable);
     }
 }

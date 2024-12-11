@@ -1,7 +1,7 @@
 package gps.base.search.ElasticDTO;
 
-import gps.base.search.ElasticEntity.Gym;
-import gps.base.search.ElasticEntity.GymCategory;
+import gps.base.search.ElasticEntity.ElasticGym;
+import gps.base.search.ElasticEntity.ElasticGymCategory;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.Setter;
 public class GymRecommendationDTO {
     private Long id;
     private String name;
-    private GymCategory category;
+    private ElasticGymCategory category;
     private String address1;
     private String openingHours;
     private String homepage;
@@ -26,18 +26,18 @@ public class GymRecommendationDTO {
     private Double distanceKm;       // 거리 정보
 
     // Gym 엔티티로부터 DTO 생성
-    public static GymRecommendationDTO fromGym(Gym gym, Double similarityScore, Double distanceKm) {
+    public static GymRecommendationDTO fromGym(ElasticGym elasticGym, Double similarityScore, Double distanceKm) {
         return new GymRecommendationDTO(
-                gym.getId(),
-                gym.getName(),
-                gym.getCategory(),
-                gym.getAddress1(),
-                gym.getOpeningHours(),
-                gym.getHomepage(),
-                gym.getPhoneNumber(),
-                gym.getRating(),
-                gym.getLongitude(),
-                gym.getLatitude(),
+                elasticGym.getId(),
+                elasticGym.getName(),
+                elasticGym.getCategory(),
+                elasticGym.getAddress1(),
+                elasticGym.getOpeningHours(),
+                elasticGym.getHomepage(),
+                elasticGym.getPhoneNumber(),
+                elasticGym.getRating(),
+                elasticGym.getLongitude(),
+                elasticGym.getLatitude(),
                 similarityScore,
                 distanceKm
         );

@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Table(name = "gym")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Gym {
+public class ElasticGym {
     @Id
     @Column(name = "gym_id")
     private Long id;
@@ -17,12 +17,21 @@ public class Gym {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    private GymCategory category;
+    private ElasticGymCategory category;
 
+    @Column(name = "address1")
     private String address1;
+
+    @Column(name = "opening_hours")
     private String openingHours;
+
+    @Column(name = "homepage")
     private String homepage;
+
+    @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Column(name = "rating")
     private Double rating;
 
     @Column(name = "g_longitude")

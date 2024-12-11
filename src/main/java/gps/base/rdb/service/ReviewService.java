@@ -6,7 +6,6 @@ import gps.base.rdb.error.ErrorCode;
 import gps.base.rdb.error.exception.CustomException;
 import gps.base.rdb.model.*;
 import gps.base.rdb.repository.*;
-import gps.base.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;

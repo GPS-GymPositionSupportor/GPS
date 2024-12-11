@@ -1,6 +1,6 @@
 package gps.base.search.ElasticEntity;
 
-public enum Authority {
+public enum ElasticAuthority {
     USER,
     ADMIN
 }

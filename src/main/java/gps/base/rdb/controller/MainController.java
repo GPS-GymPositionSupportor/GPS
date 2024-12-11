@@ -6,7 +6,6 @@ import gps.base.rdb.DTO.ImageDTO;
 import gps.base.rdb.DTO.MemberDTO;
 import gps.base.rdb.error.ErrorCode;
 import gps.base.rdb.error.exception.CustomException;
-import gps.base.model.*;
 import gps.base.rdb.model.*;
 import gps.base.rdb.repository.ImageRepository;
 import gps.base.rdb.service.GymService;

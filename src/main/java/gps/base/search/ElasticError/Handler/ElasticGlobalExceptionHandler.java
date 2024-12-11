@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 // Global Exception Handler
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class ElasticGlobalExceptionHandler {
 
     @ExceptionHandler(ElasticSearchConnectionException.class)
     public ResponseEntity<ErrorResponse> handleElasticSearchConnectionException(
