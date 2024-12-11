@@ -62,7 +62,7 @@ body::-webkit-scrollbar {
     font-size: 14px;
     border: 1px solid #fff;
     border-radius: 12px;
-    width: 18rem;
+    width: 38rem;
     background: inherit;
     padding-left: 1rem;
     color: #fff;
@@ -171,7 +171,7 @@ body::-webkit-scrollbar {
 }
 
 .login-form {
-	width: 80%;
+	width: 45rem;
 	align-items: center;
 }
 		
@@ -951,4 +951,8 @@ body::-webkit-scrollbar {
 		position: absolute;
 	    bottom: 3rem;
 	    right: -0.5rem;
+	}
+	
+	#searchInput {
+	    width: 18rem;
 	}

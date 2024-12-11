@@ -67,7 +67,6 @@
 					<div class="email-input">
 			            <input type="text" id="editIdEmailId" name="emailId">
 			            <span id="emailSpan">@</span>
-			            <!-- 직접 입력 폼 제작 필 -->
 			            <select id="editIdEmailDomain" name="emailDomain" onchange="toggleCustomDomainInput('editIdEmailDomain', 'customDomainInput')">
 			            	<option value="google.com">google.com</option>
                             <option value="naver.com">naver.com</option>

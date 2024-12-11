@@ -9,11 +9,6 @@ body {
     width: 100%;
     margin: 0 auto !important;
     overflow-x: hidden;
-    max-height: 90%
-}
-
-body::-webkit-scrollbar {
-    display: none;
 }
 
 .exit-button {
