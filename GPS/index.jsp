@@ -44,7 +44,7 @@
 
 <body>
 
-	    <div class="navbar" style="display: <%=(userID == null) ? "none" : "block" %>;">
+	    <div class="navbar" style="display: <%=(userID == null) ? "none" : "flex" %>;">
 	        <div>
 				<a href="home.jsp" class="exit-button" title="BackToHome"></a>
 			</div>
