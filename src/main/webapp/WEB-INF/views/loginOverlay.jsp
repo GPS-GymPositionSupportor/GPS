@@ -35,7 +35,7 @@
 	        </form>
 	        
 	        <div class="find-regist-btn">
-		        	<button class="findIdPw-btn" id="findIdPwBtn" onclick="location.href='/email/findIdPassword' ">아이디/비밀번호 찾기</button>
+		        	<!-- <button class="findIdPw-btn" id="findIdPwBtn" onclick="location.href='/email/findIdPassword' ">아이디/비밀번호 찾기</button> -->
 		        	<button class="register-btn" onclick="location.href='/api/register'">회원가입</button>
 			</div>
 			<p class="sns">sns로 시작하기</p>
@@ -373,7 +373,7 @@
 		}
 
 		// 회원가입 폼 제출 처리
-		document.querySelector('form')?.addEventListener('submit', function(e) {
+		document.querySelector('register-btn')?.addEventListener('submit', function(e) {
 			e.preventDefault();
 
 			const formData = new FormData(this);
@@ -401,6 +401,3 @@
 					});
 		});
 	</script>
-
-
-

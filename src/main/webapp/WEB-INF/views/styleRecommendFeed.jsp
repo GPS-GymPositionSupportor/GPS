@@ -14,7 +14,7 @@ body {
 .exit-button {
 	display: block;
 	margin: 2%;
-	background: url(image/icon_back.png) no-repeat center center;
+	background: url(../image/icon_back.png) no-repeat center center;
 	width: 24px;
 	height: 24px;
 	background-size: cover;

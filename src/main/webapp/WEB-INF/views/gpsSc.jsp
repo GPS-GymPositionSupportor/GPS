@@ -53,7 +53,7 @@
                 var type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
 
-                eyeIcon.src = type === 'password' ? 'image/closed_eyes.svg' : 'image/open_eyes.svg';
+                eyeIcon.src = type === 'password' ? '../image/closed_eyes.svg' : '../image/open_eyes.svg';
             });
 
             <%-- 햄버거 버튼 --%>
@@ -66,7 +66,7 @@
                 });
             }
 
-            document.getElementById('findIdPwBtn').addEventListener('click', function () {
+            /* document.getElementById('findIdPwBtn').addEventListener('click', function () {
                 fetch('findIdPw.jsp')
                     .then(response => response.text())
                     .then(data => {
@@ -250,7 +250,7 @@
                 }
             });
 
-        });
+        }); */
 
 
     </script>

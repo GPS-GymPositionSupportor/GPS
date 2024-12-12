@@ -237,7 +237,7 @@ body::-webkit-scrollbar {
 
 .find-regist-btn {
 	display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     flex-direction: row;
     align-items: center;
     margin: -1rem -1rem 0% -2rem;
@@ -888,7 +888,7 @@ body::-webkit-scrollbar {
 	.exit-button {
 		display: block;
 		margin: 2%;
-		background: url('image/icon_back.png') no-repeat center center; /* 이미지 경로 */
+		background: url('../image/icon_back.png') no-repeat center center; /* 이미지 경로 */
 		width: 24px;
 		height: 24px;
 		background-size: cover;

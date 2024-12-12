@@ -411,6 +411,19 @@ public class MainController {
     체육관 관리
      */
 
+    @GetMapping("/nearbyGyms")
+    public ResponseEntity<List<GymDTO>> getNearbyGyms(@RequestParam("lat") double lat,
+                                                      @RequestParam("lng") double lng) {
+        try {
+            List<GymDTO> gyms = gymService.findNearbyGyms(lat, lng);
+            return ResponseEntity.ok(gyms);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
     // HTMl 호출 [관리자 페이지 전용]
     @GetMapping("/showgyms")
     @ResponseBody
@@ -475,7 +488,7 @@ public class MainController {
         GymDTO dto = new GymDTO();
         dto.setGymId(gym.getGymId());
         dto.setAddress(gym.getAddress());
-        dto.setGName(gym.getGName());
+        dto.setG_name(gym.getGName());
         dto.setOpenHour(gym.getOpenHour());
         dto.setHomepage(gym.getHomepage());
         dto.setPhone(gym.getPhone());

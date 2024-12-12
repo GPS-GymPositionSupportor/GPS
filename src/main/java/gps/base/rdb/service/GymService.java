@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class GymService {
@@ -71,6 +72,13 @@ public class GymService {
         return gymMap;
     }
 
+    public List<GymDTO> findNearbyGyms(double userLat, double userLng) {
+        return gymRepository.findGymsWithin3Km(userLat, userLng)
+                .stream()
+                .map(GymDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
 
     // 모든 체육관 찾기
     public List<Gym> getAllGyms() {
@@ -88,7 +96,7 @@ public class GymService {
                 .orElseThrow(() -> new CustomException(ErrorCode.GYM_NOT_FOUND));
 
         // 기본 정보 업데이트
-        gym.setGName(gymData.getGName());
+        gym.setGName(gymData.getG_name());
         gym.setAddress(gymData.getAddress());
         gym.setPhone(gymData.getPhone());
         gym.setHomepage(gymData.getHomepage());
@@ -101,7 +109,7 @@ public class GymService {
     private GymDTO convertToDTO(Gym gym) {
         GymDTO dto = new GymDTO();
         dto.setGymId(gym.getGymId());
-        dto.setGName(gym.getGName());
+        dto.setG_name(gym.getGName());
         dto.setAddress(gym.getAddress());
         dto.setPhone(gym.getPhone());
         dto.setHomepage(gym.getHomepage());

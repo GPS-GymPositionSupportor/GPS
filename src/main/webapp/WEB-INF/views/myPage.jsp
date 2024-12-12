@@ -62,7 +62,7 @@
 				    </div>
 			</div>
 			
-			<div id="editProfileEmail">
+			<!-- <div id="editProfileEmail">
 				<p class="pTitle">이메일</p>
 					<div class="email-input">
 			            <input type="text" id="editIdEmailId" name="emailId">
@@ -73,7 +73,7 @@
                             <option value="daum.net">daum.net</option>
 			            </select>
 			        </div>
-			</div>
+			</div> -->
 			
 			<div id="editProfileGender">
 				<p class="pTitle">성별</p>
@@ -114,7 +114,7 @@
 			<div id="profile">
 				<button id="profileBtn" onclick="toggleEditMode()">
 					<img
-				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "image/myPage_image.svg" %>"
+				        src="<%= session.getAttribute("profile_img") != null ? session.getAttribute("profile_img") : "../image/myPage_image.svg" %>"
 				        alt="myPage_image" title="myPage_image" id="myPageImage">
 				    <p id="profilePicture">프로필 사진</p>
 				    <p id="tapToEdit">칸을 눌러 수정할 수 있습니다.</p>
@@ -123,7 +123,7 @@
 			
 			<div id="profileId">
 				<p class="pTitle">아이디</p>
-				<p id="userId"><%= session.getAttribute("mid") %></p>
+				<p id="userId"><%= session.getAttribute("mId") %></p>
 			</div>
 			
 			<div id="profileName">
@@ -136,10 +136,10 @@
 				<p id="userNickname"><%= session.getAttribute("nickname") %></p>
 			</div>
 			
-			<div id="profileEmail">
+			<%-- <div id="profileEmail">
 				<p class="pTitle">이메일</p>
 				<p id="userEmail"><%= session.getAttribute("email") %></p>
-			</div>
+			</div> --%>
 			
 			<div id="profileGender">
 				<p class="pTitle">성별</p>
