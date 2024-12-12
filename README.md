@@ -1,7 +1,9 @@
 # GPS
 현재 위치에서 가장 가까운 체육관과 헬스장을 알려주는 웹앱
 
-![GPS Main image](https://github.com/user-attachments/assets/ca4597ef-7746-4a0e-937f-e3a58eae2da2)
+![깃허브_대문이미지_GPS](https://github.com/user-attachments/assets/cc2cd082-44dd-415e-b5e6-d52630289afc)
+
+
 
 ## ✅ GPS Project Outline
 
