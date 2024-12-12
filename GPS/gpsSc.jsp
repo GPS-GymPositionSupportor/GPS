@@ -66,7 +66,7 @@
                 });
             }
 
-            document.getElementById('findIdPwBtn').addEventListener('click', function () {
+            /* document.getElementById('findIdPwBtn').addEventListener('click', function () {
                 fetch('findIdPw.jsp')
                     .then(response => response.text())
                     .then(data => {
@@ -250,7 +250,7 @@
                 }
             });
 
-        });
+        }); */
 
 
     </script>

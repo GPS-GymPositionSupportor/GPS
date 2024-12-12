@@ -102,8 +102,8 @@
 		                <button type="button" id="duplicationCheck" onclick="checkNickname()">중복확인</button>
 	            	</div>
 	            </div>
-				<div class="form-group">
-					<%--@declare id="email"--%><label for="email" id="plzEmail">5. 이메일 주소를 입력해주세요</label>
+				<%-- <div class="form-group">
+					@declare id="email"<label for="email" id="plzEmail">5. 이메일 주소를 입력해주세요</label>
 					<!--  
 					<c:choose>
 						<c:when test="${provider == 'GOOGLE'}">
@@ -144,7 +144,7 @@
 							</div>
 				        </div>
 					</div>	
-			    </div>
+			    </div> --%>
 	            <div class="form-group">
 	                <%--@declare id="birthdate"--%><label for="birthdate" id="plzBirthdate">6. 생년월일을 입력해주세요</label>
 	                <div id="birthdate-form-group">

@@ -62,7 +62,7 @@
 				    </div>
 			</div>
 			
-			<div id="editProfileEmail">
+			<!-- <div id="editProfileEmail">
 				<p class="pTitle">이메일</p>
 					<div class="email-input">
 			            <input type="text" id="editIdEmailId" name="emailId">
@@ -73,7 +73,7 @@
                             <option value="daum.net">daum.net</option>
 			            </select>
 			        </div>
-			</div>
+			</div> -->
 			
 			<div id="editProfileGender">
 				<p class="pTitle">성별</p>
@@ -136,10 +136,10 @@
 				<p id="userNickname"><%= session.getAttribute("nickname") %></p>
 			</div>
 			
-			<div id="profileEmail">
+			<%-- <div id="profileEmail">
 				<p class="pTitle">이메일</p>
 				<p id="userEmail"><%= session.getAttribute("email") %></p>
-			</div>
+			</div> --%>
 			
 			<div id="profileGender">
 				<p class="pTitle">성별</p>

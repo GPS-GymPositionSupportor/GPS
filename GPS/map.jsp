@@ -154,6 +154,10 @@
         map.relayout();
     };
     
+    /* db 
+    SELECT * FROM gym 
+    WHERE (6371 * acos(cos(radians(:userLat)) * cos(radians(lat)) * cos(radians(lng) - radians(:userLng)) + sin(radians(:userLat)) * sin(radians(lat)))) < 3;
+     */
     function displayMarker(place) {
         // 헬스장 마커 이미지 설정
         var gymImageSrc = 'image/gymMark.svg'; // 헬스장 마커 이미지 URL
@@ -172,7 +176,7 @@
         });
     }
     
-    
+    // 헬스장 위치 가져오기
     gyms.forEach(function(gym) {
         var markerPosition = new kakao.maps.LatLng(gym.lat, gym.lng);
         var marker = new kakao.maps.Marker({
