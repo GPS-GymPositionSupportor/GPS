@@ -114,8 +114,8 @@
 ### BackEnd
 
 
-<img src="https://img.shields.io/badge/java-007396?style=for-the-badge&logo=java&logoColor=white"> <img src="https://img.shields.io/badge/spring-6DB33F?style=for-the-badge&logo=spring&logoColor=white">
- <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> <img src="https://img.shields.io/badge/gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white">
+[![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,&perline=4)](https://skillicons.dev)
+출처: https://dawonny.tistory.com/460 [Let Wonny Code:티스토리]
 
 
 ### Data 
