@@ -41,7 +41,7 @@
 <details>
   <summary> 👨 문광희 </summary>
 
-** 리뷰 및 커뮤니티 기능 개발 (문광희님) **
+**리뷰 및 커뮤니티 기능 개발**
 
 -  주요 역할 : 리뷰 작성, 댓글 시스템, 사용자 인터렉션 기능 개발
 -  필요 기술 : Spring Boot, WebSocket, Restful API, JPA/Hibernate
