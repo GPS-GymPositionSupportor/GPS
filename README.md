@@ -138,4 +138,4 @@
 
 ### OS
 
-[![My Skills](https://skillicons.dev/icons?i=window&perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=windows&perline=4)](https://skillicons.dev)
