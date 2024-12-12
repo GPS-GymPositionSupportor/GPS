@@ -117,11 +117,6 @@
 [![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,&perline=4)](https://skillicons.dev)
 
 
-### Data 
-
-<img src="https://img.shields.io/badge/python-3776AB?style=for-the-badge&logo=python&logoColor=white"> <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
-
-
 ## Design
 
-<img src="https://img.shields.io/badge/figma-3776AB?style=for-the-badge&logo=figma&logoColor=#F24E1E">
+[![My Skills](https://skillicons.dev/icons?i=figma,&perline=1)](https://skillicons.dev)
