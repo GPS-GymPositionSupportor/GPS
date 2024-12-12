@@ -23,10 +23,6 @@
 <div id="map">
 	<div>
 		
-		<div class="custom_zoomcontrol radius_border"> 
-	        <span onclick="zoomIn()"><img src="" alt="확대"></span>  
-	        <span onclick="zoomOut()"><img src="" alt="축소"></span>
-	    </div>
     </div>
 </div>
 
@@ -42,20 +38,18 @@
 	var map = new kakao.maps.Map(container, options); // 지도 생성
 	
 	// 사용자 위치 마커 설정
-	var userImageSrc = 'image/userLocate.svg'; // 사용자 위치 마커 이미지 URL
-	var userImageSize = new kakao.maps.Size(32, 34); // 사용자 위치 마커 이미지 크기
-	var userImageOption = { offset: new kakao.maps.Point(27, 69) }; // 사용자 위치 마커 이미지 옵션
-	
+	var userImageSrc = 'image/userLocate.svg';
+	var userImageSize = new kakao.maps.Size(32, 34);
+	var userImageOption = { offset: new kakao.maps.Point(27, 69) };
 	var userMarkerImage = new kakao.maps.MarkerImage(userImageSrc, userImageSize, userImageOption);
 	var userMarker = new kakao.maps.Marker({
 	    map: map,
 	    position: options.center,
-	    image: userMarkerImage // 사용자 위치 마커 이미지 설정
+	    image: userMarkerImage
 	});
 	
 	var locPosition;
 	
-	// 실시간 위치 추적 시작
 	function startTracking() {
 	    if (navigator.geolocation) {
 	        navigator.geolocation.watchPosition(function(position) {
@@ -63,10 +57,7 @@
 	            var lon = position.coords.longitude;
 	            locPosition = new kakao.maps.LatLng(lat, lon);
 	
-	            // 마커 위치 업데이트
 	            userMarker.setPosition(locPosition);
-	
-	            // 지도 중심을 현재 위치로 이동
 	            map.setCenter(locPosition);
 	            fetchGyms(lat, lon);
 	        }, showError);
@@ -75,7 +66,6 @@
 	    }
 	}
 	
-	// 오류 처리 함수
 	function showError(error) {
 	    var errorTypes = {
 	        0: "알 수 없는 에러가 발생했습니다.",
@@ -89,16 +79,47 @@
 	
 	function moveToCurrentLocation() {
 	    if (locPosition) {
-	        map.setCenter(locPosition); // 현재 위치로 지도 중심 이동
+	        map.setCenter(locPosition);
 	    } else {
 	        alert("현재 위치를 가져올 수 없습니다.");
 	    }
 	}
 	
+	// 확대/축소 버튼 추가
+	var zoomControlDiv = document.createElement('div');
+	zoomControlDiv.className = 'custom_zoomcontrol';
+	zoomControlDiv.innerHTML = `
+	    <span onclick="zoomIn()"><img src="image/zoom_in_icon.png" alt="확대"></span>
+	    <span onclick="zoomOut()"><img src="image/zoom_out_icon.png" alt="축소"></span>
+	`;
+	container.appendChild(zoomControlDiv);
+	
+	function zoomIn() {
+	    map.setLevel(map.getLevel() - 1);
+	}
+	
+	function zoomOut() {
+	    map.setLevel(map.getLevel() + 1);
+	}
+	
+	// 현위치 버튼 추가
 	var locationControl = document.createElement('div');
 	locationControl.className = 'location-btn';
-	locationControl.innerHTML = '<img src="image/location_search_button.svg" alt="현위치" style="width: 30px; height: 30px;">';
+	locationControl.innerHTML = '<img src="image/location_search_button.svg" alt="현위치">';
 	locationControl.onclick = moveToCurrentLocation;
+	container.appendChild(locationControl);
+	
+	function fetchGyms(userLat, userLng) {
+	    const xhr = new XMLHttpRequest();
+	    xhr.open("GET", "fetchGyms.jsp?lat=" + userLat + "&lng=" + userLng, true);
+	    xhr.onload = function() {
+	        if (xhr.status === 200) {
+	            const gyms = JSON.parse(xhr.responseText);
+	            gyms.forEach(displayMarker);
+	        }
+	    };
+	    xhr.send();
+	}
 	
 	// 지도에 현위치 버튼 추가
 	map.addControl(locationControl, kakao.maps.ControlPosition.RIGHT); // 버튼 위치 조정	
@@ -117,61 +138,34 @@
 	    map.setLevel(map.getLevel() + 1);
 	}
 	
-	// 헬스장 위치 가져오기
-	function fetchGyms(userLat, userLng) {
-	    const xhr = new XMLHttpRequest();
-	    xhr.open("GET", "fetchGyms.jsp?lat=" + userLat + "&lng=" + userLng, true);
-	    xhr.onload = function() {
-	        if (xhr.status === 200) {
-	            const gyms = JSON.parse(xhr.responseText);
-	            gyms.forEach(function(gym) {
-	                displayMarker(gym);
-	            });
-	        }
-	    };
-	    xhr.send();
-	}
-	
-	// 헬스장 마커 표시
 	function displayMarker(gym) {
 	    var markerPosition = new kakao.maps.LatLng(gym.g_latitude, gym.g_longitude);
-	    var gymImageSrc = 'image/gymMark.svg'; // 헬스장 마커 이미지 URL
-	    var gymImageSize = new kakao.maps.Size(32, 34); // 헬스장 마커 이미지 크기
-	    var gymImageOption = { offset: new kakao.maps.Point(27, 69) }; // 헬스장 마커 이미지 옵션
-	
-	    var gymMarkerImage = new kakao.maps.MarkerImage(gymImageSrc, gymImageSize, gymImageOption);
+	    var gymMarkerImage = new kakao.maps.MarkerImage('image/gymMark.svg', new kakao.maps.Size(32, 34), { offset: new kakao.maps.Point(27, 69) });
 	    var marker = new kakao.maps.Marker({
 	        map: map,
 	        position: markerPosition,
-	        image: gymMarkerImage // 헬스장 마커 이미지 설정
+	        image: gymMarkerImage
 	    });
 	
 	    var iwContent = '<div style="padding:5px;">' + gym.g_name + 
-	                    '<br><a href="https://map.kakao.com/link/map/' + gym.g_name + ',' + gym.g_latitude + ',' + gym.g_longitude + '" style="color:blue" target="_blank">큰지도보기</a> ' +
-	                    '<a href="https://map.kakao.com/link/to/' + gym.g_name + ',' + gym.g_latitude + ',' + gym.g_longitude + '" style="color:blue" target="_blank">길찾기</a></div>';
-	    
-	    var infowindow = new kakao.maps.InfoWindow({
-	        content: iwContent 
-	    });
+        '<br><a href="https://map.kakao.com/link/map/' + gym.g_name + ',' + gym.g_latitude + ',' + gym.g_longitude + '" style="color:blue" target="_blank">큰지도보기</a> ' +
+        '<a href="https://map.kakao.com/link/to/' + gym.g_name + ',' + gym.g_latitude + ',' + gym.g_longitude + '" style="color:blue" target="_blank">길찾기</a></div>';
 	
+	    var infowindow = new kakao.maps.InfoWindow({ content: iwContent });
 	    kakao.maps.event.addListener(marker, 'click', function() {
 	        infowindow.open(map, marker);
 	    });
-	
-	    // 지도 클릭 시 인포윈도우 닫기
+	    
+	 // 지도 클릭 시 인포윈도우 닫기
 	    kakao.maps.event.addListener(map, 'click', function() {
 	        infowindow.close();
-	    });
+	    	});
 	}
-	
-	
-	
-	// 초기화 시 지도의 크기를 조정
+
 	window.onload = function() {
 	    map.relayout();
 	};
 	
-	// 실시간 위치 추적 시작
 	startTracking();
 </script>
 
