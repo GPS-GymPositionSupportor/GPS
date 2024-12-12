@@ -22,6 +22,11 @@
 ![myPage jsp](https://github.com/user-attachments/assets/7a846d26-4784-47a7-aa89-cdc7328d6df0)
 
 
+### GPS Page
+
+![위치](https://github.com/user-attachments/assets/bd70427a-222f-4d07-be9e-fada32d5aa4f)
+
+
 
 
 ## 🙆🏼‍♂️ GPS Team
