@@ -59,8 +59,8 @@
   
 **DB 관리 및 지도 API 테스트**
 
--  주요 역할 : ERD작성, DB구축, 메일 인증 구현
--  필요 기술 : Spring Boot, JPA, MySQL, Redis
+-  주요 역할 : ERD 작성, 크롤링 , DB 구축, 테스트 데이터 생성
+-  필요 기술 : Spring Boot, JPA, MySQL, Selenium, Faker(데이터 생성기)
 -  개발 내용 :
 -  크롤링을 통한 테스트 데이터 수집 (Gym, Member ,Review, Comment)
 -  즐겨찾기 기능 구현
