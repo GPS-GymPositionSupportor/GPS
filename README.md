@@ -126,16 +126,16 @@
 
 ### Design
 
-[![My Skills](https://skillicons.dev/icons?i=figma,ai&perline=1)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=figma,ai&perline=2)](https://skillicons.dev)
 
 
 
 ### Communication
 
-[![My Skills](https://skillicons.dev/icons?i=.discord, git, github, &perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=discord,git,github&perline=4)](https://skillicons.dev)
 
 
 
 ### OS
 
-[![My Skills](https://skillicons.dev/icons?i= window &perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=window&perline=4)](https://skillicons.dev)
