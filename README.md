@@ -99,6 +99,15 @@
 -  *[API 명세서](https://docs.google.com/spreadsheets/d/1kI0cgY5cfk9ynzWFlbx6ZJ6sjQnQAZhjqAqGpv3Mh2U/edit?pli=1&gid=0#gid=0)|
 
 
+## 🗂️ ERD Structure
+
+![ERD](https://github.com/user-attachments/assets/f9775516-a0ef-4f47-8a89-07565f620835)
+
+
+## ❇️ Tech Stack
+
+
+
 
 
 
