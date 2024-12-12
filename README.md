@@ -115,7 +115,6 @@
 
 
 [![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,&perline=4)](https://skillicons.dev)
-출처: https://dawonny.tistory.com/460 [Let Wonny Code:티스토리]
 
 
 ### Data 
