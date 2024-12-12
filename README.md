@@ -9,7 +9,18 @@
 
 **현재 위치에서 가장 가까운 체육관과 헬스장을 알려주는 웹앱**
 
--  로그인 페이지랑 / Home.jsp 사진 하나 넣으셈.
+
+### 로그인 화면
+![Login화면](https://github.com/user-attachments/assets/efbb6823-1c08-42dc-bd45-a31c0ba6a9d8)
+
+
+### Home 화면
+![Home jsp](https://github.com/user-attachments/assets/6a8b2916-127f-42f9-897b-20bd17c9613f)
+
+
+### 마이 페이지
+![myPage jsp](https://github.com/user-attachments/assets/7a846d26-4784-47a7-aa89-cdc7328d6df0)
+
 
 
 
