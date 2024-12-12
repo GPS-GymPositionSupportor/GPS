@@ -7,18 +7,18 @@
 |:---:|:---:|:---:|
 |<img src="https://avatars.githubusercontent.com/u/94667528?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/83564922?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/108311766?v=4" width="100">|
 |[문광희](https://github.com/MoonGwangHee)|[조민국](https://github.com/adward27)|[황정우](https://github.com/Tory99)|
-|Backend|Backend|Backend|
+|Project Reader|Data Science|Search Engine Dev|
 
 ### Frontend Developers
-|팀원|팀원|팀원|
-|:---:|:---:|:---:|
-|<img src="/api/placeholder/100/100" width="100">|<img src="/api/placeholder/100/100" width="100">|<img src="/api/placeholder/100/100" width="100">|
-|[이름](GitHub 링크)|[이름](GitHub 링크)|[이름](GitHub 링크)|
-|Frontend|Frontend|Frontend|
+|Frontend Dev|
+|:---:|
+|<img src="https://avatars.githubusercontent.com/u/101345563?v=4" width="100">|
+|[김하늘](https://github.com/Hagill)|
+|GPS 프론트|
 
 ### UI Designers
-|팀원|팀원|
+|UI Main Designer|UI Sub Designer|
 |:---:|:---:|
-|<img src="/api/placeholder/100/100" width="100">|<img src="/api/placeholder/100/100" width="100">|
-|[이름](포트폴리오 링크)|[이름](포트폴리오 링크)|
+|<img src="https://avatars.githubusercontent.com/u/101501181?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/180533821?v=4" width="100">|
+|[김하은](https://github.com/HaEunKI)|[강다연](https://github.com/dayeon1022)|
 |UI Designer|UI Designer|
