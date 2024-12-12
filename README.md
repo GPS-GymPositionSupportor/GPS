@@ -114,9 +114,28 @@
 ### BackEnd
 
 
-[![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,&perline=4)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,idea,eclipse,gradle,selenium&perline=4)](https://skillicons.dev)
 
 
-## Design
 
-[![My Skills](https://skillicons.dev/icons?i=figma,&perline=1)](https://skillicons.dev)
+### Frontend
+
+[![My Skills](https://skillicons.dev/icons?i=html,js,css&perline=4)](https://skillicons.dev)
+
+
+
+### Design
+
+[![My Skills](https://skillicons.dev/icons?i=figma,ai&perline=1)](https://skillicons.dev)
+
+
+
+### Communication
+
+[![My Skills](https://skillicons.dev/icons?i=.discord, git, github, &perline=4)](https://skillicons.dev)
+
+
+
+### OS
+
+[![My Skills](https://skillicons.dev/icons?i= window &perline=4)](https://skillicons.dev)
