@@ -111,31 +111,31 @@
 ## ❇️ Tech Stack
 
 
-### BackEnd
+### 🌃 BackEnd
 
 
 [![My Skills](https://skillicons.dev/icons?i=spring,java,jenkins,elasticsearch,redis,mysql,idea,eclipse,gradle,selenium&perline=4)](https://skillicons.dev)
 
 
 
-### Frontend
+### 🌇 Frontend
 
 [![My Skills](https://skillicons.dev/icons?i=html,js,css&perline=4)](https://skillicons.dev)
 
 
 
-### Design
+### 🏙️ Design
 
 [![My Skills](https://skillicons.dev/icons?i=figma,ai&perline=2)](https://skillicons.dev)
 
 
 
-### Communication
+### 🙊 Communication
 
 [![My Skills](https://skillicons.dev/icons?i=discord,git,github&perline=4)](https://skillicons.dev)
 
 
 
-### OS
+### 🧬 OS
 
 [![My Skills](https://skillicons.dev/icons?i=windows&perline=4)](https://skillicons.dev)
