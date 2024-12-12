@@ -96,15 +96,7 @@
 ## 📄 API 명세서
 
 -  *API 명세서에 맞추어 개발을 진행하였습니다. 아래 링크를 통해서 확인 가능합니다.*
--  *[API 명세서|[김하늘](https://github.com/Hagill)|
-|GPS 프론트|
-
-### UI Designers
-|UI Main Designer|UI Sub Designer|
-|:---:|:---:|
-|<img src="https://avatars.githubusercontent.com/u/101501181?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/180533821?v=4" width="100">|
-|[김하은](https://github.com/HaEunKI)|[강다연](https://github.com/dayeon1022)|
-|UI Designer|UI Designer|
+-  *[API 명세서](https://docs.google.com/spreadsheets/d/1kI0cgY5cfk9ynzWFlbx6ZJ6sjQnQAZhjqAqGpv3Mh2U/edit?pli=1&gid=0#gid=0)|
 
 
 
