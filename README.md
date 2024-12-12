@@ -5,7 +5,7 @@
 ### Backend Developers
 |PM & Backend Dev|Backend Dev|Backend Dev|
 |:---:|:---:|:---:|
-|<img src="https://avatars.githubusercontent.com/u/94667528?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/81797927?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/161826579?v=4" width="100">|
+|<img src="https://avatars.githubusercontent.com/u/145955453?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/83564922?v=4" width="100">|<img src="https://avatars.githubusercontent.com/u/108311766?v=4" width="100">|
 |[문광희](https://github.com/MoonGwangHee)|[조민국](https://github.com/adward27)|[황정우](https://github.com/Tory99)|
 |Backend|Backend|Backend|
 
